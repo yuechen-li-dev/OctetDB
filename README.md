@@ -1,4 +1,11 @@
-# Database Scheduler — DBSCHED-M0 / M1
+# Database Scheduler — DBSCHED-M0 / M1 / M2
+
+DBSCHED-M2 makes the M1 static conflict topology behavioral through typed
+runtime keys, centralized conflict ownership, an Oct `when policy` ablation,
+and bounded request automata/mailboxes. The report is
+[`docs/experiments/DBSCHED_M2.md`](docs/experiments/DBSCHED_M2.md); generated M2
+JSON diagnostics are intentionally ignored in favor of its normalized Markdown
+evidence.
 
 DBSCHED-M1 adds a four-lane experiment comparing runtime-derived scheduler
 metadata with an Oct-derived fixed execution plan. Its report and retained

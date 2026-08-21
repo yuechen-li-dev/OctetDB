@@ -24,16 +24,16 @@ func run() error {
 	dsn := flag.String("dsn", "postgres://dbsched:dbsched@localhost:54329/dbsched?sslmode=disable", "PostgreSQL connection string")
 	output := flag.String("output", "experiments/M0/runs/latest", "result directory")
 	quick := flag.Bool("quick", false, "run a short smoke experiment")
-	lanes := flag.String("lanes", "conventional,batch,runtime,static", "comma-separated lane order")
+	lanes := flag.String("lanes", "conventional,batch,static,conflict,utility,agentic", "comma-separated lane order")
 	flag.Parse()
 	cfg := benchrun.DefaultConfig()
 	if *quick {
 		cfg.Phases = []benchrun.Phase{
-			{Name: "steady", Duration: 2 * time.Second, Rate: 250},
-			{Name: "burst", Duration: time.Second, Rate: 2500},
-			{Name: "normal_before", Duration: 2 * time.Second, Rate: 250},
-			{Name: "overload", Duration: 2 * time.Second, Rate: 5000},
-			{Name: "normal_after", Duration: 3 * time.Second, Rate: 250},
+			{Name: "low", Duration: time.Second, Rate: 250},
+			{Name: "mixed", Duration: time.Second, Rate: 750, Regime: 1},
+			{Name: "normal_before", Duration: time.Second, Rate: 250},
+			{Name: "overload", Duration: 2 * time.Second, Rate: 2500, Regime: 2},
+			{Name: "normal_after", Duration: 2 * time.Second, Rate: 250},
 		}
 	}
 	if err := os.MkdirAll(*output, 0o755); err != nil {
@@ -58,6 +58,13 @@ func run() error {
 	}
 	if !correctness.Equal {
 		return fmt.Errorf("lane final states differ; see correctness.json")
+	}
+	trace, err := benchrun.CaptureTrace(ctx, cfg, store)
+	if err != nil {
+		return fmt.Errorf("diagnostic trace: %w", err)
+	}
+	if err := benchrun.WriteJSON(filepath.Join(*output, "trace.json"), trace); err != nil {
+		return err
 	}
 	for _, lane := range strings.Split(*lanes, ",") {
 		lane = strings.TrimSpace(lane)

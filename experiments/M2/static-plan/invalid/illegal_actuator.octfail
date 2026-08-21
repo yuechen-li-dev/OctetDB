@@ -1,0 +1,4 @@
+expect error: "actuator action is not legal for this static command class"
+package InvalidActuator
+concept LegalActuator = Int { Require(Self >= 0 and Self <= 3, "actuator action is not legal for this static command class") }
+fn Invalid() -> LegalActuator { return 4 }

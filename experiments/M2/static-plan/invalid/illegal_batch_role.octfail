@@ -1,0 +1,4 @@
+expect error: "conflicting transactional writes cannot enter a read batch"
+package InvalidBatchRole
+concept LegalBatchRole = Int { Require(Self == 0, "conflicting transactional writes cannot enter a read batch") }
+fn Invalid() -> LegalBatchRole { return 1 }

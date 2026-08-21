@@ -1,0 +1,4 @@
+expect error: "mailbox capacity must cover wake and completion notifications"
+package InvalidMailbox
+concept MailboxCapacity = Int { Require(Self >= 2, "mailbox capacity must cover wake and completion notifications") }
+fn Invalid() -> MailboxCapacity { return 1 }

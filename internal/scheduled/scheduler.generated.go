@@ -76,6 +76,16 @@ type Scheduler_SchedulerDecisionBoardSnapshot struct {
 	Decision int
 }
 
+type Scheduler_PolicyHysteresisProbeBoardSnapshot struct {
+	Tick   int
+	Chosen int
+}
+
+type Scheduler_PolicyMinCommitProbeBoardSnapshot struct {
+	Tick   int
+	Chosen int
+}
+
 type Scheduler_SchedulerOutcome struct {
 	Tag     int
 	Payload any
@@ -303,12 +313,430 @@ func (f *__octFlow_Scheduler_SchedulerDecision) __octStep() {
 	}
 }
 
+type __octFlow_Scheduler_UtilityDecision struct {
+	started         bool
+	completed       bool
+	currentState    int
+	instruction     int
+	result          int
+	hasResult       bool
+	history         []string
+	hasResumeTarget bool
+	resumeTarget    int
+	utilitySites    map[int]__octUtilitySiteState
+	legal           bool
+	priority        int
+	ageMicros       int
+	batchCount      int
+	maxBatch        int
+}
+
+func fn_Scheduler_UtilityDecision(legal bool, priority int, ageMicros int, batchCount int, maxBatch int) __octFlowInstance_Int {
+	__flow := &__octFlow_Scheduler_UtilityDecision{}
+	__flow.utilitySites = map[int]__octUtilitySiteState{}
+	__flow.legal = legal
+	__flow.priority = priority
+	__flow.ageMicros = ageMicros
+	__flow.batchCount = batchCount
+	__flow.maxBatch = maxBatch
+	return __flow
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octActive() string {
+	if !f.started || f.completed {
+		return ""
+	}
+	switch f.currentState {
+	case 0:
+		return "Eligibility"
+	case 1:
+		return "Rank"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octComplete() bool { return f.completed }
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octResult() (int, bool) {
+	return f.result, f.hasResult
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octStateHistory() []string {
+	out := make([]string, len(f.history))
+	copy(out, f.history)
+	return out
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octStateName(id int) string {
+	switch id {
+	case 0:
+		return "Eligibility"
+	case 1:
+		return "Rank"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octResumeTarget() string {
+	if !f.hasResumeTarget {
+		return ""
+	}
+	return f.__octStateName(f.resumeTarget)
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octBoardSnapshot() (any, bool) {
+	return nil, false
+}
+
+func (f *__octFlow_Scheduler_UtilityDecision) __octStep() {
+	if f.completed {
+		return
+	}
+	if !f.started {
+		f.started = true
+		f.currentState = 0
+		f.instruction = 0
+		f.history = append(f.history, "Eligibility")
+	}
+	for {
+		switch f.currentState {
+		case 0:
+			switch f.instruction {
+			case 0:
+				if f.legal == false {
+					f.result = 1
+					f.hasResult = true
+					f.completed = true
+					f.currentState = -1
+					return
+				}
+				f.currentState = 1
+				f.instruction = 0
+				f.history = append(f.history, "Rank")
+				continue
+			default:
+				panic("runtime invariant violation: flow state Eligibility exited without suspend or return")
+			}
+		case 1:
+			switch f.instruction {
+			case 0:
+				f.result = __octUtilSelect[int](f.utilitySites, 0, 8, 3, []__octUtilCandidate[int]{{Valid: (f.ageMicros >= 5000), Value: 2, Score: (300 + f.ageMicros)}, {Valid: (f.batchCount > 1), Value: 3, Score: (200 + f.batchCount)}, {Valid: ((f.batchCount < f.maxBatch) && (f.ageMicros < 2000)), Value: 1, Score: 150}, {Valid: true, Value: 0, Score: (100 + (f.priority * 10))}}, 0)
+				f.hasResult = true
+				f.completed = true
+				f.currentState = -1
+				return
+			default:
+				panic("runtime invariant violation: flow state Rank exited without suspend or return")
+			}
+		default:
+			panic("runtime invariant violation: unknown flow state")
+		}
+	}
+}
+
+type __octFlow_Scheduler_PolicyHysteresisProbe struct {
+	started         bool
+	completed       bool
+	currentState    int
+	instruction     int
+	result          int
+	hasResult       bool
+	history         []string
+	hasResumeTarget bool
+	resumeTarget    int
+	utilitySites    map[int]__octUtilitySiteState
+	clearWin        bool
+	board           struct {
+		Tick   int
+		Chosen int
+	}
+}
+
+func fn_Scheduler_PolicyHysteresisProbe(clearWin bool) __octFlowInstance_Int {
+	__flow := &__octFlow_Scheduler_PolicyHysteresisProbe{}
+	__flow.utilitySites = map[int]__octUtilitySiteState{}
+	__flow.clearWin = clearWin
+	return __flow
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octActive() string {
+	if !f.started || f.completed {
+		return ""
+	}
+	switch f.currentState {
+	case 0:
+		return "Decide"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octComplete() bool { return f.completed }
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octResult() (int, bool) {
+	return f.result, f.hasResult
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octStateHistory() []string {
+	out := make([]string, len(f.history))
+	copy(out, f.history)
+	return out
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octStateName(id int) string {
+	switch id {
+	case 0:
+		return "Decide"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octResumeTarget() string {
+	if !f.hasResumeTarget {
+		return ""
+	}
+	return f.__octStateName(f.resumeTarget)
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octBoardSnapshot() (any, bool) {
+	return Scheduler_PolicyHysteresisProbeBoardSnapshot{
+		Tick:   f.board.Tick,
+		Chosen: f.board.Chosen,
+	}, true
+}
+
+func (f *__octFlow_Scheduler_PolicyHysteresisProbe) __octStep() {
+	if f.completed {
+		return
+	}
+	if !f.started {
+		f.started = true
+		f.currentState = 0
+		f.instruction = 0
+		f.history = append(f.history, "Decide")
+	}
+	for {
+		switch f.currentState {
+		case 0:
+			switch f.instruction {
+			case 0:
+				f.board.Chosen = __octUtilSelect[int](f.utilitySites, 1, 8, 1, []__octUtilCandidate[int]{{Valid: true, Value: 1, Score: 60}, {Valid: (f.board.Tick > 0), Value: 2, Score: func() int {
+					if f.clearWin {
+						return 80
+					}
+					return 65
+				}()}}, 0)
+				f.instruction++
+				continue
+			case 1:
+				if f.board.Tick == 1 {
+					f.result = f.board.Chosen
+					f.hasResult = true
+					f.completed = true
+					f.currentState = -1
+					return
+				}
+				f.instruction++
+				continue
+			case 2:
+				f.board.Tick = (f.board.Tick + 1)
+				f.instruction++
+				continue
+			case 3:
+				f.currentState = 0
+				f.instruction = 0
+				f.history = append(f.history, "Decide")
+				continue
+			default:
+				panic("runtime invariant violation: flow state Decide exited without suspend or return")
+			}
+		default:
+			panic("runtime invariant violation: unknown flow state")
+		}
+	}
+}
+
+type __octFlow_Scheduler_PolicyMinCommitProbe struct {
+	started         bool
+	completed       bool
+	currentState    int
+	instruction     int
+	result          int
+	hasResult       bool
+	history         []string
+	hasResumeTarget bool
+	resumeTarget    int
+	utilitySites    map[int]__octUtilitySiteState
+	board           struct {
+		Tick   int
+		Chosen int
+	}
+}
+
+func fn_Scheduler_PolicyMinCommitProbe() __octFlowInstance_Int {
+	__flow := &__octFlow_Scheduler_PolicyMinCommitProbe{}
+	__flow.utilitySites = map[int]__octUtilitySiteState{}
+	return __flow
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octActive() string {
+	if !f.started || f.completed {
+		return ""
+	}
+	switch f.currentState {
+	case 0:
+		return "Decide"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octComplete() bool { return f.completed }
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octResult() (int, bool) {
+	return f.result, f.hasResult
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octStateHistory() []string {
+	out := make([]string, len(f.history))
+	copy(out, f.history)
+	return out
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octStateName(id int) string {
+	switch id {
+	case 0:
+		return "Decide"
+	default:
+		return ""
+	}
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octResumeTarget() string {
+	if !f.hasResumeTarget {
+		return ""
+	}
+	return f.__octStateName(f.resumeTarget)
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octBoardSnapshot() (any, bool) {
+	return Scheduler_PolicyMinCommitProbeBoardSnapshot{
+		Tick:   f.board.Tick,
+		Chosen: f.board.Chosen,
+	}, true
+}
+
+func (f *__octFlow_Scheduler_PolicyMinCommitProbe) __octStep() {
+	if f.completed {
+		return
+	}
+	if !f.started {
+		f.started = true
+		f.currentState = 0
+		f.instruction = 0
+		f.history = append(f.history, "Decide")
+	}
+	for {
+		switch f.currentState {
+		case 0:
+			switch f.instruction {
+			case 0:
+				f.board.Chosen = __octUtilSelect[int](f.utilitySites, 2, 0, 3, []__octUtilCandidate[int]{{Valid: true, Value: 1, Score: 60}, {Valid: (f.board.Tick > 0), Value: 2, Score: 100}}, 0)
+				f.instruction++
+				continue
+			case 1:
+				if f.board.Tick == 1 {
+					f.result = f.board.Chosen
+					f.hasResult = true
+					f.completed = true
+					f.currentState = -1
+					return
+				}
+				f.instruction++
+				continue
+			case 2:
+				f.board.Tick = (f.board.Tick + 1)
+				f.instruction++
+				continue
+			case 3:
+				f.currentState = 0
+				f.instruction = 0
+				f.history = append(f.history, "Decide")
+				continue
+			default:
+				panic("runtime invariant violation: flow state Decide exited without suspend or return")
+			}
+		default:
+			panic("runtime invariant violation: unknown flow state")
+		}
+	}
+}
+
 func __octIntArrayToFloat(values []int) []float64 {
 	out := make([]float64, len(values))
 	for i, value := range values {
 		out[i] = float64(value)
 	}
 	return out
+}
+
+type __octUtilitySiteState struct {
+	HasCurrent bool
+	Current    any
+	Score      int
+	CommitAge  int
+}
+
+type __octUtilCandidate[T any] struct {
+	Valid bool
+	Value T
+	Score int
+}
+
+func __octUtilSelect[T any](sites map[int]__octUtilitySiteState, siteID int, hysteresis int, minCommit int, candidates []__octUtilCandidate[T], elseValue T) T {
+	valid := make([]__octUtilCandidate[T], 0, len(candidates))
+	for _, c := range candidates {
+		if c.Valid {
+			valid = append(valid, c)
+		}
+	}
+	next := __octUtilCandidate[T]{Valid: true, Value: elseValue, Score: 0}
+	if len(valid) > 0 {
+		next = valid[0]
+		for _, c := range valid[1:] {
+			if c.Score > next.Score {
+				next = c
+			}
+		}
+	}
+	site := sites[siteID]
+	if site.HasCurrent {
+		currentStillValid := false
+		for _, c := range valid {
+			if reflect.DeepEqual(c.Value, site.Current) {
+				currentStillValid = true
+				break
+			}
+		}
+		if currentStillValid {
+			commitActive := site.CommitAge < minCommit
+			hysteresisBlocks := next.Score <= site.Score+hysteresis
+			if commitActive || hysteresisBlocks {
+				next = __octUtilCandidate[T]{Valid: true, Value: site.Current.(T), Score: site.Score}
+			}
+		}
+	}
+	if !site.HasCurrent || !reflect.DeepEqual(site.Current, next.Value) {
+		sites[siteID] = __octUtilitySiteState{HasCurrent: true, Current: next.Value, Score: next.Score, CommitAge: 1}
+	} else {
+		site.Score = next.Score
+		site.CommitAge++
+		sites[siteID] = site
+	}
+	return next.Value
 }
 func fn_Scheduler_OutcomeCode(__oct_user_0 Scheduler_SchedulerOutcome) int {
 	var __oct_internal_tmp_0 bool

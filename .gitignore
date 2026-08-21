@@ -3,6 +3,10 @@
 #
 # Binaries for programs and plugins
 *.exe
+
+# M2 benchmark/diagnostic JSON is reproducible but too large for source control.
+# The Markdown experiment report retains normalized evidence and commands.
+experiments/M2/evidence/**/*.json
 *.exe~
 *.dll
 *.so

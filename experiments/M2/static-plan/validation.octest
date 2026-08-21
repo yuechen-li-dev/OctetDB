@@ -1,0 +1,44 @@
+package DBSchedulerM2Validation
+
+enum ConflictDomain { None Customer Inventory }
+enum KeyProjection { None CustomerID ProductID }
+enum PriorityClass { Interactive Normal }
+enum ActuatorAction { Acquire Dispatch Release Complete }
+
+concept MailboxCapacity = Int {
+    Require(Self >= 2, "mailbox capacity must cover wake and completion notifications")
+}
+
+record CommandScheduling {
+    ConflictAware: Bool
+    Domain: ConflictDomain
+    Projection: KeyProjection
+    Mailbox: MailboxCapacity
+}
+
+fn PriorityWeight(priority: PriorityClass) -> Int {
+    return match priority {
+        case PriorityClass.Interactive => 0
+        case PriorityClass.Normal => 1
+    }
+}
+
+fn ActionLegal(action: ActuatorAction) -> Bool {
+    return match action {
+        case ActuatorAction.Acquire => true
+        case ActuatorAction.Dispatch => true
+        case ActuatorAction.Release => true
+        case ActuatorAction.Complete => true
+    }
+}
+
+[Fact]
+fn M2StaticSchedulingTopologyIsClosed() -> Void {
+    let order = CommandScheduling { ConflictAware: true Domain: ConflictDomain.Customer Projection: KeyProjection.CustomerID Mailbox: 2 }
+    let inventory = CommandScheduling { ConflictAware: true Domain: ConflictDomain.Inventory Projection: KeyProjection.ProductID Mailbox: 2 }
+    Assert.True(order.Domain != ConflictDomain.None and order.Projection != KeyProjection.None, "conflict-aware order command requires typed domain and key projection")
+    Assert.True(inventory.Domain != ConflictDomain.None and inventory.Projection != KeyProjection.None, "conflict-aware inventory command requires typed domain and key projection")
+    Assert.Equal(0, PriorityWeight(PriorityClass.Interactive), "interactive priority covered")
+    Assert.Equal(1, PriorityWeight(PriorityClass.Normal), "normal priority covered")
+    Assert.True(ActionLegal(ActuatorAction.Release), "release actuator is statically legal")
+}

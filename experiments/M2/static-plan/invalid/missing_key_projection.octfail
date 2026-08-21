@@ -1,0 +1,4 @@
+expect error: "conflict-aware command requires a runtime key projection"
+package InvalidMissingProjection
+concept RuntimeKeyProjection = Int { Require(Self > 0, "conflict-aware command requires a runtime key projection") }
+fn Invalid() -> RuntimeKeyProjection { return 0 }

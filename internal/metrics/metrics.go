@@ -7,15 +7,16 @@ import (
 )
 
 type Sample struct {
-	CompletedAt time.Time
-	Phase       string
-	Latency     time.Duration
-	Queue       time.Duration
-	Service     time.Duration
-	BatchSize   int
-	Admitted    bool
-	Rejected    bool
-	Failed      bool
+	CompletedAt  time.Time
+	Phase        string
+	Latency      time.Duration
+	Queue        time.Duration
+	Service      time.Duration
+	ConflictWait time.Duration
+	BatchSize    int
+	Admitted     bool
+	Rejected     bool
+	Failed       bool
 }
 
 type Percentiles struct {
@@ -35,6 +36,7 @@ type Summary struct {
 	Latency          Percentiles             `json:"latency"`
 	Queue            Percentiles             `json:"queue_residence"`
 	Service          Percentiles             `json:"database_service"`
+	ConflictWait     Percentiles             `json:"conflict_wait"`
 	BatchCount       int                     `json:"batch_count"`
 	BatchSizes       map[int]int             `json:"batch_size_distribution"`
 	AverageBatchSize float64                 `json:"average_batch_size"`
@@ -56,7 +58,7 @@ type PhaseSummary struct {
 
 func Summarize(samples []Sample, elapsed time.Duration, maxBatch int, overloadEnd time.Time) Summary {
 	out := Summary{Attempted: len(samples), BatchSizes: map[int]int{}, Phases: map[string]PhaseSummary{}}
-	latencies, queues, services := []time.Duration{}, []time.Duration{}, []time.Duration{}
+	latencies, queues, services, conflictWaits := []time.Duration{}, []time.Duration{}, []time.Duration{}, []time.Duration{}
 	totalBatchItems := 0
 	for _, sample := range samples {
 		if sample.Admitted {
@@ -74,6 +76,9 @@ func Summarize(samples []Sample, elapsed time.Duration, maxBatch int, overloadEn
 		latencies = append(latencies, sample.Latency)
 		queues = append(queues, sample.Queue)
 		services = append(services, sample.Service)
+		if sample.ConflictWait > 0 {
+			conflictWaits = append(conflictWaits, sample.ConflictWait)
+		}
 		if sample.BatchSize > 0 {
 			out.BatchSizes[sample.BatchSize]++
 		}
@@ -95,6 +100,7 @@ func Summarize(samples []Sample, elapsed time.Duration, maxBatch int, overloadEn
 	out.Latency = percentiles(latencies)
 	out.Queue = percentiles(queues)
 	out.Service = percentiles(services)
+	out.ConflictWait = percentiles(conflictWaits)
 	out.RecoverySeconds = recovery(samples, overloadEnd)
 	groups := map[string][]Sample{}
 	for _, sample := range samples {

@@ -22,3 +22,23 @@ func TestGenerateDeterministicAndWriteIDsUnique(t *testing.T) {
 		}
 	}
 }
+
+func TestContentionRegimesAreDeterministicAndHotIsBounded(t *testing.T) {
+	a := GenerateRegime(42, 1000, time.Unix(0, 0).UTC(), HotKeyContention)
+	b := GenerateRegime(42, 1000, time.Unix(0, 0).UTC(), HotKeyContention)
+	if !reflect.DeepEqual(a, b) {
+		t.Fatal("hot regime is not deterministic")
+	}
+	writes := 0
+	for _, op := range a {
+		if op.Kind == OrderWrite || op.Kind == InventoryWrite {
+			writes++
+			if op.CustomerID > 4 || op.ProductID > 2 {
+				t.Fatalf("hot write escaped bounded hot set: %+v", op)
+			}
+		}
+	}
+	if writes < 500 {
+		t.Fatalf("hot regime lacks contention signal: writes=%d", writes)
+	}
+}

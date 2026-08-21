@@ -1,0 +1,18 @@
+{
+  "seed": 20260821,
+  "pool_size": 8,
+  "scheduler_capacity": 128,
+  "max_batch": 8,
+  "batch_wait": 2000000,
+  "request_timeout": 30000000000,
+  "warmup_operations": 5000,
+  "dataset_customers": 100,
+  "dataset_products": 20,
+  "phases": [
+    {"name":"low","duration":10000000000,"rate_per_second":750,"conflict_regime":0},
+    {"name":"mixed","duration":10000000000,"rate_per_second":1500,"conflict_regime":1},
+    {"name":"normal_before","duration":10000000000,"rate_per_second":750,"conflict_regime":0},
+    {"name":"overload","duration":8000000000,"rate_per_second":5000,"conflict_regime":2},
+    {"name":"normal_after","duration":12000000000,"rate_per_second":750,"conflict_regime":0}
+  ]
+}

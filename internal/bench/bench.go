@@ -19,9 +19,10 @@ import (
 )
 
 type Phase struct {
-	Name     string        `json:"name"`
-	Duration time.Duration `json:"duration"`
-	Rate     int           `json:"rate_per_second"`
+	Name     string                  `json:"name"`
+	Duration time.Duration           `json:"duration"`
+	Rate     int                     `json:"rate_per_second"`
+	Regime   workload.ConflictRegime `json:"conflict_regime"`
 }
 
 type Config struct {
@@ -41,7 +42,7 @@ func DefaultConfig() Config {
 	return Config{
 		Seed: 20260821, PoolSize: 8, SchedulerCapacity: 128, MaxBatch: 8, BatchWait: 2 * time.Millisecond,
 		RequestTimeout: 30 * time.Second, WarmupOperations: 5000, DatasetCustomers: 100, DatasetProducts: 20,
-		Phases: []Phase{{"steady", 15 * time.Second, 500}, {"burst", 2 * time.Second, 5000}, {"normal_before", 15 * time.Second, 500}, {"overload", 10 * time.Second, 10000}, {"normal_after", 20 * time.Second, 500}},
+		Phases: []Phase{{"low", 10 * time.Second, 750, workload.LowContention}, {"mixed", 10 * time.Second, 1500, workload.MixedContention}, {"normal_before", 10 * time.Second, 750, workload.LowContention}, {"overload", 8 * time.Second, 5000, workload.HotKeyContention}, {"normal_after", 12 * time.Second, 750, workload.LowContention}},
 	}
 }
 
@@ -79,12 +80,13 @@ type Result struct {
 	Initialization   scheduled.InitializationMetrics `json:"initialization"`
 	PeakQueueDepth   int64                           `json:"peak_queue_depth"`
 	SchedulerCPUTime time.Duration                   `json:"scheduler_cpu_time"`
+	Conflict         scheduled.ConflictMetrics       `json:"conflict"`
 }
 
 type laneResult struct {
-	Err                error
-	QueueTime, Service time.Duration
-	BatchSize          int
+	Err                              error
+	QueueTime, Service, ConflictWait time.Duration
+	BatchSize                        int
 }
 type lane interface {
 	Submit(context.Context, workload.Operation) laneResult
@@ -93,7 +95,7 @@ type baselineAdapter struct{ baseline.Lane }
 
 func (l baselineAdapter) Submit(ctx context.Context, op workload.Operation) laneResult {
 	r := l.Lane.Submit(ctx, op)
-	return laneResult(r)
+	return laneResult{Err: r.Err, QueueTime: r.QueueTime, Service: r.Service, BatchSize: r.BatchSize}
 }
 
 type scheduledAdapter struct{ *scheduled.Scheduler }
@@ -122,6 +124,15 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	case "static", "scheduled":
 		scheduler = scheduled.NewStatic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
+	case "conflict":
+		scheduler = scheduled.NewConflictAware(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "utility":
+		scheduler = scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "agentic":
+		scheduler = scheduled.NewAgentic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
 	default:
 		return Result{}, fmt.Errorf("unknown lane %q", name)
 	}
@@ -139,11 +150,8 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	if err := store.Reset(ctx); err != nil {
 		return Result{}, fmt.Errorf("reset after warmup: %w", err)
 	}
-	count := 0
-	for _, p := range cfg.Phases {
-		count += int(p.Duration.Seconds() * float64(p.Rate))
-	}
-	ops := workload.Generate(cfg.Seed, count, time.Unix(1_800_000_000, 0).UTC())
+	ops := generatePhasedOps(cfg)
+	count := len(ops)
 	debug.FreeOSMemory()
 	var before runtime.MemStats
 	runtime.ReadMemStats(&before)
@@ -179,7 +187,7 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 				defer cancel()
 				begin := time.Now()
 				r := impl.Submit(reqCtx, op)
-				sample := metrics.Sample{CompletedAt: time.Now(), Phase: phaseName, Latency: time.Since(begin), Queue: r.QueueTime, Service: r.Service, BatchSize: r.BatchSize, Admitted: !errorsIsRejected(r.Err), Rejected: errorsIsRejected(r.Err), Failed: r.Err != nil && !errorsIsRejected(r.Err)}
+				sample := metrics.Sample{CompletedAt: time.Now(), Phase: phaseName, Latency: time.Since(begin), Queue: r.QueueTime, Service: r.Service, ConflictWait: r.ConflictWait, BatchSize: r.BatchSize, Admitted: !errorsIsRejected(r.Err), Rejected: errorsIsRejected(r.Err), Failed: r.Err != nil && !errorsIsRejected(r.Err)}
 				mu.Lock()
 				samples = append(samples, sample)
 				mu.Unlock()
@@ -211,6 +219,7 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	if scheduler != nil {
 		result.PeakQueueDepth = scheduler.PeakQueueDepth()
 		result.SchedulerCPUTime = scheduler.PolicyCPUTime()
+		result.Conflict = scheduler.ConflictMetrics()
 	}
 	return result, nil
 }
@@ -224,10 +233,29 @@ func divide(value, denominator float64) float64 {
 
 func errorsIsRejected(err error) bool { return err == scheduled.ErrRejected }
 func batchMax(name string, cfg Config) int {
-	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" {
+	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" || name == "conflict" || name == "utility" || name == "agentic" {
 		return cfg.MaxBatch
 	}
 	return 1
+}
+
+func generatePhasedOps(cfg Config) []workload.Operation {
+	total := 0
+	for _, p := range cfg.Phases {
+		total += int(p.Duration.Seconds() * float64(p.Rate))
+	}
+	ops := make([]workload.Operation, 0, total)
+	base := time.Unix(1_800_000_000, 0).UTC()
+	for phaseIndex, p := range cfg.Phases {
+		count := int(p.Duration.Seconds() * float64(p.Rate))
+		part := workload.GenerateRegime(cfg.Seed^uint64(phaseIndex+1)*0x9e3779b9, count, base.Add(time.Duration(len(ops))*time.Microsecond), p.Regime)
+		for i := range part {
+			part[i].Sequence = int64(len(ops) + i)
+			part[i].OrderID = 1_000_000 + part[i].Sequence
+		}
+		ops = append(ops, part...)
+	}
+	return ops
 }
 
 type Correctness struct {
@@ -265,10 +293,19 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 		"static": func() *scheduled.Scheduler {
 			return scheduled.NewStatic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		},
+		"conflict": func() *scheduled.Scheduler {
+			return scheduled.NewConflictAware(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"utility": func() *scheduled.Scheduler {
+			return scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"agentic": func() *scheduled.Scheduler {
+			return scheduled.NewAgentic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
 	}
 	equal := true
 	var ss db.State
-	for _, name := range []string{"batch", "runtime", "static"} {
+	for _, name := range []string{"batch", "runtime", "static", "conflict", "utility", "agentic"} {
 		if err := store.Reset(ctx); err != nil {
 			return Correctness{}, err
 		}
@@ -289,6 +326,43 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 		equal = equal && reflect.DeepEqual(bs, state)
 	}
 	return Correctness{Equal: equal, Operations: len(ops), BaselineState: bs, ScheduledState: ss, States: states}, nil
+}
+
+type DiagnosticTrace struct {
+	Utility []scheduled.TraceEvent `json:"utility"`
+	Agentic []scheduled.TraceEvent `json:"agentic"`
+}
+
+// CaptureTrace runs a bounded diagnostic workload outside authoritative
+// timing. Performance lanes leave tracing disabled.
+func CaptureTrace(ctx context.Context, cfg Config, store *db.Store) (DiagnosticTrace, error) {
+	var out DiagnosticTrace
+	for _, item := range []struct {
+		name string
+		new  func() *scheduled.Scheduler
+		dst  *[]scheduled.TraceEvent
+	}{
+		{"utility", func() *scheduled.Scheduler {
+			return scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		}, &out.Utility},
+		{"agentic", func() *scheduled.Scheduler {
+			return scheduled.NewAgentic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		}, &out.Agentic},
+	} {
+		if err := store.Reset(ctx); err != nil {
+			return out, err
+		}
+		s := item.new()
+		s.EnableTrace()
+		ops := workload.GenerateRegime(cfg.Seed^0x4d32, 64, time.Unix(1_810_000_000, 0).UTC(), workload.HotKeyContention)
+		if err := runCorrectnessOps(ctx, ops, 64, scheduledAdapter{s}); err != nil {
+			s.Close()
+			return out, fmt.Errorf("trace %s: %w", item.name, err)
+		}
+		*item.dst = s.Trace()
+		s.Close()
+	}
+	return out, nil
 }
 
 func runCorrectnessOps(ctx context.Context, ops []workload.Operation, width int, impl lane) error {
