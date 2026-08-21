@@ -1,0 +1,14 @@
+{
+  "aggregation": "median of three full lane-order-rotated runs",
+  "operations_per_lane_per_run": 135000,
+  "correctness_equal_all_lanes": true,
+  "failures_all_runs": 0,
+  "rejections_all_runs": 0,
+  "lanes": {
+    "conventional": {"throughput_per_sec": 2177.56, "p50_ms": 0.0, "p95_ms": 1.6263, "p99_ms": 2.1129, "p99_9_ms": 2.7784, "overload_p99_ms": 2.1396, "allocations_per_op": 23.8271, "bytes_per_op": 1421.68, "gc_cycles": 10, "average_batch_size": 1.0, "pool_acquires": 135000, "pool_acquire_wait_ms": 1355.50, "recovery_seconds": 1.0},
+    "batch": {"throughput_per_sec": 2177.43, "p50_ms": 0.5161, "p95_ms": 2.0630, "p99_ms": 2.5522, "p99_9_ms": 3.1520, "overload_p99_ms": 2.1307, "allocations_per_op": 33.1818, "bytes_per_op": 1953.17, "gc_cycles": 14, "average_batch_size": 1.4502, "pool_acquires": 93089, "pool_acquire_wait_ms": 0.5232, "peak_queue_depth": 47, "recovery_seconds": 1.0},
+    "runtime": {"throughput_per_sec": 2177.46, "p50_ms": 0.5180, "p95_ms": 2.0735, "p99_ms": 2.5595, "p99_9_ms": 3.7768, "overload_p99_ms": 2.1904, "allocations_per_op": 38.7265, "bytes_per_op": 2188.41, "gc_cycles": 15, "average_batch_size": 1.4486, "peak_queue_depth": 46, "recovery_seconds": 1.0, "metadata_allocations": 8, "metadata_allocated_bytes": 1464, "initialization_allocations": 23, "initialization_allocated_bytes": 3512},
+    "static": {"throughput_per_sec": 2177.45, "p50_ms": 0.5167, "p95_ms": 2.0691, "p99_ms": 2.5502, "p99_9_ms": 3.0110, "overload_p99_ms": 2.1434, "allocations_per_op": 38.6770, "bytes_per_op": 2186.29, "gc_cycles": 16, "average_batch_size": 1.4524, "peak_queue_depth": 46, "recovery_seconds": 1.0, "metadata_allocations": 0, "metadata_allocated_bytes": 0, "initialization_allocations": 15, "initialization_allocated_bytes": 2048}
+  },
+  "oct": {"execution_identity": "gooct-cli", "oct_version": "dev", "compiled_tests_passed": 7, "interpreted_fallbacks": 0, "artifact_sha256": "a165d977c3839e384c9aa295eae4ffab8cd16da65791b5e3a84ee0f63b53641a"}
+}

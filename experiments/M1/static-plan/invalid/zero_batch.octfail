@@ -1,0 +1,4 @@
+expect error: "maximum batch width must be at least one"
+package InvalidZeroBatch
+concept PositiveBatchWidth = Int { Require(Self >= 1, "maximum batch width must be at least one") }
+fn Invalid() -> PositiveBatchWidth { return 0 }

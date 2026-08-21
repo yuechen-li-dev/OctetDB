@@ -1,0 +1,8 @@
+expect error: "queue capacity must admit one maximum batch"
+package InvalidEnvelope
+fn Invalid() -> Int {
+    let capacity = 4
+    let maxBatch = 8
+    Require(capacity >= maxBatch, "queue capacity must admit one maximum batch")
+    return 0
+}

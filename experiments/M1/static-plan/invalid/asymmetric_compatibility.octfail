@@ -1,0 +1,10 @@
+expect error: "batch compatibility must be symmetric"
+
+package InvalidCompatibility
+
+fn Invalid() -> Int {
+    let pointWithRange = true
+    let rangeWithPoint = false
+    Require(pointWithRange == rangeWithPoint, "batch compatibility must be symmetric")
+    return 0
+}

@@ -1,0 +1,4 @@
+expect error: "a positive scheduler capacity must be greater than zero"
+package InvalidZeroCapacity
+concept PositiveCapacity = Int { Require(Self > 0, "a positive scheduler capacity must be greater than zero") }
+fn Invalid() -> PositiveCapacity { return 0 }

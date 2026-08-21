@@ -46,10 +46,13 @@ func DefaultConfig() Config {
 }
 
 type Memory struct {
-	AllocatedBytes uint64  `json:"allocated_bytes"`
-	HeapHighBytes  uint64  `json:"heap_high_bytes"`
-	GCCycles       uint32  `json:"gc_cycles"`
-	GCPauseTotalMS float64 `json:"gc_pause_total_ms"`
+	AllocatedBytes   uint64  `json:"allocated_bytes"`
+	Allocations      uint64  `json:"allocations"`
+	BytesPerOp       float64 `json:"bytes_per_op"`
+	AllocationsPerOp float64 `json:"allocations_per_op"`
+	HeapHighBytes    uint64  `json:"heap_high_bytes"`
+	GCCycles         uint32  `json:"gc_cycles"`
+	GCPauseTotalMS   float64 `json:"gc_pause_total_ms"`
 }
 type Pool struct {
 	MaxConns      int32   `json:"max_connections"`
@@ -66,13 +69,16 @@ type Environment struct {
 	CPUCount          int    `json:"cpu_count"`
 }
 type Result struct {
-	Lane        string          `json:"lane"`
-	Started     time.Time       `json:"started"`
-	Elapsed     time.Duration   `json:"elapsed"`
-	Summary     metrics.Summary `json:"summary"`
-	Memory      Memory          `json:"memory"`
-	Pool        Pool            `json:"pool"`
-	Environment Environment     `json:"environment"`
+	Lane             string                          `json:"lane"`
+	Started          time.Time                       `json:"started"`
+	Elapsed          time.Duration                   `json:"elapsed"`
+	Summary          metrics.Summary                 `json:"summary"`
+	Memory           Memory                          `json:"memory"`
+	Pool             Pool                            `json:"pool"`
+	Environment      Environment                     `json:"environment"`
+	Initialization   scheduled.InitializationMetrics `json:"initialization"`
+	PeakQueueDepth   int64                           `json:"peak_queue_depth"`
+	SchedulerCPUTime time.Duration                   `json:"scheduler_cpu_time"`
 }
 
 type laneResult struct {
@@ -103,20 +109,28 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	}
 	var impl lane
 	var scheduler *scheduled.Scheduler
+	startupStarted := time.Now()
 	switch name {
-	case "baseline":
+	case "conventional", "baseline":
 		impl = baselineAdapter{baseline.Lane{Store: store}}
-	case "admission":
-		scheduler = scheduled.New(store, cfg.SchedulerCapacity, 1, int(cfg.PoolSize), cfg.BatchWait)
+	case "batch", "admission":
+		scheduler = scheduled.NewFixedBatch(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
-	case "scheduled":
-		scheduler = scheduled.New(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+	case "runtime":
+		scheduler = scheduled.NewRuntime(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "static", "scheduled":
+		scheduler = scheduled.NewStatic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
 	default:
 		return Result{}, fmt.Errorf("unknown lane %q", name)
 	}
 	if scheduler != nil {
 		defer scheduler.Close()
+	}
+	initialization := scheduled.InitializationMetrics{WallTimeUS: float64(time.Since(startupStarted)) / float64(time.Microsecond)}
+	if scheduler != nil {
+		initialization = scheduler.Initialization()
 	}
 	warmup := workload.Generate(cfg.Seed^0xa5a5a5a5, cfg.WarmupOperations, time.Unix(1_750_000_000, 0).UTC())
 	if err := runCorrectnessOps(ctx, warmup, cfg.SchedulerCapacity/2, impl); err != nil {
@@ -186,23 +200,42 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	poolAfter := store.Pool.Stat()
 	var pgVersion string
 	_ = store.Pool.QueryRow(ctx, "SHOW server_version").Scan(&pgVersion)
-	result := Result{Lane: name, Started: started, Elapsed: elapsed, Summary: metrics.Summarize(samples, elapsed, batchMax(name, cfg), overloadEnd), Memory: Memory{AllocatedBytes: after.TotalAlloc - before.TotalAlloc, HeapHighBytes: after.HeapSys, GCCycles: after.NumGC - before.NumGC, GCPauseTotalMS: float64(after.PauseTotalNs-before.PauseTotalNs) / float64(time.Millisecond)}, Pool: Pool{MaxConns: cfg.PoolSize, Acquires: poolAfter.AcquireCount() - poolBefore.AcquireCount(), AcquireWaitMS: float64(poolAfter.AcquireDuration()-poolBefore.AcquireDuration()) / float64(time.Millisecond), MaxInUse: maxInUse}, Environment: Environment{OS: runtime.GOOS, Arch: runtime.GOARCH, GoVersion: runtime.Version(), PostgreSQLVersion: pgVersion, PgxVersion: "github.com/jackc/pgx/v5 v5.7.6", CPUCount: runtime.NumCPU()}}
+	summary := metrics.Summarize(samples, elapsed, batchMax(name, cfg), overloadEnd)
+	allocated := after.TotalAlloc - before.TotalAlloc
+	allocations := after.Mallocs - before.Mallocs
+	perOp := float64(0)
+	if summary.Completed > 0 {
+		perOp = float64(summary.Completed)
+	}
+	result := Result{Lane: name, Started: started, Elapsed: elapsed, Summary: summary, Memory: Memory{AllocatedBytes: allocated, Allocations: allocations, BytesPerOp: divide(float64(allocated), perOp), AllocationsPerOp: divide(float64(allocations), perOp), HeapHighBytes: after.HeapSys, GCCycles: after.NumGC - before.NumGC, GCPauseTotalMS: float64(after.PauseTotalNs-before.PauseTotalNs) / float64(time.Millisecond)}, Pool: Pool{MaxConns: cfg.PoolSize, Acquires: poolAfter.AcquireCount() - poolBefore.AcquireCount(), AcquireWaitMS: float64(poolAfter.AcquireDuration()-poolBefore.AcquireDuration()) / float64(time.Millisecond), MaxInUse: maxInUse}, Environment: Environment{OS: runtime.GOOS, Arch: runtime.GOARCH, GoVersion: runtime.Version(), PostgreSQLVersion: pgVersion, PgxVersion: "github.com/jackc/pgx/v5 v5.7.6", CPUCount: runtime.NumCPU()}, Initialization: initialization}
+	if scheduler != nil {
+		result.PeakQueueDepth = scheduler.PeakQueueDepth()
+		result.SchedulerCPUTime = scheduler.PolicyCPUTime()
+	}
 	return result, nil
+}
+
+func divide(value, denominator float64) float64 {
+	if denominator == 0 {
+		return 0
+	}
+	return value / denominator
 }
 
 func errorsIsRejected(err error) bool { return err == scheduled.ErrRejected }
 func batchMax(name string, cfg Config) int {
-	if name == "scheduled" {
+	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" {
 		return cfg.MaxBatch
 	}
 	return 1
 }
 
 type Correctness struct {
-	Equal          bool     `json:"equal"`
-	Operations     int      `json:"operations"`
-	BaselineState  db.State `json:"baseline_state"`
-	ScheduledState db.State `json:"scheduled_state"`
+	Equal          bool                `json:"equal"`
+	Operations     int                 `json:"operations"`
+	BaselineState  db.State            `json:"baseline_state"`
+	ScheduledState db.State            `json:"scheduled_state"`
+	States         map[string]db.State `json:"states"`
 }
 
 func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correctness, error) {
@@ -221,16 +254,41 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 	if err := store.Reset(ctx); err != nil {
 		return Correctness{}, err
 	}
-	s := scheduled.New(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
-	defer s.Close()
-	if err := runCorrectnessOps(ctx, ops, cfg.SchedulerCapacity/2, scheduledAdapter{s}); err != nil {
-		return Correctness{}, fmt.Errorf("scheduled: %w", err)
+	states := map[string]db.State{"conventional": bs}
+	constructors := map[string]func() *scheduled.Scheduler{
+		"batch": func() *scheduled.Scheduler {
+			return scheduled.NewFixedBatch(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"runtime": func() *scheduled.Scheduler {
+			return scheduled.NewRuntime(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"static": func() *scheduled.Scheduler {
+			return scheduled.NewStatic(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
 	}
-	ss, err := store.Snapshot(ctx)
-	if err != nil {
-		return Correctness{}, err
+	equal := true
+	var ss db.State
+	for _, name := range []string{"batch", "runtime", "static"} {
+		if err := store.Reset(ctx); err != nil {
+			return Correctness{}, err
+		}
+		s := constructors[name]()
+		if err := runCorrectnessOps(ctx, ops, cfg.SchedulerCapacity/2, scheduledAdapter{s}); err != nil {
+			s.Close()
+			return Correctness{}, fmt.Errorf("%s: %w", name, err)
+		}
+		s.Close()
+		state, err := store.Snapshot(ctx)
+		if err != nil {
+			return Correctness{}, err
+		}
+		states[name] = state
+		if name == "static" {
+			ss = state
+		}
+		equal = equal && reflect.DeepEqual(bs, state)
 	}
-	return Correctness{Equal: reflect.DeepEqual(bs, ss), Operations: len(ops), BaselineState: bs, ScheduledState: ss}, nil
+	return Correctness{Equal: equal, Operations: len(ops), BaselineState: bs, ScheduledState: ss, States: states}, nil
 }
 
 func runCorrectnessOps(ctx context.Context, ops []workload.Operation, width int, impl lane) error {

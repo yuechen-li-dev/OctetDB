@@ -1,0 +1,8 @@
+expect error: "command numeric identities must be unique"
+package InvalidDuplicateCommand
+fn Invalid() -> Int {
+    let first = 0
+    let second = 0
+    Require(first != second, "command numeric identities must be unique")
+    return 0
+}

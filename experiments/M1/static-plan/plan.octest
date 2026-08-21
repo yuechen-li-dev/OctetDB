@@ -1,0 +1,215 @@
+package DBSchedulerM1
+
+enum CommandKind { PointRead RangeRead OrderWrite InventoryWrite }
+enum StatementKind { SelectCustomer SelectOrders InsertOrder InsertOrderItem UpdateInventory }
+enum BatchClass { Point Range None }
+enum PriorityClass { Interactive Normal }
+enum ConflictClass { Customer Orders Inventory }
+enum TransactionRole { ReadOnly TransactionalWrite SingleWrite }
+enum ParameterShape { CustomerID OrderWrite OrderItem ProductID }
+enum ResultShape { CustomerName OrderIDs CommandTag }
+
+concept PositiveCapacity = Int {
+    Require(Self > 0, "scheduler capacity must be positive")
+}
+
+concept PositiveBatchWidth = Int {
+    Require(Self >= 1, "maximum batch width must be at least one")
+}
+
+record table CommandDefinitions {
+    Kind: CommandKind
+    NumericID: Int
+    Name: String
+    Statement: StatementKind
+    Batch: BatchClass
+    Priority: PriorityClass
+    Conflict: ConflictClass
+    Transaction: TransactionRole
+    QueueCapacity: PositiveCapacity
+    MaxBatch: PositiveBatchWidth
+}
+
+record table StatementDefinitions {
+    Kind: StatementKind
+    NumericID: Int
+    Name: String
+    SQL: String
+    ParameterShape: ParameterShape
+    ResultShape: ResultShape
+}
+
+fn Commands() -> CommandDefinitions {
+    let ids = [0, 1, 2, 3]
+    Require(Len(ids) == 4, "the closed command space has four entries")
+    Require(0 != 1 and 0 != 2 and 0 != 3 and 1 != 2 and 1 != 3 and 2 != 3, "command numeric identities must be unique")
+    return CommandDefinitions {
+        Kind: [CommandKind.PointRead, CommandKind.RangeRead, CommandKind.OrderWrite, CommandKind.InventoryWrite]
+        NumericID: ids
+        Name: ["point_read", "range_read", "order_write", "inventory_write"]
+        Statement: [StatementKind.SelectCustomer, StatementKind.SelectOrders, StatementKind.InsertOrder, StatementKind.UpdateInventory]
+        Batch: [BatchClass.Point, BatchClass.Range, BatchClass.None, BatchClass.None]
+        Priority: [PriorityClass.Interactive, PriorityClass.Interactive, PriorityClass.Normal, PriorityClass.Normal]
+        Conflict: [ConflictClass.Customer, ConflictClass.Orders, ConflictClass.Orders, ConflictClass.Inventory]
+        Transaction: [TransactionRole.ReadOnly, TransactionRole.ReadOnly, TransactionRole.TransactionalWrite, TransactionRole.SingleWrite]
+        QueueCapacity: [128, 128, 128, 128]
+        MaxBatch: [8, 8, 1, 1]
+    }
+}
+
+fn Statements() -> StatementDefinitions {
+    let ids = [0, 1, 2, 3, 4]
+    Require(Len(ids) == 5, "the statement catalog has five entries")
+    return StatementDefinitions {
+        Kind: [StatementKind.SelectCustomer, StatementKind.SelectOrders, StatementKind.InsertOrder, StatementKind.InsertOrderItem, StatementKind.UpdateInventory]
+        NumericID: ids
+        Name: ["select_customer", "select_orders", "insert_order", "insert_order_item", "update_inventory"]
+        SQL: ["SELECT name FROM customers WHERE id=$1", "SELECT id FROM orders WHERE customer_id=$1 ORDER BY created_at DESC LIMIT 10", "INSERT INTO orders(id,customer_id,created_at,status) VALUES($1,$2,$3,'created')", "INSERT INTO order_items(order_id,product_id,quantity,unit_price_cents) VALUES($1,$2,1,1000)", "UPDATE inventory SET quantity=quantity-1 WHERE product_id=$1 AND quantity>0"]
+        ParameterShape: [ParameterShape.CustomerID, ParameterShape.CustomerID, ParameterShape.OrderWrite, ParameterShape.OrderItem, ParameterShape.ProductID]
+        ResultShape: [ResultShape.CustomerName, ResultShape.OrderIDs, ResultShape.CommandTag, ResultShape.CommandTag, ResultShape.CommandTag]
+    }
+}
+
+fn Compatible(left: CommandKind, right: CommandKind) -> Bool {
+    return match left {
+        case CommandKind.PointRead => right == CommandKind.PointRead
+        case CommandKind.RangeRead => right == CommandKind.RangeRead
+        case CommandKind.OrderWrite => false
+        case CommandKind.InventoryWrite => false
+    }
+}
+
+fn CommandCode(kind: CommandKind) -> String {
+    return match kind {
+        case CommandKind.PointRead => "0"
+        case CommandKind.RangeRead => "1"
+        case CommandKind.OrderWrite => "2"
+        case CommandKind.InventoryWrite => "3"
+    }
+}
+
+fn StatementCode(kind: StatementKind) -> String {
+    return match kind {
+        case StatementKind.SelectCustomer => "0"
+        case StatementKind.SelectOrders => "1"
+        case StatementKind.InsertOrder => "2"
+        case StatementKind.InsertOrderItem => "3"
+        case StatementKind.UpdateInventory => "4"
+    }
+}
+
+fn BatchCode(kind: BatchClass) -> String {
+    return match kind {
+        case BatchClass.Point => "0"
+        case BatchClass.Range => "1"
+        case BatchClass.None => "2"
+    }
+}
+
+fn PriorityCode(kind: PriorityClass) -> String {
+    return match kind {
+        case PriorityClass.Interactive => "0"
+        case PriorityClass.Normal => "1"
+    }
+}
+
+fn ConflictCode(kind: ConflictClass) -> String {
+    return match kind {
+        case ConflictClass.Customer => "0"
+        case ConflictClass.Orders => "1"
+        case ConflictClass.Inventory => "2"
+    }
+}
+
+fn TransactionCode(kind: TransactionRole) -> String {
+    return match kind {
+        case TransactionRole.ReadOnly => "0"
+        case TransactionRole.TransactionalWrite => "1"
+        case TransactionRole.SingleWrite => "2"
+    }
+}
+
+fn ParameterShapeName(shape: ParameterShape) -> String {
+    return match shape {
+        case ParameterShape.CustomerID => "CustomerID:Int64"
+        case ParameterShape.OrderWrite => "OrderID:Int64,CustomerID:Int64,At:Time"
+        case ParameterShape.OrderItem => "OrderID:Int64,ProductID:Int64"
+        case ParameterShape.ProductID => "ProductID:Int64"
+    }
+}
+
+fn ResultShapeName(shape: ResultShape) -> String {
+    return match shape {
+        case ResultShape.CustomerName => "Name:String/one"
+        case ResultShape.OrderIDs => "OrderID:Int64/up-to-10"
+        case ResultShape.CommandTag => "CommandTag/one"
+    }
+}
+
+fn CapacityCode(kind: CommandKind) -> String {
+    return match kind {
+        case CommandKind.PointRead => "128"
+        case CommandKind.RangeRead => "128"
+        case CommandKind.OrderWrite => "128"
+        case CommandKind.InventoryWrite => "128"
+    }
+}
+
+fn MaxBatchCode(kind: CommandKind) -> String {
+    return match kind {
+        case CommandKind.PointRead => "8"
+        case CommandKind.RangeRead => "8"
+        case CommandKind.OrderWrite => "1"
+        case CommandKind.InventoryWrite => "1"
+    }
+}
+
+fn BoolCode(value: Bool) -> String {
+    return if value { "true" } else { "false" }
+}
+
+[Fact]
+fn StaticPlanIsClosedAndSymmetric() -> Void {
+    let commands = Commands()
+    let statements = Statements()
+    Assert.Equal(4, Len(commands), "all workload commands are described")
+    Assert.Equal(5, Len(statements), "all SQL statements are described")
+    for left in 0..Len(commands) {
+        for right in 0..Len(commands) {
+            Assert.Equal(Compatible(commands[left].Kind, commands[right].Kind), Compatible(commands[right].Kind, commands[left].Kind), "batch compatibility is symmetric")
+        }
+    }
+}
+
+[Artifact]
+fn EmitStaticGoPlan() -> Void {
+    let commands = Commands()
+    let statements = Statements()
+    var lines = [
+        "// Code generated from experiments/M1/static-plan/plan.octest by Oct artifact. DO NOT EDIT.",
+        "package scheduled", "", "var staticExecutionPlan = executionPlan{", "    Commands: [4]commandDescriptor{"
+    ]
+    for i in 0..Len(commands) {
+        let row = commands[i]
+        lines = Append(lines, "        {Kind: " + CommandCode(row.Kind) + ", Name: \"" + row.Name + "\", Statement: " + StatementCode(row.Statement) + ", BatchClass: " + BatchCode(row.Batch) + ", Priority: " + PriorityCode(row.Priority) + ", Conflict: " + ConflictCode(row.Conflict) + ", Transaction: " + TransactionCode(row.Transaction) + ", QueueCapacity: " + CapacityCode(row.Kind) + ", MaxBatch: " + MaxBatchCode(row.Kind) + "},")
+    }
+    lines = Append(lines, "    },")
+    lines = Append(lines, "    Compatibility: [4][4]bool{")
+    for left in 0..Len(commands) {
+        var cells = ""
+        for right in 0..Len(commands) {
+            cells = cells + if right == 0 { BoolCode(Compatible(commands[left].Kind, commands[right].Kind)) } else { ", " + BoolCode(Compatible(commands[left].Kind, commands[right].Kind)) }
+        }
+        lines = Append(lines, "        {" + cells + "},")
+    }
+    lines = Append(lines, "    },")
+    lines = Append(lines, "    Statements: [5]statementDescriptor{")
+    for i in 0..Len(statements) {
+        let row = statements[i]
+        lines = Append(lines, "        {Kind: " + StatementCode(row.Kind) + ", Name: \"" + row.Name + "\", SQL: \"" + row.SQL + "\", ParameterShape: \"" + ParameterShapeName(row.ParameterShape) + "\", ResultShape: \"" + ResultShapeName(row.ResultShape) + "\"},")
+    }
+    lines = Append(lines, "    },")
+    lines = Append(lines, "    QueueCapacity: 128, MaxBatch: 8, Workers: 8,")
+    lines = Append(lines, "}")
+    Artifact.WriteLines("internal/scheduled/static_plan.generated.go", lines)
+}

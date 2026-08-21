@@ -1,0 +1,4 @@
+expect error: "enum 'StatementKind' has no variant 'Missing'"
+package InvalidUnknownStatement
+enum StatementKind { SelectCustomer }
+fn Invalid() -> StatementKind { return StatementKind.Missing }

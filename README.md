@@ -1,4 +1,31 @@
-# Database Scheduler — DBSCHED-M0
+# Database Scheduler — DBSCHED-M0 / M1
+
+DBSCHED-M1 adds a four-lane experiment comparing runtime-derived scheduler
+metadata with an Oct-derived fixed execution plan. Its report and retained
+evidence are in `docs/experiments/DBSCHED_M1.md` and `experiments/M1`.
+
+```powershell
+docker compose up -d --wait
+go test ./...
+go run ./cmd/bench -output experiments/M1/evidence/run-local
+```
+
+Regenerate the M1 plan explicitly from the Oct repository:
+
+```powershell
+Set-Location ..\oct
+go run ./cmd/oct test `
+  ..\Database-Scheduler\experiments\M1\static-plan `
+  --execution compiled
+go run ./cmd/oct artifact `
+  ..\Database-Scheduler\experiments\M1\static-plan\plan.octest `
+  --output-root ..\Database-Scheduler
+```
+
+Ordinary `go build` and `go test` use the committed generated plan and do not
+require Oct.
+
+## DBSCHED-M0
 
 DBSCHED-M0 is a bounded research harness comparing conventional Go/pgx access
 to PostgreSQL with the same workload routed through an Oct-authored scheduler.
@@ -33,4 +60,3 @@ go run ./experimental/octemit generate `
 
 Freshness can be checked by replacing `generate` with `check`. The generated
 file is committed and must not be hand-edited.
-

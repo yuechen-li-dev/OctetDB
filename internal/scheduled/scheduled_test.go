@@ -1,6 +1,10 @@
 package scheduled
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+)
 
 func TestGeneratedPolicyDecisionsAndStateHistory(t *testing.T) {
 	tests := []struct {
@@ -28,5 +32,38 @@ func TestGeneratedPolicyDecisionsAndStateHistory(t *testing.T) {
 	history := m.__octStateHistory()
 	if len(history) < 3 || history[0] != "Idle" || history[1] != "Observe" || history[2] != "Complete" {
 		t.Fatalf("unexpected explicit state history: %v", history)
+	}
+}
+
+func TestStaticPlanRemovesRuntimeMetadataConstruction(t *testing.T) {
+	runtimeScheduler := NewRuntime(nil, 128, 8, 8, 2)
+	runtimeMetrics := runtimeScheduler.Initialization()
+	runtimeScheduler.Close()
+	staticScheduler := NewStatic(nil, 128, 8, 8, 2)
+	staticMetrics := staticScheduler.Initialization()
+	staticScheduler.Close()
+	t.Logf("runtime=%+v static=%+v", runtimeMetrics, staticMetrics)
+	if staticMetrics.MetadataAllocations >= runtimeMetrics.MetadataAllocations {
+		t.Fatalf("static metadata allocations=%d, want less than runtime=%d", staticMetrics.MetadataAllocations, runtimeMetrics.MetadataAllocations)
+	}
+	if staticMetrics.MetadataAllocatedBytes >= runtimeMetrics.MetadataAllocatedBytes {
+		t.Fatalf("static metadata bytes=%d, want less than runtime=%d", staticMetrics.MetadataAllocatedBytes, runtimeMetrics.MetadataAllocatedBytes)
+	}
+}
+
+func TestRuntimeAndStaticPlansAreEquivalent(t *testing.T) {
+	runtimePlan := buildRuntimePlan(128, 8, 8)
+	staticPlan := staticPlanLookup{plan: &staticExecutionPlan}
+	for kind := 0; kind < 4; kind++ {
+		runtimeCommand, runtimeOK := runtimePlan.command(workload.Kind(kind))
+		staticCommand, staticOK := staticPlan.command(workload.Kind(kind))
+		if runtimeOK != staticOK || runtimeCommand != staticCommand {
+			t.Fatalf("command %d differs: runtime=%+v static=%+v", kind, runtimeCommand, staticCommand)
+		}
+		for right := 0; right < 4; right++ {
+			if runtimePlan.compatible(workload.Kind(kind), workload.Kind(right)) != staticPlan.compatible(workload.Kind(kind), workload.Kind(right)) {
+				t.Fatalf("compatibility[%d][%d] differs", kind, right)
+			}
+		}
 	}
 }

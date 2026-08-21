@@ -30,20 +30,46 @@ type request struct {
 type batch struct{ requests []*request }
 
 type Scheduler struct {
-	store     *db.Store
-	capacity  int64
-	maxBatch  int
-	batchWait time.Duration
-	workers   int
-	used      atomic.Int64
-	input     chan *request
-	jobs      chan batch
-	closed    chan struct{}
-	closeOnce sync.Once
-	wg        sync.WaitGroup
+	store          *db.Store
+	capacity       int64
+	maxBatch       int
+	batchWait      time.Duration
+	workers        int
+	used           atomic.Int64
+	input          chan *request
+	jobs           chan batch
+	closed         chan struct{}
+	closeOnce      sync.Once
+	wg             sync.WaitGroup
+	plan           planLookup
+	plainBatch     bool
+	initialization InitializationMetrics
+	peakQueue      atomic.Int64
+	policyNanos    atomic.Int64
 }
 
 func New(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	return NewStatic(store, capacity, maxBatch, workers, batchWait)
+}
+
+func NewRuntime(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "runtime")
+}
+
+func NewStatic(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	if capacity != staticExecutionPlan.QueueCapacity || maxBatch != staticExecutionPlan.MaxBatch || workers != staticExecutionPlan.Workers {
+		panic("static scheduler configuration differs from the Oct execution plan")
+	}
+	return newScheduler(store, staticExecutionPlan.QueueCapacity, staticExecutionPlan.MaxBatch, staticExecutionPlan.Workers, batchWait, "static")
+}
+
+func NewFixedBatch(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "fixed")
+}
+
+func newScheduler(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration, mode string) *Scheduler {
+	wallStarted := time.Now()
+	before := readMem()
 	if capacity < 1 {
 		capacity = 1
 	}
@@ -53,26 +79,63 @@ func New(store *db.Store, capacity, maxBatch, workers int, batchWait time.Durati
 	if workers < 1 {
 		workers = 1
 	}
+	metadataStarted := time.Now()
+	var plan planLookup
+	if mode == "runtime" {
+		plan = buildRuntimePlan(capacity, maxBatch, workers)
+	} else if mode == "static" {
+		plan = staticPlanLookup{plan: &staticExecutionPlan}
+	}
+	metadataTime := time.Since(metadataStarted)
+	afterMetadata := readMem()
+	catalogStarted := time.Now()
+	catalogCount := 0
+	if plan != nil {
+		catalogCount = plan.statementCount()
+	}
+	catalogTime := time.Since(catalogStarted)
+	schedulerStarted := time.Now()
 	s := &Scheduler{
 		store: store, capacity: int64(capacity), maxBatch: maxBatch,
 		batchWait: batchWait, workers: workers,
 		input: make(chan *request, capacity), jobs: make(chan batch, workers), closed: make(chan struct{}),
+		plan: plan, plainBatch: mode == "fixed",
 	}
 	s.wg.Add(1 + workers)
 	go s.dispatch()
 	for range workers {
 		go s.work()
 	}
+	after := readMem()
+	s.initialization = InitializationMetrics{
+		WallTimeUS: durationUS(time.Since(wallStarted)), SchedulerTimeUS: durationUS(time.Since(schedulerStarted)), MetadataTimeUS: durationUS(metadataTime),
+		StatementCatalogTimeUS: durationUS(catalogTime), Allocations: after.Mallocs - before.Mallocs,
+		AllocatedBytes: after.TotalAlloc - before.TotalAlloc, MetadataAllocations: afterMetadata.Mallocs - before.Mallocs,
+		MetadataAllocatedBytes: afterMetadata.TotalAlloc - before.TotalAlloc, StatementCatalogCount: catalogCount,
+	}
 	return s
 }
+
+func durationUS(value time.Duration) float64 { return float64(value) / float64(time.Microsecond) }
 
 // Submit decides admission before enqueueing. The CAS is the authoritative
 // resource bound; the generated Oct flow is the authoritative policy decision.
 func (s *Scheduler) Submit(ctx context.Context, op workload.Operation) Result {
 	for {
 		used := s.used.Load()
-		if policyDecision(int(used), int(s.capacity), int(op.Kind), 0, 0, s.maxBatch) == 0 {
+		if used >= s.capacity {
 			return Result{Err: ErrRejected}
+		}
+		if !s.plainBatch {
+			if _, ok := s.plan.command(op.Kind); !ok {
+				return Result{Err: errors.New("operation absent from execution plan")}
+			}
+			started := time.Now()
+			decision := policyDecision(int(used), int(s.capacity), int(op.Kind), 0, 0, s.maxBatch)
+			s.policyNanos.Add(int64(time.Since(started)))
+			if decision == 0 {
+				return Result{Err: ErrRejected}
+			}
 		}
 		if s.used.CompareAndSwap(used, used+1) {
 			break
@@ -81,6 +144,12 @@ func (s *Scheduler) Submit(ctx context.Context, op workload.Operation) Result {
 	r := &request{ctx: ctx, op: op, queuedAt: time.Now(), done: make(chan Result, 1)}
 	select {
 	case s.input <- r:
+		for depth := int64(len(s.input)); ; {
+			peak := s.peakQueue.Load()
+			if depth <= peak || s.peakQueue.CompareAndSwap(peak, depth) {
+				break
+			}
+		}
 	case <-ctx.Done():
 		s.used.Add(-1)
 		return Result{Err: ctx.Err()}
@@ -99,6 +168,12 @@ func (s *Scheduler) Submit(ctx context.Context, op workload.Operation) Result {
 }
 
 func (s *Scheduler) InUse() int64 { return s.used.Load() }
+
+func (s *Scheduler) Initialization() InitializationMetrics { return s.initialization }
+
+func (s *Scheduler) PeakQueueDepth() int64 { return s.peakQueue.Load() }
+
+func (s *Scheduler) PolicyCPUTime() time.Duration { return time.Duration(s.policyNanos.Load()) }
 
 func (s *Scheduler) Close() {
 	s.closeOnce.Do(func() { close(s.closed); s.wg.Wait() })
@@ -126,8 +201,15 @@ func (s *Scheduler) dispatch() {
 			for len(group) < s.maxBatch {
 				select {
 				case next := <-s.input:
-					decision := policyDecision(int(s.used.Load()), int(s.capacity)+1, int(next.op.Kind), int(first.op.Kind), len(group), s.maxBatch)
-					if decision == 1 {
+					compatible := next.op.Kind == first.op.Kind && next.op.Kind <= workload.RangeRead
+					decision := 2
+					if !s.plainBatch {
+						compatible = s.plan.compatible(first.op.Kind, next.op.Kind)
+						started := time.Now()
+						decision = policyDecision(int(s.used.Load()), int(s.capacity)+1, int(next.op.Kind), int(first.op.Kind), len(group), s.maxBatch)
+						s.policyNanos.Add(int64(time.Since(started)))
+					}
+					if !compatible || decision == 1 {
 						carry = next
 						break gather
 					}

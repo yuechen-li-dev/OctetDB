@@ -24,7 +24,7 @@ func run() error {
 	dsn := flag.String("dsn", "postgres://dbsched:dbsched@localhost:54329/dbsched?sslmode=disable", "PostgreSQL connection string")
 	output := flag.String("output", "experiments/M0/runs/latest", "result directory")
 	quick := flag.Bool("quick", false, "run a short smoke experiment")
-	lanes := flag.String("lanes", "baseline,admission,scheduled", "comma-separated lane order")
+	lanes := flag.String("lanes", "conventional,batch,runtime,static", "comma-separated lane order")
 	flag.Parse()
 	cfg := benchrun.DefaultConfig()
 	if *quick {
