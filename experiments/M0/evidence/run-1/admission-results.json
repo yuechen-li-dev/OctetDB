@@ -1,0 +1,182 @@
+{
+  "lane": "admission",
+  "started": "2026-08-21T10:25:16.257676-07:00",
+  "elapsed": 61997278700,
+  "summary": {
+    "attempted": 135000,
+    "admitted": 128429,
+    "completed": 128429,
+    "rejected": 6571,
+    "failed": 0,
+    "throughput_per_sec": 2071.5264071743845,
+    "latency": {
+      "p50_ms": 0.5089,
+      "p95_ms": 17.1956,
+      "p99_ms": 20.5652,
+      "p99_9_ms": 23.9046
+    },
+    "queue_residence": {
+      "p50_ms": 0,
+      "p95_ms": 16.0939,
+      "p99_ms": 18.75,
+      "p99_9_ms": 21.129
+    },
+    "database_service": {
+      "p50_ms": 0,
+      "p95_ms": 2.7562,
+      "p99_ms": 4.3328,
+      "p99_9_ms": 5.9276
+    },
+    "batch_count": 128429,
+    "batch_size_distribution": {
+      "1": 128429
+    },
+    "average_batch_size": 1,
+    "batch_fill_ratio": 1,
+    "recovery_seconds": 1,
+    "phases": {
+      "burst": {
+        "attempted": 10000,
+        "admitted": 10000,
+        "completed": 10000,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 0,
+          "p95_ms": 4.1119,
+          "p99_ms": 4.8506,
+          "p99_9_ms": 6.3716
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 0,
+          "p99_ms": 1.0631,
+          "p99_9_ms": 1.6169
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 3.8971,
+          "p99_ms": 4.8214,
+          "p99_9_ms": 6.3252
+        }
+      },
+      "normal_after": {
+        "attempted": 10000,
+        "admitted": 10000,
+        "completed": 10000,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 0,
+          "p95_ms": 1.7781,
+          "p99_ms": 2.0816,
+          "p99_9_ms": 2.3172
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 0,
+          "p99_ms": 0
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 1.778,
+          "p99_ms": 2.0807,
+          "p99_9_ms": 2.3172
+        }
+      },
+      "normal_before": {
+        "attempted": 7500,
+        "admitted": 7500,
+        "completed": 7500,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 0,
+          "p95_ms": 2.8617,
+          "p99_ms": 3.42,
+          "p99_9_ms": 4.1961
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 0,
+          "p99_ms": 0
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 2.8549,
+          "p99_ms": 3.4135,
+          "p99_9_ms": 4.1961
+        }
+      },
+      "overload": {
+        "attempted": 100000,
+        "admitted": 93429,
+        "completed": 93429,
+        "rejected": 6571,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 0.55,
+          "p95_ms": 18.0226,
+          "p99_ms": 21.0888,
+          "p99_9_ms": 24.2365
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 16.6621,
+          "p99_ms": 19.2327,
+          "p99_9_ms": 21.5238
+        },
+        "database_service": {
+          "p50_ms": 0.5072,
+          "p95_ms": 2.6283,
+          "p99_ms": 4.3878,
+          "p99_9_ms": 6.1057
+        }
+      },
+      "steady": {
+        "attempted": 7500,
+        "admitted": 7500,
+        "completed": 7500,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 0,
+          "p95_ms": 2.8782,
+          "p99_ms": 3.454,
+          "p99_9_ms": 6.5321
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 0,
+          "p99_ms": 0
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 2.8731,
+          "p99_ms": 3.454,
+          "p99_9_ms": 6.5321
+        }
+      }
+    }
+  },
+  "memory": {
+    "allocated_bytes": 244440224,
+    "heap_high_bytes": 53215232,
+    "gc_cycles": 13,
+    "gc_pause_total_ms": 0
+  },
+  "pool": {
+    "max_connections": 8,
+    "acquires": 128429,
+    "acquire_wait_ms": 7.37,
+    "max_in_use": 8
+  },
+  "environment": {
+    "os": "windows",
+    "arch": "amd64",
+    "go_version": "go1.26.2",
+    "postgresql_version": "17.11",
+    "pgx_version": "github.com/jackc/pgx/v5 v5.7.6",
+    "cpu_count": 16
+  }
+}

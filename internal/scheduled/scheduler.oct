@@ -1,0 +1,81 @@
+package Scheduler
+
+enum SchedulerOutcome {
+    Reject
+    Wait
+    Compatible
+    Dispatch
+}
+
+fn OutcomeCode(outcome: SchedulerOutcome) -> Int {
+    return match outcome {
+        case SchedulerOutcome.Reject => 0
+        case SchedulerOutcome.Wait => 1
+        case SchedulerOutcome.Compatible => 2
+        case SchedulerOutcome.Dispatch => 3
+    }
+}
+
+// SchedulerDecision is a bounded, deterministic control-policy flow. The Go
+// integration consumes OutcomeCode's stable scalar projection, while the Oct
+// policy retains a closed, exhaustively matched outcome space.
+flow SchedulerDecision(used: Int, capacity: Int, requestClass: Int, batchClass: Int, batchCount: Int, maxBatch: Int) -> Int {
+    board {
+        Decision: Int
+    }
+
+    state Idle {
+        goto Observe
+    }
+
+    state Observe {
+        when {
+            case used >= capacity -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Reject)
+                goto Complete
+            }
+            else -> goto Queue
+        }
+    }
+
+    state Queue {
+        when {
+            case batchCount == 0 -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Wait)
+                goto Complete
+            }
+            case requestClass > 1 -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Wait)
+                goto Complete
+            }
+            case requestClass != batchClass -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Wait)
+                goto Complete
+            }
+            else -> goto BatchReady
+        }
+    }
+
+    state BatchReady {
+        when {
+            case batchCount + 1 >= maxBatch -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Dispatch)
+                goto Complete
+            }
+            else -> {
+                board.Decision = OutcomeCode(SchedulerOutcome.Compatible)
+                goto Complete
+            }
+        }
+    }
+
+    state Complete {
+        return board.Decision
+    }
+}
+
+fn Main() -> Int {
+    let controller = SchedulerDecision(0, 64, 0, 0, 0, 8)
+    Step(controller)
+    return 0
+}
