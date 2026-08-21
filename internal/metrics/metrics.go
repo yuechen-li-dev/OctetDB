@@ -17,6 +17,7 @@ type Sample struct {
 	Admitted     bool
 	Rejected     bool
 	Failed       bool
+	Priority     int
 }
 
 type Percentiles struct {
@@ -43,6 +44,13 @@ type Summary struct {
 	BatchFillRatio   float64                 `json:"batch_fill_ratio"`
 	RecoverySeconds  *float64                `json:"recovery_seconds"`
 	Phases           map[string]PhaseSummary `json:"phases"`
+	Priorities       map[int]PrioritySummary `json:"priorities"`
+}
+
+type PrioritySummary struct {
+	Completed int         `json:"completed"`
+	Wait      Percentiles `json:"wait"`
+	MaxWaitMS float64     `json:"max_wait_ms"`
 }
 
 type PhaseSummary struct {
@@ -57,7 +65,7 @@ type PhaseSummary struct {
 }
 
 func Summarize(samples []Sample, elapsed time.Duration, maxBatch int, overloadEnd time.Time) Summary {
-	out := Summary{Attempted: len(samples), BatchSizes: map[int]int{}, Phases: map[string]PhaseSummary{}}
+	out := Summary{Attempted: len(samples), BatchSizes: map[int]int{}, Phases: map[string]PhaseSummary{}, Priorities: map[int]PrioritySummary{}}
 	latencies, queues, services, conflictWaits := []time.Duration{}, []time.Duration{}, []time.Duration{}, []time.Duration{}
 	totalBatchItems := 0
 	for _, sample := range samples {
@@ -108,6 +116,21 @@ func Summarize(samples []Sample, elapsed time.Duration, maxBatch int, overloadEn
 	}
 	for name, group := range groups {
 		out.Phases[name] = summarizePhase(group)
+	}
+	priorityGroups := map[int][]time.Duration{}
+	for _, sample := range samples {
+		if !sample.Rejected && !sample.Failed {
+			priorityGroups[sample.Priority] = append(priorityGroups[sample.Priority], sample.Queue)
+		}
+	}
+	for priority, waits := range priorityGroups {
+		maximum := time.Duration(0)
+		for _, wait := range waits {
+			if wait > maximum {
+				maximum = wait
+			}
+		}
+		out.Priorities[priority] = PrioritySummary{Completed: len(waits), Wait: percentiles(waits), MaxWaitMS: float64(maximum) / float64(time.Millisecond)}
 	}
 	return out
 }

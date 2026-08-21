@@ -1,0 +1,2291 @@
+{
+  "utility": [
+    {
+      "request_id": 0,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 0,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 0,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 1,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 2,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 2,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 2,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 14,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 14,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 14,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 3,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 4,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 18,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 18,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 18,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 5,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 15,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 12,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 11,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 9,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 7,
+      "event": "WaitingConflict",
+      "reason": "token=1:3 owner=14"
+    },
+    {
+      "request_id": 19,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 17,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 20,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 32,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 38,
+      "event": "WaitingConflict",
+      "reason": "token=1:3 owner=14"
+    },
+    {
+      "request_id": 22,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 33,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 23,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 34,
+      "event": "WaitingConflict",
+      "reason": "token=1:2 owner=18"
+    },
+    {
+      "request_id": 35,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 35,
+      "event": "ConflictAcquired",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 35,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 37,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 27,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 29,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 26,
+      "event": "WaitingConflict",
+      "reason": "token=1:1 owner=35"
+    },
+    {
+      "request_id": 24,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 6,
+      "event": "PolicyDecision",
+      "reason": "eligible=8 action=3 raw=3 scores(oldest=100 high=300 batch=400) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 6,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 13,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 16,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 28,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 30,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 36,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 39,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 56,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 41,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 63,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 42,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 51,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 21,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 25,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 61,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 46,
+      "event": "WaitingConflict",
+      "reason": "token=1:2 owner=18"
+    },
+    {
+      "request_id": 53,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=100 high=300 batch=0) previous_persistent=true age_us=0"
+    },
+    {
+      "request_id": 53,
+      "event": "ConflictAcquired",
+      "reason": "1:4"
+    },
+    {
+      "request_id": 53,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 43,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 59,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 62,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 47,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 48,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 49,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=2"
+    },
+    {
+      "request_id": 0,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 1,
+      "event": "PolicyDecision",
+      "reason": "eligible=16 action=1 raw=1 scores(oldest=110 high=310 batch=0) previous_persistent=true age_us=1030"
+    },
+    {
+      "request_id": 1,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 1,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 2,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 3,
+      "event": "PolicyDecision",
+      "reason": "eligible=16 action=1 raw=1 scores(oldest=115 high=315 batch=0) previous_persistent=true age_us=1541"
+    },
+    {
+      "request_id": 3,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 3,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 8,
+      "event": "PolicyDecision",
+      "reason": "eligible=13 action=3 raw=3 scores(oldest=120 high=320 batch=375) previous_persistent=true age_us=2000"
+    },
+    {
+      "request_id": 8,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 10,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 31,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 50,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 55,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 57,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 58,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 40,
+      "event": "PolicyDecision",
+      "reason": "eligible=6 action=3 raw=3 scores(oldest=120 high=320 batch=350) previous_persistent=true age_us=2000"
+    },
+    {
+      "request_id": 40,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 44,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 45,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 52,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 54,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 60,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 1,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 4,
+      "event": "PolicyDecision",
+      "reason": "eligible=15 action=1 raw=1 scores(oldest=120 high=320 batch=0) previous_persistent=true age_us=2063"
+    },
+    {
+      "request_id": 4,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 4,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 3,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 9,
+      "event": "PolicyDecision",
+      "reason": "eligible=15 action=1 raw=1 scores(oldest=125 high=325 batch=0) previous_persistent=true age_us=2577"
+    },
+    {
+      "request_id": 9,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 9,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 4,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 5,
+      "event": "PolicyDecision",
+      "reason": "eligible=14 action=1 raw=1 scores(oldest=130 high=330 batch=0) previous_persistent=true age_us=3091"
+    },
+    {
+      "request_id": 5,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 5,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 18,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 34,
+      "event": "PolicyDecision",
+      "reason": "eligible=2 action=1 raw=1 scores(oldest=136 high=336 batch=0) previous_persistent=true age_us=3600"
+    },
+    {
+      "request_id": 34,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 34,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 53,
+      "event": "ConflictReleased",
+      "reason": "1:4"
+    },
+    {
+      "request_id": 9,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 17,
+      "event": "PolicyDecision",
+      "reason": "eligible=14 action=1 raw=1 scores(oldest=136 high=336 batch=0) previous_persistent=true age_us=3600"
+    },
+    {
+      "request_id": 17,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 17,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 14,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 7,
+      "event": "PolicyDecision",
+      "reason": "eligible=2 action=1 raw=1 scores(oldest=136 high=336 batch=0) previous_persistent=true age_us=3600"
+    },
+    {
+      "request_id": 7,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 7,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 35,
+      "event": "ConflictReleased",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 26,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=136 high=336 batch=0) previous_persistent=true age_us=3600"
+    },
+    {
+      "request_id": 26,
+      "event": "ConflictAcquired",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 26,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 5,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 11,
+      "event": "PolicyDecision",
+      "reason": "eligible=13 action=1 raw=1 scores(oldest=141 high=341 batch=0) previous_persistent=true age_us=4111"
+    },
+    {
+      "request_id": 11,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 11,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 17,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 19,
+      "event": "PolicyDecision",
+      "reason": "eligible=13 action=1 raw=1 scores(oldest=146 high=346 batch=0) previous_persistent=true age_us=4622"
+    },
+    {
+      "request_id": 19,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 19,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 11,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 12,
+      "event": "PolicyDecision",
+      "reason": "eligible=12 action=1 raw=1 scores(oldest=151 high=351 batch=0) previous_persistent=true age_us=5135"
+    },
+    {
+      "request_id": 12,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 12,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 34,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 46,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=151 high=351 batch=0) previous_persistent=true age_us=5135"
+    },
+    {
+      "request_id": 46,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 46,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 26,
+      "event": "ConflictReleased",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 19,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 23,
+      "event": "PolicyDecision",
+      "reason": "eligible=12 action=1 raw=1 scores(oldest=156 high=356 batch=0) previous_persistent=true age_us=5655"
+    },
+    {
+      "request_id": 23,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 23,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 12,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 15,
+      "event": "PolicyDecision",
+      "reason": "eligible=11 action=1 raw=1 scores(oldest=156 high=356 batch=0) previous_persistent=true age_us=5655"
+    },
+    {
+      "request_id": 15,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 15,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 23,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 24,
+      "event": "PolicyDecision",
+      "reason": "eligible=11 action=1 raw=1 scores(oldest=161 high=361 batch=0) previous_persistent=true age_us=6168"
+    },
+    {
+      "request_id": 24,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 24,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 7,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 38,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=1 raw=1 scores(oldest=161 high=361 batch=0) previous_persistent=true age_us=6168"
+    },
+    {
+      "request_id": 38,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 38,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 15,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 20,
+      "event": "PolicyDecision",
+      "reason": "eligible=10 action=1 raw=1 scores(oldest=166 high=366 batch=0) previous_persistent=true age_us=6679"
+    },
+    {
+      "request_id": 20,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 20,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 24,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 32,
+      "event": "PolicyDecision",
+      "reason": "eligible=10 action=1 raw=1 scores(oldest=171 high=371 batch=0) previous_persistent=true age_us=7189"
+    },
+    {
+      "request_id": 32,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 32,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 46,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 20,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 21,
+      "event": "PolicyDecision",
+      "reason": "eligible=9 action=1 raw=1 scores(oldest=177 high=377 batch=0) previous_persistent=true age_us=7700"
+    },
+    {
+      "request_id": 21,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 21,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 38,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 32,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 37,
+      "event": "PolicyDecision",
+      "reason": "eligible=9 action=1 raw=1 scores(oldest=182 high=382 batch=0) previous_persistent=true age_us=8213"
+    },
+    {
+      "request_id": 37,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 37,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 21,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 22,
+      "event": "PolicyDecision",
+      "reason": "eligible=8 action=1 raw=1 scores(oldest=182 high=382 batch=0) previous_persistent=true age_us=8213"
+    },
+    {
+      "request_id": 22,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 22,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 37,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 42,
+      "event": "PolicyDecision",
+      "reason": "eligible=8 action=1 raw=1 scores(oldest=187 high=387 batch=0) previous_persistent=true age_us=8724"
+    },
+    {
+      "request_id": 42,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 42,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 22,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 25,
+      "event": "PolicyDecision",
+      "reason": "eligible=7 action=1 raw=1 scores(oldest=192 high=392 batch=0) previous_persistent=true age_us=9235"
+    },
+    {
+      "request_id": 25,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 25,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 42,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 43,
+      "event": "PolicyDecision",
+      "reason": "eligible=7 action=1 raw=1 scores(oldest=197 high=397 batch=0) previous_persistent=true age_us=9748"
+    },
+    {
+      "request_id": 43,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 43,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 25,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 27,
+      "event": "PolicyDecision",
+      "reason": "eligible=6 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=10260"
+    },
+    {
+      "request_id": 27,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 27,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 43,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 47,
+      "event": "PolicyDecision",
+      "reason": "eligible=6 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=10776"
+    },
+    {
+      "request_id": 47,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 47,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 27,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 29,
+      "event": "PolicyDecision",
+      "reason": "eligible=5 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=10776"
+    },
+    {
+      "request_id": 29,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 29,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 47,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 49,
+      "event": "PolicyDecision",
+      "reason": "eligible=5 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=11287"
+    },
+    {
+      "request_id": 49,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 49,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 29,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 33,
+      "event": "PolicyDecision",
+      "reason": "eligible=4 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=11802"
+    },
+    {
+      "request_id": 33,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 33,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 49,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 51,
+      "event": "PolicyDecision",
+      "reason": "eligible=4 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=12369"
+    },
+    {
+      "request_id": 51,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 51,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 33,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 41,
+      "event": "PolicyDecision",
+      "reason": "eligible=3 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=12878"
+    },
+    {
+      "request_id": 41,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 41,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 51,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 59,
+      "event": "PolicyDecision",
+      "reason": "eligible=3 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=12878"
+    },
+    {
+      "request_id": 59,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 59,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 41,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 48,
+      "event": "PolicyDecision",
+      "reason": "eligible=2 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=13385"
+    },
+    {
+      "request_id": 48,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 48,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 59,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 61,
+      "event": "PolicyDecision",
+      "reason": "eligible=2 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=13902"
+    },
+    {
+      "request_id": 61,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 61,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 48,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 63,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=14410"
+    },
+    {
+      "request_id": 63,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 63,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 61,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 62,
+      "event": "PolicyDecision",
+      "reason": "eligible=1 action=2 raw=2 scores(oldest=200 high=400 batch=0) previous_persistent=true age_us=14921"
+    },
+    {
+      "request_id": 62,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 62,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 63,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 62,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    }
+  ],
+  "agentic": [
+    {
+      "request_id": 0,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 0,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 3,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 3,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 1,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 2,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 12,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 9,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 11,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 23,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 7,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 7,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 14,
+      "event": "WaitingConflict",
+      "reason": "token=1:3 owner=7"
+    },
+    {
+      "request_id": 4,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 15,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 5,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 17,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 21,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 22,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 35,
+      "event": "ConflictAcquired",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 35,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 18,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 18,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 24,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 19,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 25,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 26,
+      "event": "WaitingConflict",
+      "reason": "token=1:1 owner=35"
+    },
+    {
+      "request_id": 20,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 27,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 63,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 32,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 46,
+      "event": "WaitingConflict",
+      "reason": "token=1:2 owner=18"
+    },
+    {
+      "request_id": 33,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 47,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 34,
+      "event": "WaitingConflict",
+      "reason": "token=1:2 owner=18"
+    },
+    {
+      "request_id": 48,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 41,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 49,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 42,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 43,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 37,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 29,
+      "event": "WaitingConflict",
+      "reason": "token=2:2 owner=0"
+    },
+    {
+      "request_id": 38,
+      "event": "WaitingConflict",
+      "reason": "token=1:3 owner=7"
+    },
+    {
+      "request_id": 6,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 13,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 16,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 28,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 36,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 39,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 40,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 45,
+      "event": "Dispatch",
+      "reason": "batch=8"
+    },
+    {
+      "request_id": 51,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 59,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 53,
+      "event": "ConflictAcquired",
+      "reason": "1:4"
+    },
+    {
+      "request_id": 53,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 61,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 62,
+      "event": "WaitingConflict",
+      "reason": "token=2:1 owner=3"
+    },
+    {
+      "request_id": 0,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 1,
+      "event": "Wake",
+      "reason": "released_by=0"
+    },
+    {
+      "request_id": 1,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 1,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 3,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 2,
+      "event": "Wake",
+      "reason": "released_by=3"
+    },
+    {
+      "request_id": 2,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 2,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 1,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 4,
+      "event": "Wake",
+      "reason": "released_by=1"
+    },
+    {
+      "request_id": 4,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 4,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 8,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 10,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 31,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 50,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 55,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 57,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 58,
+      "event": "Dispatch",
+      "reason": "batch=7"
+    },
+    {
+      "request_id": 30,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 44,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 52,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 54,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 56,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 60,
+      "event": "Dispatch",
+      "reason": "batch=6"
+    },
+    {
+      "request_id": 2,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 9,
+      "event": "Wake",
+      "reason": "released_by=2"
+    },
+    {
+      "request_id": 9,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 9,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 4,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 5,
+      "event": "Wake",
+      "reason": "released_by=4"
+    },
+    {
+      "request_id": 5,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 5,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 18,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 34,
+      "event": "Wake",
+      "reason": "released_by=18"
+    },
+    {
+      "request_id": 34,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 34,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 7,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 14,
+      "event": "Wake",
+      "reason": "released_by=7"
+    },
+    {
+      "request_id": 14,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 14,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 35,
+      "event": "ConflictReleased",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 26,
+      "event": "Wake",
+      "reason": "released_by=35"
+    },
+    {
+      "request_id": 26,
+      "event": "ConflictAcquired",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 26,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 9,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 17,
+      "event": "Wake",
+      "reason": "released_by=9"
+    },
+    {
+      "request_id": 17,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 17,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 53,
+      "event": "ConflictReleased",
+      "reason": "1:4"
+    },
+    {
+      "request_id": 5,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 11,
+      "event": "Wake",
+      "reason": "released_by=5"
+    },
+    {
+      "request_id": 11,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 11,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 17,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 19,
+      "event": "Wake",
+      "reason": "released_by=17"
+    },
+    {
+      "request_id": 19,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 19,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 11,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 12,
+      "event": "Wake",
+      "reason": "released_by=11"
+    },
+    {
+      "request_id": 12,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 12,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 19,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 23,
+      "event": "Wake",
+      "reason": "released_by=19"
+    },
+    {
+      "request_id": 23,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 23,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 34,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 46,
+      "event": "Wake",
+      "reason": "released_by=34"
+    },
+    {
+      "request_id": 46,
+      "event": "ConflictAcquired",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 46,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 26,
+      "event": "ConflictReleased",
+      "reason": "1:1"
+    },
+    {
+      "request_id": 12,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 15,
+      "event": "Wake",
+      "reason": "released_by=12"
+    },
+    {
+      "request_id": 15,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 15,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 14,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 38,
+      "event": "Wake",
+      "reason": "released_by=14"
+    },
+    {
+      "request_id": 38,
+      "event": "ConflictAcquired",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 38,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 23,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 24,
+      "event": "Wake",
+      "reason": "released_by=23"
+    },
+    {
+      "request_id": 24,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 24,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 15,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 20,
+      "event": "Wake",
+      "reason": "released_by=15"
+    },
+    {
+      "request_id": 20,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 20,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 24,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 32,
+      "event": "Wake",
+      "reason": "released_by=24"
+    },
+    {
+      "request_id": 32,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 32,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 46,
+      "event": "ConflictReleased",
+      "reason": "1:2"
+    },
+    {
+      "request_id": 20,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 21,
+      "event": "Wake",
+      "reason": "released_by=20"
+    },
+    {
+      "request_id": 21,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 21,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 38,
+      "event": "ConflictReleased",
+      "reason": "1:3"
+    },
+    {
+      "request_id": 32,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 37,
+      "event": "Wake",
+      "reason": "released_by=32"
+    },
+    {
+      "request_id": 37,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 37,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 21,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 22,
+      "event": "Wake",
+      "reason": "released_by=21"
+    },
+    {
+      "request_id": 22,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 22,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 22,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 25,
+      "event": "Wake",
+      "reason": "released_by=22"
+    },
+    {
+      "request_id": 25,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 25,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 37,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 42,
+      "event": "Wake",
+      "reason": "released_by=37"
+    },
+    {
+      "request_id": 42,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 42,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 25,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 27,
+      "event": "Wake",
+      "reason": "released_by=25"
+    },
+    {
+      "request_id": 27,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 27,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 42,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 43,
+      "event": "Wake",
+      "reason": "released_by=42"
+    },
+    {
+      "request_id": 43,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 43,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 27,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 29,
+      "event": "Wake",
+      "reason": "released_by=27"
+    },
+    {
+      "request_id": 29,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 29,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 43,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 47,
+      "event": "Wake",
+      "reason": "released_by=43"
+    },
+    {
+      "request_id": 47,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 47,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 29,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 33,
+      "event": "Wake",
+      "reason": "released_by=29"
+    },
+    {
+      "request_id": 33,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 33,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 47,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 49,
+      "event": "Wake",
+      "reason": "released_by=47"
+    },
+    {
+      "request_id": 49,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 49,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 33,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 41,
+      "event": "Wake",
+      "reason": "released_by=33"
+    },
+    {
+      "request_id": 41,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 41,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 49,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 51,
+      "event": "Wake",
+      "reason": "released_by=49"
+    },
+    {
+      "request_id": 51,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 51,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 41,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 48,
+      "event": "Wake",
+      "reason": "released_by=41"
+    },
+    {
+      "request_id": 48,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 48,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 51,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 59,
+      "event": "Wake",
+      "reason": "released_by=51"
+    },
+    {
+      "request_id": 59,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 59,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 48,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 63,
+      "event": "Wake",
+      "reason": "released_by=48"
+    },
+    {
+      "request_id": 63,
+      "event": "ConflictAcquired",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 63,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 59,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 61,
+      "event": "Wake",
+      "reason": "released_by=59"
+    },
+    {
+      "request_id": 61,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 61,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 63,
+      "event": "ConflictReleased",
+      "reason": "2:2"
+    },
+    {
+      "request_id": 61,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 62,
+      "event": "Wake",
+      "reason": "released_by=61"
+    },
+    {
+      "request_id": 62,
+      "event": "ConflictAcquired",
+      "reason": "2:1"
+    },
+    {
+      "request_id": 62,
+      "event": "Dispatch",
+      "reason": "batch=1"
+    },
+    {
+      "request_id": 62,
+      "event": "ConflictReleased",
+      "reason": "2:1"
+    }
+  ]
+}

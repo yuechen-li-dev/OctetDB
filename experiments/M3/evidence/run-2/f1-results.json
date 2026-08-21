@@ -1,0 +1,245 @@
+{
+  "lane": "f1",
+  "started": "2026-08-21T14:15:23.6681105-07:00",
+  "elapsed": 6990492600,
+  "summary": {
+    "attempted": 6750,
+    "admitted": 6750,
+    "completed": 6750,
+    "rejected": 0,
+    "failed": 0,
+    "throughput_per_sec": 965.5971883869815,
+    "latency": {
+      "p50_ms": 1.5234,
+      "p95_ms": 3.0334,
+      "p99_ms": 3.295,
+      "p99_9_ms": 4.4535
+    },
+    "queue_residence": {
+      "p50_ms": 0.5059,
+      "p95_ms": 3.017,
+      "p99_ms": 3.1012,
+      "p99_9_ms": 3.9302
+    },
+    "database_service": {
+      "p50_ms": 0.5055,
+      "p95_ms": 1.5588,
+      "p99_ms": 2.0397,
+      "p99_9_ms": 2.534
+    },
+    "conflict_wait": {
+      "p50_ms": 0.5285,
+      "p95_ms": 2.0359,
+      "p99_ms": 2.7743
+    },
+    "batch_count": 5685,
+    "batch_size_distribution": {
+      "1": 4911,
+      "2": 1068,
+      "3": 585,
+      "4": 156,
+      "5": 30
+    },
+    "average_batch_size": 1.187335092348285,
+    "batch_fill_ratio": 0.14841688654353563,
+    "recovery_seconds": 1,
+    "phases": {
+      "low": {
+        "attempted": 250,
+        "admitted": 250,
+        "completed": 250,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 3.0184,
+          "p95_ms": 3.1578,
+          "p99_ms": 3.6319
+        },
+        "queue_residence": {
+          "p50_ms": 3.0163,
+          "p95_ms": 3.1278,
+          "p99_ms": 3.3676
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 1.5385,
+          "p99_ms": 1.6121
+        }
+      },
+      "mixed": {
+        "attempted": 750,
+        "admitted": 750,
+        "completed": 750,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 2.0323,
+          "p95_ms": 3.0541,
+          "p99_ms": 3.1212
+        },
+        "queue_residence": {
+          "p50_ms": 2.0105,
+          "p95_ms": 3.0364,
+          "p99_ms": 3.1084
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 1.3952,
+          "p99_ms": 1.5983
+        }
+      },
+      "normal_after": {
+        "attempted": 500,
+        "admitted": 500,
+        "completed": 500,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 2.5464,
+          "p95_ms": 3.0525,
+          "p99_ms": 3.0955
+        },
+        "queue_residence": {
+          "p50_ms": 2.546,
+          "p95_ms": 3.0525,
+          "p99_ms": 3.0955
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 1.5195,
+          "p99_ms": 1.5666
+        }
+      },
+      "normal_before": {
+        "attempted": 250,
+        "admitted": 250,
+        "completed": 250,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 2.5386,
+          "p95_ms": 3.021,
+          "p99_ms": 3.1132
+        },
+        "queue_residence": {
+          "p50_ms": 2.5381,
+          "p95_ms": 3.0167,
+          "p99_ms": 3.0841
+        },
+        "database_service": {
+          "p50_ms": 0,
+          "p95_ms": 1.5376,
+          "p99_ms": 1.5753
+        }
+      },
+      "overload": {
+        "attempted": 5000,
+        "admitted": 5000,
+        "completed": 5000,
+        "rejected": 0,
+        "failed": 0,
+        "latency": {
+          "p50_ms": 1.0507,
+          "p95_ms": 2.5654,
+          "p99_ms": 3.3907,
+          "p99_9_ms": 4.6163
+        },
+        "queue_residence": {
+          "p50_ms": 0,
+          "p95_ms": 2.3504,
+          "p99_ms": 3.0487,
+          "p99_9_ms": 3.9766
+        },
+        "database_service": {
+          "p50_ms": 0.5124,
+          "p95_ms": 1.5702,
+          "p99_ms": 2.0607,
+          "p99_9_ms": 2.534
+        }
+      }
+    },
+    "priorities": {
+      "0": {
+        "completed": 3149,
+        "wait": {
+          "p50_ms": 2.1005,
+          "p95_ms": 3.0524,
+          "p99_ms": 3.295,
+          "p99_9_ms": 4.099
+        },
+        "max_wait_ms": 4.4535
+      },
+      "1": {
+        "completed": 3601,
+        "wait": {
+          "p50_ms": 0,
+          "p95_ms": 1.0118,
+          "p99_ms": 1.6051,
+          "p99_9_ms": 3.1004
+        },
+        "max_wait_ms": 3.3538
+      }
+    }
+  },
+  "memory": {
+    "allocated_bytes": 14589920,
+    "allocations": 240350,
+    "bytes_per_op": 2161.4696296296297,
+    "allocations_per_op": 35.60740740740741,
+    "heap_high_bytes": 15171584,
+    "gc_cycles": 6,
+    "gc_pause_total_ms": 0
+  },
+  "pool": {
+    "max_connections": 8,
+    "acquires": 5685,
+    "acquire_wait_ms": 0,
+    "max_in_use": 5
+  },
+  "environment": {
+    "os": "windows",
+    "arch": "amd64",
+    "go_version": "go1.26.2",
+    "postgresql_version": "17.11",
+    "pgx_version": "github.com/jackc/pgx/v5 v5.7.6",
+    "cpu_count": 16
+  },
+  "initialization": {
+    "wall_time_us": 0,
+    "scheduler_initialization_time_us": 0,
+    "metadata_construction_time_us": 0,
+    "statement_catalog_setup_time_us": 0,
+    "allocations": 20,
+    "allocated_bytes": 3440,
+    "metadata_allocations": 0,
+    "metadata_allocated_bytes": 0,
+    "statement_catalog_count": 5
+  },
+  "peak_queue_depth": 57,
+  "scheduler_cpu_time": 1028900,
+  "conflict": {
+    "conflicts_detected": 1083,
+    "requests_blocked": 1083,
+    "conflict_wait_total": 528363500,
+    "conflict_wait_max": 3646200,
+    "ownership_total": 4680526500,
+    "ownership_max": 4605800,
+    "peak_hot_key_queue_depth": 4,
+    "wakeups": 0,
+    "messages": 0,
+    "peak_mailbox_occupancy": 0,
+    "mailbox_overflows": 0,
+    "utility_decisions": 7237,
+    "utility_candidates": 28948,
+    "starvation_promotions": 0,
+    "controller_constructions": 1,
+    "policy_switches": 418,
+    "hysteresis_holds": 25,
+    "minimum_commit_holds": 52,
+    "fairness_overrides": 0,
+    "overtakes": 1994,
+    "maximum_dispatch_age": 4698400,
+    "ownership_leaks": 0,
+    "double_releases": 0
+  }
+}

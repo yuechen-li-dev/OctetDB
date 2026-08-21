@@ -87,6 +87,7 @@ type laneResult struct {
 	Err                              error
 	QueueTime, Service, ConflictWait time.Duration
 	BatchSize                        int
+	Priority                         int
 }
 type lane interface {
 	Submit(context.Context, workload.Operation) laneResult
@@ -102,7 +103,7 @@ type scheduledAdapter struct{ *scheduled.Scheduler }
 
 func (l scheduledAdapter) Submit(ctx context.Context, op workload.Operation) laneResult {
 	r := l.Scheduler.Submit(ctx, op)
-	return laneResult(r)
+	return laneResult{Err: r.Err, QueueTime: r.QueueTime, Service: r.Service, ConflictWait: r.ConflictWait, BatchSize: r.BatchSize, Priority: r.Priority}
 }
 
 func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result, error) {
@@ -127,7 +128,13 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	case "conflict":
 		scheduler = scheduled.NewConflictAware(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
-	case "utility":
+	case "f0":
+		scheduler = scheduled.NewPersistentParity(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "priority", "h":
+		scheduler = scheduled.NewPriority(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "utility", "f1":
 		scheduler = scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
 	case "agentic":
@@ -187,7 +194,7 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 				defer cancel()
 				begin := time.Now()
 				r := impl.Submit(reqCtx, op)
-				sample := metrics.Sample{CompletedAt: time.Now(), Phase: phaseName, Latency: time.Since(begin), Queue: r.QueueTime, Service: r.Service, ConflictWait: r.ConflictWait, BatchSize: r.BatchSize, Admitted: !errorsIsRejected(r.Err), Rejected: errorsIsRejected(r.Err), Failed: r.Err != nil && !errorsIsRejected(r.Err)}
+				sample := metrics.Sample{CompletedAt: time.Now(), Phase: phaseName, Latency: time.Since(begin), Queue: r.QueueTime, Service: r.Service, ConflictWait: r.ConflictWait, BatchSize: r.BatchSize, Priority: r.Priority, Admitted: !errorsIsRejected(r.Err), Rejected: errorsIsRejected(r.Err), Failed: r.Err != nil && !errorsIsRejected(r.Err)}
 				mu.Lock()
 				samples = append(samples, sample)
 				mu.Unlock()
@@ -233,7 +240,7 @@ func divide(value, denominator float64) float64 {
 
 func errorsIsRejected(err error) bool { return err == scheduled.ErrRejected }
 func batchMax(name string, cfg Config) int {
-	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" || name == "conflict" || name == "utility" || name == "agentic" {
+	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" || name == "conflict" || name == "f0" || name == "priority" || name == "h" || name == "utility" || name == "f1" || name == "agentic" {
 		return cfg.MaxBatch
 	}
 	return 1
@@ -296,6 +303,12 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 		"conflict": func() *scheduled.Scheduler {
 			return scheduled.NewConflictAware(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		},
+		"f0": func() *scheduled.Scheduler {
+			return scheduled.NewPersistentParity(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"priority": func() *scheduled.Scheduler {
+			return scheduled.NewPriority(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
 		"utility": func() *scheduled.Scheduler {
 			return scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		},
@@ -305,7 +318,7 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 	}
 	equal := true
 	var ss db.State
-	for _, name := range []string{"batch", "runtime", "static", "conflict", "utility", "agentic"} {
+	for _, name := range []string{"batch", "runtime", "static", "conflict", "f0", "priority", "utility", "agentic"} {
 		if err := store.Reset(ctx); err != nil {
 			return Correctness{}, err
 		}

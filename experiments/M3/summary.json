@@ -1,0 +1,18 @@
+{
+  "verdict": "Success",
+  "compiler_revision": "a997285fc006b29143c31f6391ca6f21a950adb2",
+  "method": "three rotated quick PostgreSQL runs; arithmetic means",
+  "operations_per_lane_per_run": 6750,
+  "lanes": {
+    "E": {"name":"conflict", "completed":6750, "rejected":0, "throughput_per_sec":965.57, "p50_ms":1.538, "p95_ms":3.049, "p99_ms":3.451, "p99_9_ms":5.642, "queue_p99_ms":3.152, "db_service_p99_ms":2.085, "allocations_per_op":35.69, "bytes_per_op":2170.4, "priority_0_wait_p99_ms":3.342, "priority_1_wait_p99_ms":1.803},
+    "F0": {"name":"f0", "completed":6750, "rejected":0, "throughput_per_sec":965.51, "p50_ms":1.534, "p95_ms":3.050, "p99_ms":3.462, "p99_9_ms":4.715, "queue_p99_ms":3.182, "db_service_p99_ms":2.068, "allocations_per_op":35.66, "bytes_per_op":2169.5, "priority_0_wait_p99_ms":3.390, "priority_1_wait_p99_ms":1.774},
+    "H": {"name":"priority", "completed":6750, "rejected":0, "throughput_per_sec":965.51, "p50_ms":1.530, "p95_ms":3.046, "p99_ms":3.571, "p99_9_ms":5.144, "queue_p99_ms":3.176, "db_service_p99_ms":2.067, "allocations_per_op":35.66, "bytes_per_op":2169.1, "priority_0_wait_p99_ms":3.287, "priority_1_wait_p99_ms":1.993, "policy_switches":412.7, "hysteresis_holds":27.3, "minimum_commit_holds":58.0, "fairness_overrides":0.0, "overtakes":1953.0},
+    "F1": {"name":"f1", "completed":6750, "rejected":0, "throughput_per_sec":965.50, "p50_ms":1.530, "p95_ms":3.041, "p99_ms":3.349, "p99_9_ms":4.485, "queue_p99_ms":3.120, "db_service_p99_ms":2.053, "allocations_per_op":35.65, "bytes_per_op":2164.2, "priority_0_wait_p99_ms":3.260, "priority_1_wait_p99_ms":1.587, "policy_switches":422.7, "hysteresis_holds":22.7, "minimum_commit_holds":54.0, "fairness_overrides":0.0, "overtakes":1953.0}
+  },
+  "policy_microbenchmarks": {
+    "F0": {"ns_per_decision_min":6.298, "ns_per_decision_max":6.340, "bytes_per_decision":0, "allocations_per_decision":0},
+    "H": {"ns_per_decision_min":2.655, "ns_per_decision_max":2.671, "bytes_per_decision":0, "allocations_per_decision":0},
+    "F1": {"ns_per_decision_min":7.215, "ns_per_decision_max":7.284, "bytes_per_decision":0, "allocations_per_decision":0}
+  },
+  "generated_go": {"bytes":13789, "lines":563, "imports":0, "typed_policy_sites":2, "reflect":false, "clone_helper":false, "range_helper":false, "generic_policy_map":false, "any_policy_state":false}
+}

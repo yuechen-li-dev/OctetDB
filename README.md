@@ -1,4 +1,8 @@
-# Database Scheduler — DBSCHED-M0 / M1 / M2
+# Database Scheduler — DBSCHED-M0 / M1 / M2 / M3
+
+DBSCHED-M3 adds persistent zero-allocation Oct policy controllers and compares
+conventional and utility-scored priority/aging above the M2 mechanism. See
+`docs/experiments/DBSCHED_M3.md` and `experiments/M3/summary.json`.
 
 DBSCHED-M2 makes the M1 static conflict topology behavioral through typed
 runtime keys, centralized conflict ownership, an Oct `when policy` ablation,

@@ -1,0 +1,21 @@
+{
+  "seed": 20260821,
+  "pool_size": 8,
+  "scheduler_capacity": 128,
+  "max_batch": 8,
+  "batch_wait_ns": 2000000,
+  "request_timeout_ns": 30000000000,
+  "warmup_operations": 5000,
+  "phases": [
+    {"name":"low", "duration_s":1, "rate_per_second":250, "conflict_regime":0},
+    {"name":"mixed", "duration_s":1, "rate_per_second":750, "conflict_regime":1},
+    {"name":"normal_before", "duration_s":1, "rate_per_second":250, "conflict_regime":0},
+    {"name":"overload", "duration_s":2, "rate_per_second":2500, "conflict_regime":2},
+    {"name":"normal_after", "duration_s":2, "rate_per_second":250, "conflict_regime":0}
+  ],
+  "orders": [
+    ["E","F0","H","F1"],
+    ["F0","H","F1","E"],
+    ["H","F1","E","F0"]
+  ]
+}

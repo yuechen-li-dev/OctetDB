@@ -19,6 +19,7 @@ type Result struct {
 	Service      time.Duration
 	ConflictWait time.Duration
 	BatchSize    int
+	Priority     int
 }
 
 type request struct {
@@ -53,6 +54,9 @@ type Scheduler struct {
 	peakQueue      atomic.Int64
 	policyNanos    atomic.Int64
 	strategy       controlStrategy
+	parityPolicy   *__octFlow_Scheduler_PersistentParityController
+	fairPolicy     *__octFlow_Scheduler_PersistentFairController
+	goFairPolicy   conventionalPolicy
 	conflicts      conflictCounters
 	traceMu        sync.Mutex
 	traceEvents    []TraceEvent
@@ -87,7 +91,17 @@ func NewConflictAware(store *db.Store, capacity, maxBatch, workers int, batchWai
 
 func NewUtility(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
 	validateStaticEnvelope(capacity, maxBatch, workers)
-	return newScheduler(store, capacity, maxBatch, workers, batchWait, "utility")
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "f1")
+}
+
+func NewPersistentParity(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	validateStaticEnvelope(capacity, maxBatch, workers)
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "f0")
+}
+
+func NewPriority(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	validateStaticEnvelope(capacity, maxBatch, workers)
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "priority")
 }
 
 func NewAgentic(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
@@ -117,7 +131,7 @@ func newScheduler(store *db.Store, capacity, maxBatch, workers int, batchWait ti
 	var plan planLookup
 	if mode == "runtime" {
 		plan = buildRuntimePlan(capacity, maxBatch, workers)
-	} else if mode == "static" || mode == "conflict" || mode == "utility" || mode == "agentic" {
+	} else if mode == "static" || mode == "conflict" || mode == "f0" || mode == "priority" || mode == "f1" || mode == "agentic" {
 		plan = staticPlanLookup{plan: &staticExecutionPlan}
 	}
 	metadataTime := time.Since(metadataStarted)
@@ -142,8 +156,17 @@ func newScheduler(store *db.Store, capacity, maxBatch, workers int, batchWait ti
 	switch mode {
 	case "conflict":
 		s.strategy = controlCentralized
-	case "utility":
+	case "f0":
+		s.strategy = controlParity
+		s.parityPolicy = fn_Scheduler_PersistentParityController().(*__octFlow_Scheduler_PersistentParityController)
+		s.conflicts.controllerConstructions.Add(1)
+	case "priority":
+		s.strategy = controlPriority
+		s.conflicts.controllerConstructions.Add(1)
+	case "f1":
 		s.strategy = controlUtility
+		s.fairPolicy = fn_Scheduler_PersistentFairController().(*__octFlow_Scheduler_PersistentFairController)
+		s.conflicts.controllerConstructions.Add(1)
 	case "agentic":
 		s.strategy = controlAgentic
 	}
@@ -342,23 +365,6 @@ func policyDecision(used, capacity, requestClass, batchClass, batchCount, maxBat
 	decision, complete := machine.__octResult()
 	if !complete {
 		panic("generated Oct scheduler did not complete")
-	}
-	return decision
-}
-
-const (
-	utilityDispatch = iota
-	utilityDefer
-	utilityPromote
-	utilityJoinBatch
-)
-
-func utilityDecision(legal bool, priority, ageMicros, batchCount, maxBatch int) int {
-	machine := fn_Scheduler_UtilityDecision(legal, priority, ageMicros, batchCount, maxBatch)
-	machine.__octStep()
-	decision, complete := machine.__octResult()
-	if !complete {
-		panic("generated Oct utility policy did not complete")
 	}
 	return decision
 }
