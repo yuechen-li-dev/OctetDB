@@ -95,3 +95,25 @@ func (s *Store) CanonicalOctagon() ([]byte, string) {
 }
 
 func (s *Store) LedgerLen() int { s.mu.RLock(); defer s.mu.RUnlock(); return len(s.ledger) }
+
+func (s *Store) snapshotState() ([]Account, []LedgerEntry) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	accounts := make([]Account, 0, len(s.accounts))
+	for _, account := range s.accounts {
+		accounts = append(accounts, account)
+	}
+	sort.Slice(accounts, func(i, j int) bool { return accounts[i].ID < accounts[j].ID })
+	ledger := append([]LedgerEntry(nil), s.ledger...)
+	return accounts, ledger
+}
+
+func (s *Store) restoreState(accounts []Account, ledger []LedgerEntry) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.accounts = make(map[AccountID]Account, len(accounts))
+	for _, account := range accounts {
+		s.accounts[account.ID] = account
+	}
+	s.ledger = append([]LedgerEntry(nil), ledger...)
+}

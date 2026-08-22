@@ -16,6 +16,8 @@ const maxRecordBytes = 1 << 20
 
 type logRecord struct {
 	Version      int       `json:"version"`
+	SchemaID     string    `json:"schema_id,omitempty"`
+	ProgramID    string    `json:"program_id,omitempty"`
 	Sequence     uint64    `json:"sequence"`
 	AgentID      AccountID `json:"agent_id"`
 	CommandID    string    `json:"command_id"`

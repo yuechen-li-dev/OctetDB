@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -30,6 +32,8 @@ type agentEntry struct {
 	checkpoint []byte
 	started    bool
 	mu         sync.Mutex
+	goPending  pendingTransfer
+	goTurns    int
 }
 
 type Engine struct {
@@ -44,11 +48,36 @@ type Engine struct {
 	sequence          atomic.Uint64
 	closed            atomic.Bool
 	recoveryTruncated bool
+	m1                *m1Storage
+	authority         chan any
+	recoveryStats     RecoveryStats
+	dedupeOrder       []string
+	dedupeHead        int
+	poisoned          error
 }
+
+type m1Commit struct {
+	record     logRecord
+	entry      *agentEntry
+	checkpoint []byte
+	response   chan outcome
+	install    func()
+}
+
+type snapshotRequest struct{ response chan snapshotOutcome }
+type snapshotOutcome struct {
+	path  string
+	bytes int64
+	err   error
+}
+type closeAuthority struct{ response chan error }
 
 func Open(cfg Config) (*Engine, error) {
 	if cfg.MailboxCapacity <= 0 {
 		cfg.MailboxCapacity = 64
+	}
+	if cfg.StorageDir != "" {
+		return openM1Engine(cfg)
 	}
 	log, records, truncated, err := openCommitLog(cfg.LogPath, cfg.Durability, cfg.BatchSize)
 	if err != nil {
@@ -80,12 +109,122 @@ func Open(cfg Config) (*Engine, error) {
 	return e, nil
 }
 
+func openM1Engine(cfg Config) (*Engine, error) {
+	started := time.Now()
+	if cfg.MailboxCapacity <= 0 {
+		cfg.MailboxCapacity = 64
+	}
+	if cfg.GroupMax <= 0 {
+		cfg.GroupMax = 16
+	}
+	if cfg.GroupWait < 0 {
+		cfg.GroupWait = 200 * time.Microsecond
+	}
+	if cfg.DedupeWindow <= 0 {
+		cfg.DedupeWindow = 100_000
+	}
+	e := &Engine{cfg: cfg, store: NewStore(), locks: newLockTable(), registry: make(map[AccountID]*agentEntry), results: make(map[string]Result), authority: make(chan any, cfg.GroupMax*2+16)}
+	snapshot, snapshotBytes, decodeTime, err := loadLatestSnapshot(cfg.StorageDir, expectedProgramID(cfg))
+	if err != nil {
+		return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: err}
+	}
+	var frontier uint64
+	if snapshot != nil {
+		frontier = snapshot.Sequence
+		e.store.restoreState(snapshot.Accounts, snapshot.Ledger)
+		publication, hash := e.store.CanonicalOctagon()
+		if string(publication) != string(snapshot.Octagon) || hash != snapshot.OctHash {
+			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: errors.New("snapshot authoritative state/publication mismatch")}
+		}
+		for _, item := range snapshot.Dedupe {
+			e.results[item.CommandID] = item.Result
+			e.dedupeOrder = append(e.dedupeOrder, item.CommandID)
+		}
+		for _, agent := range snapshot.Agents {
+			if cfg.GoBehavioralControl {
+				var state goAgentCheckpoint
+				if err := json.Unmarshal(agent.Checkpoint, &state); err != nil {
+					return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+				}
+				entry := e.entry(agent.ID)
+				entry.goPending, entry.goTurns = state.Pending, state.Turns
+				entry.checkpoint = append([]byte(nil), agent.Checkpoint...)
+				continue
+			}
+			checkpoint, err := generated.ParseAccountAgentCheckpoint(agent.Checkpoint)
+			if err != nil {
+				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+			}
+			machine, err := generated.RestoreAccountAgent(checkpoint)
+			if err != nil {
+				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+			}
+			entry := e.entry(agent.ID)
+			entry.machine = machine
+			entry.checkpoint = append([]byte(nil), agent.Checkpoint...)
+		}
+		e.sequence.Store(frontier)
+		e.recoveryStats = RecoveryStats{SnapshotSequence: frontier, SnapshotBytes: snapshotBytes, SnapshotDecode: decodeTime, AgentsRestored: len(snapshot.Agents)}
+	}
+	storage, records, stats, err := openM1Storage(cfg, frontier)
+	if err != nil {
+		return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: err}
+	}
+	e.m1 = storage
+	e.recoveryStats.WALScan = stats.WALScan
+	e.recoveryStats.WALBytesScanned = stats.WALBytesScanned
+	e.recoveryStats.RecordsReplayed = len(records)
+	for _, record := range records {
+		if record.Sequence != e.sequence.Load()+1 {
+			storage.close()
+			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: fmt.Errorf("non-monotonic sequence %d", record.Sequence)}
+		}
+		e.store.apply(record)
+		entry := e.entry(record.AgentID)
+		if cfg.GoBehavioralControl {
+			var state goAgentCheckpoint
+			if err := json.Unmarshal(record.Checkpoint, &state); err != nil {
+				storage.close()
+				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+			}
+			entry.goPending, entry.goTurns = state.Pending, state.Turns
+		} else {
+			checkpoint, err := generated.ParseAccountAgentCheckpoint(record.Checkpoint)
+			if err != nil {
+				storage.close()
+				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+			}
+			machine, err := generated.RestoreAccountAgent(checkpoint)
+			if err != nil {
+				storage.close()
+				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
+			}
+			entry.machine = machine
+		}
+		entry.checkpoint = append(entry.checkpoint[:0], record.Checkpoint...)
+		e.rememberResult(record.CommandID, record.Result)
+		e.sequence.Store(record.Sequence)
+	}
+	e.recoveryStats.AgentsRestored = e.AgentCount()
+	e.recoveryStats.TotalReady = time.Since(started)
+	go e.runCommitAuthority()
+	return e, nil
+}
+
 func (e *Engine) Store() *Store               { return e.store }
 func (e *Engine) RecoveryTruncatedTail() bool { return e.recoveryTruncated }
 func (e *Engine) AgentCount() int {
 	e.registryMu.Lock()
 	defer e.registryMu.Unlock()
 	return len(e.registry)
+}
+
+func (e *Engine) RecoveryMetrics() RecoveryStats { return e.recoveryStats }
+func (e *Engine) StorageMetrics() StorageStats {
+	if e.m1 == nil {
+		return StorageStats{}
+	}
+	return e.m1.statsSnapshot()
 }
 
 func (e *Engine) entry(id AccountID) *agentEntry {
@@ -141,15 +280,20 @@ func (e *Engine) process(entry *agentEntry, envelope Envelope) outcome {
 	release := e.locks.acquire(tokens)
 	defer release()
 	e.trace(TraceEvent{CommandID: command.ID, Agent: command.Account, Phase: "ownership_acquired", ConflictTokens: tokens})
-	e.commitMu.Lock()
-	if prior, ok := e.results[command.ID]; ok {
+	if e.m1 == nil {
+		e.commitMu.Lock()
+		if prior, ok := e.results[command.ID]; ok {
+			e.commitMu.Unlock()
+			prior.Duplicate = true
+			return outcome{result: prior}
+		}
 		e.commitMu.Unlock()
-		prior.Duplicate = true
-		return outcome{result: prior}
 	}
-	e.commitMu.Unlock()
 	a, aok, b, bok := e.store.view(command.Account, command.Other)
 	e.trace(TraceEvent{CommandID: command.ID, Agent: command.Account, Phase: "state_view", VersionA: a.Version, VersionB: b.Version})
+	if e.m1 != nil && e.cfg.GoBehavioralControl {
+		return e.processGoM1(entry, command, a, aok, b, bok)
+	}
 	if entry.machine == nil {
 		entry.machine = generated.NewAccountAgent(int(command.Account))
 	}
@@ -191,6 +335,17 @@ func (e *Engine) process(entry *agentEntry, envelope Envelope) outcome {
 		return outcome{err: &RuntimeError{Kind: CheckpointExportFailed, Err: err}}
 	}
 	cpBytes := checkpoint.Bytes()
+	if e.m1 != nil {
+		result := Result{CommandID: command.ID, Accepted: decision.Accepted, ReasonTag: decision.Reason.Tag, EffectTag: decision.Effect.Tag, TransitionCount: decision.TransitionCount}
+		record := logRecord{Version: m1WALVersion, SchemaID: m1SchemaID, ProgramID: m1ProgramID, AgentID: command.Account, CommandID: command.ID, CommandKind: command.Kind.Tag, AccountA: command.Account, AccountB: command.Other, Amount: command.Amount, Result: result, EffectTag: decision.Effect.Tag, NewBalanceA: decision.NewBalanceA, NewBalanceB: decision.NewBalanceB, NewStatusTag: decision.NewStatus.Tag, ExpectedA: uint64(decision.ExpectedVersionA), ExpectedB: uint64(decision.ExpectedVersionB), Checkpoint: cpBytes}
+		response := make(chan outcome, 1)
+		e.authority <- &m1Commit{record: record, entry: entry, checkpoint: cpBytes, response: response}
+		got := <-response
+		if got.err != nil || got.result.Duplicate {
+			_ = rollback()
+		}
+		return got
+	}
 	e.commitMu.Lock()
 	defer e.commitMu.Unlock()
 	if prior, ok := e.results[command.ID]; ok {
@@ -252,11 +407,288 @@ func (e *Engine) trace(event TraceEvent) {
 		e.cfg.Trace(event)
 	}
 }
-func (e *Engine) Flush() error                      { return e.log.flush() }
-func (e *Engine) InjectDurabilityFailure(err error) { e.log.injectFailure(err) }
+func (e *Engine) Flush() error { return e.log.flush() }
+func (e *Engine) InjectDurabilityFailure(err error) {
+	if e.m1 != nil {
+		e.m1.failpoint = func(point FailurePoint) error {
+			if point == BeforeWALAppend {
+				return err
+			}
+			return nil
+		}
+		return
+	}
+	e.log.injectFailure(err)
+}
 func (e *Engine) Close() error {
 	if !e.closed.CompareAndSwap(false, true) {
 		return nil
 	}
+	if e.m1 != nil {
+		response := make(chan error, 1)
+		e.authority <- &closeAuthority{response: response}
+		return <-response
+	}
 	return e.log.close()
+}
+
+func (e *Engine) rememberResult(id string, result Result) {
+	e.results[id] = result
+	e.dedupeOrder = append(e.dedupeOrder, id)
+	if len(e.dedupeOrder)-e.dedupeHead > e.cfg.DedupeWindow {
+		delete(e.results, e.dedupeOrder[e.dedupeHead])
+		e.dedupeHead++
+	}
+	if e.dedupeHead >= e.cfg.DedupeWindow && e.dedupeHead*2 >= len(e.dedupeOrder) {
+		active := copy(e.dedupeOrder, e.dedupeOrder[e.dedupeHead:])
+		clear(e.dedupeOrder[active:])
+		e.dedupeOrder = e.dedupeOrder[:active]
+		e.dedupeHead = 0
+	}
+}
+
+func (e *Engine) runCommitAuthority() {
+	for {
+		message := <-e.authority
+		switch first := message.(type) {
+		case *m1Commit:
+			group := []*m1Commit{first}
+			max := e.cfg.GroupMax
+			if e.cfg.Durability != BatchSync {
+				max = 1
+			}
+			var deferred []any
+			if max > 1 {
+				if e.cfg.GroupWait == 0 {
+				drain:
+					for len(group) < max {
+						select {
+						case next := <-e.authority:
+							if commit, ok := next.(*m1Commit); ok {
+								group = append(group, commit)
+							} else {
+								deferred = append(deferred, next)
+							}
+						default:
+							break drain
+						}
+					}
+				} else {
+					timer := time.NewTimer(e.cfg.GroupWait)
+				collect:
+					for len(group) < max {
+						select {
+						case next := <-e.authority:
+							if commit, ok := next.(*m1Commit); ok {
+								group = append(group, commit)
+							} else {
+								deferred = append(deferred, next)
+							}
+						case <-timer.C:
+							break collect
+						}
+					}
+					if !timer.Stop() {
+						select {
+						case <-timer.C:
+						default:
+						}
+					}
+				}
+			}
+			e.commitGroup(group)
+			for _, item := range deferred {
+				e.handleAuthorityControl(item)
+			}
+		case *snapshotRequest, *closeAuthority:
+			if e.handleAuthorityControl(first) {
+				return
+			}
+		}
+	}
+}
+
+func (e *Engine) commitGroup(group []*m1Commit) {
+	if e.poisoned != nil {
+		for _, request := range group {
+			request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: e.poisoned}}
+		}
+		return
+	}
+	unique := make([]*m1Commit, 0, len(group))
+	type repeated struct{ request, original *m1Commit }
+	var repeats []repeated
+	seen := make(map[string]*m1Commit)
+	for _, request := range group {
+		if prior, ok := e.results[request.record.CommandID]; ok {
+			prior.Duplicate = true
+			request.response <- outcome{result: prior}
+			continue
+		}
+		if original, ok := seen[request.record.CommandID]; ok {
+			repeats = append(repeats, repeated{request: request, original: original})
+			continue
+		}
+		seen[request.record.CommandID] = request
+		sequence := e.sequence.Load() + uint64(len(unique)) + 1
+		request.record.Sequence = sequence
+		request.record.Result.Sequence = sequence
+		unique = append(unique, request)
+	}
+	records := make([]logRecord, len(unique))
+	for i, request := range unique {
+		records[i] = request.record
+	}
+	if err := e.m1.appendGroup(records); err != nil {
+		e.poisoned = err
+		for _, request := range unique {
+			request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		for _, repeat := range repeats {
+			repeat.request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		return
+	}
+	if err := e.m1.inject(AfterWALSyncBeforeApply); err != nil {
+		e.poisoned = err
+		for _, request := range unique {
+			request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		for _, repeat := range repeats {
+			repeat.request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		return
+	}
+	for _, request := range unique {
+		e.store.apply(request.record)
+		request.entry.checkpoint = append(request.entry.checkpoint[:0], request.checkpoint...)
+		if request.install != nil {
+			request.install()
+		}
+		e.rememberResult(request.record.CommandID, request.record.Result)
+		e.sequence.Store(request.record.Sequence)
+	}
+	if err := e.m1.inject(AfterStateApplyBeforeAck); err != nil {
+		e.poisoned = err
+		for _, request := range unique {
+			request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		for _, repeat := range repeats {
+			repeat.request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		return
+	}
+	for _, request := range unique {
+		request.response <- outcome{result: request.record.Result}
+	}
+	for _, repeat := range repeats {
+		result := repeat.original.record.Result
+		result.Duplicate = true
+		repeat.request.response <- outcome{result: result}
+	}
+	if e.cfg.SnapshotEvery > 0 && e.sequence.Load()%e.cfg.SnapshotEvery == 0 {
+		_, _, _ = e.snapshotAtFrontier()
+	}
+}
+
+func (e *Engine) handleAuthorityControl(message any) bool {
+	switch request := message.(type) {
+	case *snapshotRequest:
+		path, size, err := e.snapshotAtFrontier()
+		request.response <- snapshotOutcome{path: path, bytes: size, err: err}
+	case *closeAuthority:
+		request.response <- e.m1.close()
+		return true
+	}
+	return false
+}
+
+func (e *Engine) snapshotAtFrontier() (string, int64, error) {
+	if e.poisoned != nil {
+		return "", 0, e.poisoned
+	}
+	if err := e.m1.closeSegment(true); err != nil {
+		return "", 0, err
+	}
+	accounts, ledger := e.store.snapshotState()
+	octagon, hash := e.store.CanonicalOctagon()
+	snapshot := durableSnapshot{Version: m1SnapshotVersion, Sequence: e.sequence.Load(), SchemaID: m1SchemaID, ProgramID: expectedProgramID(e.cfg), Accounts: accounts, Ledger: ledger, Octagon: octagon, OctHash: hash}
+	for _, id := range e.dedupeOrder[e.dedupeHead:] {
+		snapshot.Dedupe = append(snapshot.Dedupe, snapshotResult{CommandID: id, Result: e.results[id]})
+	}
+	e.registryMu.Lock()
+	ids := make([]int, 0, len(e.registry))
+	for id, entry := range e.registry {
+		if len(entry.checkpoint) > 0 {
+			ids = append(ids, int(id))
+		}
+	}
+	sort.Ints(ids)
+	for _, raw := range ids {
+		entry := e.registry[AccountID(raw)]
+		snapshot.Agents = append(snapshot.Agents, snapshotAgent{ID: entry.id, Checkpoint: append([]byte(nil), entry.checkpoint...)})
+	}
+	e.registryMu.Unlock()
+	logicalBytes, _ := json.Marshal(struct {
+		Accounts []Account     `json:"accounts"`
+		Ledger   []LedgerEntry `json:"ledger"`
+	}{accounts, ledger})
+	dedupeBytes, _ := json.Marshal(snapshot.Dedupe)
+	e.m1.stats.LogicalStateBytes = uint64(len(logicalBytes))
+	e.m1.stats.DedupeBytes = uint64(len(dedupeBytes))
+	e.m1.stats.PublicationBytes = uint64(len(octagon))
+	e.m1.stats.FlowCheckpointBytes = 0
+	for _, agent := range snapshot.Agents {
+		e.m1.stats.FlowCheckpointBytes += uint64(len(agent.Checkpoint))
+	}
+	path, size, err := e.m1.installSnapshot(snapshot)
+	if err != nil {
+		return "", 0, err
+	}
+	if err := e.m1.retireThrough(snapshot.Sequence); err != nil {
+		return path, size, err
+	}
+	return path, size, nil
+}
+
+func (e *Engine) Snapshot() (string, int64, error) {
+	if e.m1 == nil {
+		return "", 0, errors.New("snapshots require StorageDir")
+	}
+	response := make(chan snapshotOutcome, 1)
+	e.authority <- &snapshotRequest{response: response}
+	got := <-response
+	return got.path, got.bytes, got.err
+}
+
+type goAgentCheckpoint struct {
+	Pending pendingTransfer `json:"pending"`
+	Turns   int             `json:"turns"`
+}
+
+func (e *Engine) processGoM1(entry *agentEntry, command Command, a Account, aok bool, b Account, bok bool) outcome {
+	pending := entry.goPending
+	d := decideGo(command, a, aok, b, bok, pending)
+	next := pending
+	if isKind(command.Kind, BeginTransfer) && d.accepted {
+		next = pendingTransfer{Active: true, Target: command.Other, Amount: command.Amount}
+	}
+	if isKind(command.Kind, Confirm) || isKind(command.Kind, Cancel) {
+		next = pendingTransfer{}
+	}
+	turns := entry.goTurns + 1
+	checkpoint, err := json.Marshal(goAgentCheckpoint{Pending: next, Turns: turns})
+	if err != nil {
+		return outcome{err: err}
+	}
+	result := Result{CommandID: command.ID, Accepted: d.accepted, ReasonTag: d.reason, EffectTag: d.effect, TransitionCount: turns}
+	record := logRecord{Version: m1WALVersion, SchemaID: m1SchemaID, ProgramID: expectedProgramID(e.cfg), AgentID: command.Account, CommandID: command.ID, CommandKind: command.Kind.Tag, AccountA: command.Account, AccountB: command.Other, Amount: command.Amount, Result: result, EffectTag: d.effect, NewBalanceA: d.balanceA, NewBalanceB: d.balanceB, NewStatusTag: d.status, ExpectedA: a.Version, ExpectedB: b.Version, Checkpoint: checkpoint}
+	response := make(chan outcome, 1)
+	e.authority <- &m1Commit{record: record, entry: entry, checkpoint: checkpoint, response: response, install: func() { entry.goPending, entry.goTurns = next, turns }}
+	return <-response
+}
+
+func OpenGoM1Baseline(cfg Config) (*Engine, error) {
+	cfg.GoBehavioralControl = true
+	return Open(cfg)
 }

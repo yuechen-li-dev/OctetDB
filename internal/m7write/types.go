@@ -74,6 +74,52 @@ type Config struct {
 	BatchSize       int
 	LogPath         string
 	Trace           func(TraceEvent)
+	// StorageDir selects the M1 segmented-WAL and snapshot path. LogPath keeps
+	// the M0 single-file format available as an explicit control.
+	StorageDir          string
+	SegmentRecords      int
+	GroupMax            int
+	GroupWait           time.Duration
+	SnapshotEvery       uint64
+	DedupeWindow        int
+	FailureInjector     func(FailurePoint) error
+	GoBehavioralControl bool
+}
+
+type FailurePoint string
+
+const (
+	BeforeWALAppend                   FailurePoint = "before_wal_append"
+	DuringWALAppend                   FailurePoint = "during_wal_append"
+	AfterWALAppendBeforeSync          FailurePoint = "after_wal_append_before_sync"
+	AfterWALSyncBeforeApply           FailurePoint = "after_wal_sync_before_apply"
+	AfterStateApplyBeforeAck          FailurePoint = "after_state_apply_before_ack"
+	DuringSegmentRotation             FailurePoint = "during_segment_rotation"
+	DuringSnapshotWrite               FailurePoint = "during_snapshot_temp_write"
+	AfterSnapshotSyncBeforeInstall    FailurePoint = "after_snapshot_sync_before_install"
+	AfterSnapshotInstallBeforeCleanup FailurePoint = "after_snapshot_install_before_wal_cleanup"
+)
+
+type RecoveryStats struct {
+	SnapshotSequence uint64        `json:"snapshot_sequence"`
+	SnapshotBytes    int64         `json:"snapshot_bytes"`
+	SnapshotDecode   time.Duration `json:"snapshot_decode"`
+	WALScan          time.Duration `json:"wal_scan"`
+	WALBytesScanned  int64         `json:"wal_bytes_scanned"`
+	RecordsReplayed  int           `json:"records_replayed"`
+	AgentsRestored   int           `json:"agents_restored"`
+	TotalReady       time.Duration `json:"total_ready"`
+}
+
+type StorageStats struct {
+	WALBytesWritten      uint64 `json:"wal_bytes_written"`
+	SnapshotBytesWritten uint64 `json:"snapshot_bytes_written"`
+	Syncs                uint64 `json:"syncs"`
+	Committed            uint64 `json:"committed"`
+	LogicalStateBytes    uint64 `json:"logical_state_bytes"`
+	FlowCheckpointBytes  uint64 `json:"flow_checkpoint_bytes"`
+	DedupeBytes          uint64 `json:"dedupe_bytes"`
+	PublicationBytes     uint64 `json:"publication_bytes"`
 }
 
 type TraceEvent struct {

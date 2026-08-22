@@ -1,0 +1,45 @@
+{
+  "generated_at": "2026-08-22T07:04:13Z",
+  "go_version": "go1.26.2",
+  "results": [
+    {
+      "control": "m0_log_only",
+      "commits": 1000000,
+      "tail": "full_history",
+      "time_to_ready_ms": 21746.394,
+      "records_replayed": 1000000,
+      "agents_restored": 128,
+      "snapshot_bytes": 0,
+      "wal_bytes_scanned": 1456924198,
+      "recovery_allocs": 47008899,
+      "recovery_bytes": 8181062152,
+      "canonical_hash": "804ac9e3c066f2562f1532d3f2611251a3990e3073419168295f25c6204f8578"
+    },
+    {
+      "control": "m1_snapshot",
+      "commits": 1000000,
+      "tail": "none",
+      "time_to_ready_ms": 883.246,
+      "records_replayed": 0,
+      "agents_restored": 128,
+      "snapshot_bytes": 109988920,
+      "wal_bytes_scanned": 0,
+      "recovery_allocs": 1206128,
+      "recovery_bytes": 587422400,
+      "canonical_hash": "804ac9e3c066f2562f1532d3f2611251a3990e3073419168295f25c6204f8578"
+    },
+    {
+      "control": "m1_snapshot",
+      "commits": 1010000,
+      "tail": "medium",
+      "time_to_ready_ms": 1131.803,
+      "records_replayed": 10000,
+      "agents_restored": 128,
+      "snapshot_bytes": 109988920,
+      "wal_bytes_scanned": 15652318,
+      "recovery_allocs": 1696192,
+      "recovery_bytes": 750202152,
+      "canonical_hash": "1d56d36374801304da2396a4d53a123e03c8d9f1df1cddf18bd38e9631a059c3"
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "milestone": "OctetDB Write M1",
+  "verdict": "Success",
+  "architecture": "parallel typed decisions -> ordered bounded commit authority -> segmented checksummed WAL -> bounded group sync -> authoritative apply + flow checkpoint frontier -> deterministic snapshot -> segment retirement -> bounded restart -> canonical Octagon publication",
+  "defaults": {
+    "segment_records": 4096,
+    "group_max": 16,
+    "group_wait_us": 0,
+    "dedupe_window": 100000,
+    "snapshot_cadence": "manual in API; 100000 commits recommended for this specimen"
+  },
+  "format_identity": {
+    "wal_version": 2,
+    "snapshot_version": 1,
+    "schema": "octetdb-write/account-state/v1",
+    "oct_program": "account-agent/309da01b60ec0f7917d4fd5efd1707bd71d2d40f",
+    "go_control_program": "go-account-control/v1"
+  },
+  "representative": {
+    "oct_fsync_each_independent_commands_per_second": 3366,
+    "go_fsync_each_independent_commands_per_second": 3458,
+    "postgres_independent_commands_per_second": 2529,
+    "oct_group16_wait0_independent_commands_per_second": 21748,
+    "oct_group16_wait0_independent_commands_per_sync": 8.0,
+    "oct_group16_wait0_hot_commands_per_sync": 1.0,
+    "m0_100k_ready_ms": 2025.13,
+    "m1_100k_snapshot_ready_ms": 233.11,
+    "m0_1m_ready_ms": 21746.394,
+    "m1_1m_snapshot_ready_ms": 883.246,
+    "snapshot_100k_bytes": 27500080,
+    "snapshot_100k_pause_ms": 114.47,
+    "oct_wal_bytes_per_op": 1562,
+    "go_wal_bytes_per_op": 558
+  },
+  "next_recommendation": "Durable snapshot format refinement focused on bounded dedupe encoding and checkpoint/storage amplification."
+}

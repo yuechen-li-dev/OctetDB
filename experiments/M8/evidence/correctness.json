@@ -1,0 +1,11 @@
+{
+  "command": "go test -race ./internal/m7write",
+  "result": "pass",
+  "coverage": {
+    "segmented_wal": ["size/count rotation", "header identity", "closed footer validation", "monotonic sequence", "tail truncation"],
+    "snapshot": ["deterministic state", "FLOW-TURN checkpoint restore", "dedupe restore", "Octagon byte/hash frontier", "covered segment retirement", "snapshot+tail equivalence"],
+    "crash_points": ["before WAL append", "during WAL append", "after append before sync", "after sync before apply", "after apply before acknowledgement", "during segment rotation", "during snapshot temp write", "after snapshot sync before install", "after snapshot install before cleanup"],
+    "corruption": ["record checksum", "segment header", "segment footer", "missing segment", "out-of-order sequence", "snapshot hash", "snapshot publication hash", "flow checkpoint mismatch"],
+    "controls": ["Go M1 storage and workflow recovery", "M7 Oct/Go semantic equivalence", "PostgreSQL integration"]
+  }
+}
