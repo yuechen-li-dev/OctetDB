@@ -1,0 +1,6 @@
+AccountSnapshot {
+  Accounts: [
+    { ID: 1 Balance: 75 Status: 1 Version: 2 }
+    { ID: 2 Balance: 35 Status: 1 Version: 2 }
+  ]
+}

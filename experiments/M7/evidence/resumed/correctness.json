@@ -1,0 +1,20 @@
+{
+  "go_test_all": "pass",
+  "postgresql_17_integration": "pass",
+  "contracts": {
+    "generated_seam_checkpoint_restore": "pass",
+    "atomic_two_account_transfer": "pass",
+    "duplicate_replays_without_second_effect": "pass",
+    "clean_restart_equivalence": "pass",
+    "workflow_private_board_survives_restart": "pass",
+    "utility_decisions_match_go_control": "pass",
+    "frozen_withdrawal_rejected_without_mutation": "pass",
+    "durability_failure_rolls_back_resident_flow": "pass",
+    "truncated_tail_removed": "pass",
+    "checksum_corruption_stops_recovery": "pass",
+    "bounded_mailbox_rejects_overflow": "pass",
+    "independent_agents_reach_state_view_concurrently": "pass",
+    "canonical_publication_stable_across_restart": "pass",
+    "changed_state_changes_logical_hash": "pass"
+  }
+}

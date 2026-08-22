@@ -1,81 +1,42 @@
 {
-  "schema": "dbsched.m7.summary.v1",
+  "schema": "dbsched.m7.summary.v2",
   "milestone": "DBSCHED-M7 — OctetDB Write M0",
-  "verdict": "Meaningful progression",
-  "date": "2026-08-21",
-  "databaseSchedulerRevision": "cc7e3e7c85d42b30f3d9b410d5c59f5297ad4ec0",
-  "octRevision": "319b07a8b1f60c87b90d1c430a6ec3aae03b5ea8",
-  "octExecutionIdentity": "gooct-cli",
-  "octVersion": "dev",
-  "goVersion": "go1.26.2 windows/amd64",
-  "probe": {
-    "requestedExecution": "compiled",
-    "compiledCases": 2,
-    "interpretedFallbacks": 0,
-    "positiveContractsPassed": 2,
-    "negativeContractsPassed": 4,
-    "totalPassed": 6,
-    "totalFailed": 0,
-    "toolTimingMilliseconds": 1294
-  },
-  "generatedProbe": {
-    "bytes": 23285,
-    "sha256": "a1f518b1eeb3701fa3ad23159cffb669d54ac2f4a70df76665633d4644e6c2b4",
-    "retained": false,
-    "reason": "compiled-test generated layout is explicitly non-public and temporary"
-  },
-  "flowOverhead": {
-    "cpu": "AMD Ryzen 7 7700X 8-Core Processor",
-    "goos": "windows",
-    "goarch": "amd64",
-    "persistentPolicyStep": {
-      "compiledMedianNanoseconds": 9.182,
-      "handwrittenMedianNanoseconds": 1.936,
-      "ratio": 4.743,
-      "compiledBytesPerOp": 0,
-      "compiledAllocsPerOp": 0,
-      "samples": 5,
-      "scope": "existing Oct persistent scalar policy specimen; resident instance"
+  "lineage": {
+    "initial": {
+      "verdict": "Meaningful progression",
+      "date": "2026-08-21",
+      "databaseSchedulerRevision": "cc7e3e7c85d42b30f3d9b410d5c59f5297ad4ec0",
+      "octRevision": "319b07a8b1f60c87b90d1c430a6ec3aae03b5ea8",
+      "blocker": "No post-construction typed input, compiled checkpoint/restore, or exported generated host facade."
     },
-    "m7Instantiation": {
-      "medianNanoseconds": 40.03,
-      "bytesPerOp": 224,
-      "allocsPerOp": 1,
-      "samples": 5,
-      "scope": "escaping compiled DecideWithdrawal instance"
-    },
-    "handwrittenInstantiation": {
-      "medianNanoseconds": 16.35,
-      "bytesPerOp": 48,
-      "allocsPerOp": 1,
-      "samples": 5,
-      "scope": "escaping three-field Go control"
-    },
-    "m7InstantiateAndStep": {
-      "medianNanoseconds": 52.86,
-      "bytesPerOp": 232,
-      "allocsPerOp": 2,
-      "samples": 5
-    },
-    "m7BoardSnapshot": {
-      "nanoseconds": 19.61,
-      "bytesPerOp": 48,
-      "allocsPerOp": 1,
-      "samples": 1,
-      "scope": "snapshot escaped through any"
+    "intervention": "FLOW-TURN-M0/M1",
+    "resumed": {
+      "verdict": "Success",
+      "date": "2026-08-21",
+      "databaseSchedulerBaseRevision": "65d1b9a845f8ca572f73743d4d8dfda4f0448adf",
+      "octRevision": "309da01b60ec0f7917d4fd5efd1707bd71d2d40f"
     }
   },
-  "foundationalBlockers": [
-    "declared boards are owned by one flow instance and cannot be shared or externally addressed",
-    "a flow receives parameters only at construction; Step accepts no command or message",
-    "compiled flow instances expose no checkpoint or restore seam",
-    "nominal record and enum board fields are rejected",
-    "OctGen/EmitGoSource is an internal compiler API and generated flow methods are not an application integration contract"
+  "architecture": "typed command -> bounded keyed mailbox -> resident generated Oct flow -> typed yielded decision -> canonical conflict ownership -> framed WAL with embedded post-turn checkpoint -> authoritative Go state -> canonical Octagon publication",
+  "correctness": "all Go tests pass; real PostgreSQL 17 integration passes",
+  "performanceEvidence": "experiments/M7/evidence/resumed/benchmarks.json",
+  "memory": {
+    "activeCheckpointedAgentBytesAt100k": 1599.8,
+    "objectsPerAgentAt100k": 6.0,
+    "checkpointBytesRepresentative": 779,
+    "unsafeOrCustomAllocation": false
+  },
+  "publication": {
+    "artifact": "experiments/M7/publication/accounts.octagon",
+    "sha256": "f03c65912c048bac106317057b90b3a81c3ae0a50f3cbdccb867b5e81101082d"
+  },
+  "remainingLimitations": [
+    "log-only recovery; no periodic state snapshot or compaction",
+    "single process and one serialized WAL append boundary",
+    "batch acknowledgements are not individually durable until the next sync",
+    "generated record yields retain one allocation",
+    "no eviction policy",
+    "Windows sub-millisecond latency samples are clock-resolution censored"
   ],
-  "additionalFindings": [
-    "array board fields are accepted by the checker and compiled BoardSnapshot despite scalar-only reference text",
-    "Append on an array board field type-checks but is unsupported in compiled flow lowering",
-    "interpreter checkpointing is limited to parameterless suspended flows without locals or utility state"
-  ],
-  "nextRecommendation": "Perform a dedicated Oct flow/board/agent language and compiler pass before continuing OctetDB Write."
+  "nextRecommendation": "OctetDB Write M1 durability/storage refinement"
 }

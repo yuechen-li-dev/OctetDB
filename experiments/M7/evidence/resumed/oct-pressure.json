@@ -1,0 +1,22 @@
+{
+  "findings": [
+    {
+      "classification": "Bug",
+      "symptom": "A flow-local let bound to a TransitionDecision and used by yield passed checking, but generated Go referenced a nonexistent persisted flow field.",
+      "evidence": "generated compile error: f.decision undefined",
+      "workaround": "Yield Decide(...) directly and retain only explicit workflow facts on the private board."
+    },
+    {
+      "classification": "Compiler gap",
+      "symptom": "when utility with record-valued candidates materialized excessive candidate data.",
+      "evidence": "about 1050 ns, 4240 B/op, 2 allocs/op before the outcome-code rewrite",
+      "workaround": "Score Int outcome codes, then construct one typed decision through a closed switch; about 300 ns, 576 B/op, 1 alloc/op."
+    },
+    {
+      "classification": "Host ABI gap",
+      "symptom": "A nominal record yield is retained through an internal any slot and allocates once per turn.",
+      "evidence": "576 B/op and 1 alloc/op for generated Step plus Yielded",
+      "workaround": "Accepted for M0; preserve as a future typed-yield lowering target."
+    }
+  ]
+}

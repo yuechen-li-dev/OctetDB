@@ -1,0 +1,15 @@
+{
+  "environment": {
+    "os": "windows",
+    "arch": "amd64",
+    "cpu": "AMD Ryzen 7 7700X 8-Core Processor",
+    "go": "go1.26.2"
+  },
+  "samples": 3,
+  "generated_step_yield": {"ns_per_op": [300.2, 305.3, 345.8], "bytes_per_op": 576, "allocs_per_op": 1},
+  "checkpoint": {"ns_per_op": [1237, 1031, 1107], "bytes_per_op": 1249, "allocs_per_op": 2},
+  "restore": {"ns_per_op": [5555, 5574, 5574], "bytes_per_op": 1328, "allocs_per_op": 18},
+  "oct_engine_memory_only": {"ns_per_op": [6179, 6072, 6081], "bytes_per_op": [3703, 3668, 3667], "allocs_per_op": 14},
+  "go_control_memory_only": {"ns_per_op": [764.5, 748.4, 738.5], "bytes_per_op": [763, 744, 768], "allocs_per_op": 8},
+  "note": "The typed record yield is boxed in the generated last-yield slot. Utility arbitration over integer outcome codes reduced the earlier direct-record-candidate result from about 1050 ns and 4240 B/op to about 300 ns and 576 B/op."
+}

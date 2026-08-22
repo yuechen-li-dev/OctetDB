@@ -1,0 +1,191 @@
+[
+  {
+    "sequence": 0,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "mailbox_dequeue",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 1
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "ownership_acquired",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 1
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "state_view"
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "flow_yield",
+    "accepted": true,
+    "effect_tag": 1,
+    "flow_state": "Active"
+  },
+  {
+    "sequence": 1,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "wal_append",
+    "accepted": true,
+    "effect_tag": 1,
+    "detail": "record_version=1 checkpoint_bytes=782"
+  },
+  {
+    "sequence": 1,
+    "command_id": "create-1",
+    "agent": 1,
+    "phase": "committed",
+    "accepted": true,
+    "effect_tag": 1,
+    "new_version_a": 1,
+    "checkpoint_hash": "14003aee7ba43c55ea947f6a95a0c09600708d581e21a9f42446846f79d01090"
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "mailbox_dequeue",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 2
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "ownership_acquired",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 2
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "state_view"
+  },
+  {
+    "sequence": 0,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "flow_yield",
+    "accepted": true,
+    "effect_tag": 1,
+    "flow_state": "Active"
+  },
+  {
+    "sequence": 2,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "wal_append",
+    "accepted": true,
+    "effect_tag": 1,
+    "detail": "record_version=1 checkpoint_bytes=780"
+  },
+  {
+    "sequence": 2,
+    "command_id": "create-2",
+    "agent": 2,
+    "phase": "committed",
+    "accepted": true,
+    "effect_tag": 1,
+    "new_version_a": 1,
+    "checkpoint_hash": "63cbf341551dea7cb7722500be667b91fa58d387d244d628aaf93b372e305996"
+  },
+  {
+    "sequence": 0,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "mailbox_dequeue",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 1
+      },
+      {
+        "kind": 1,
+        "id": 2
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "ownership_acquired",
+    "conflict_tokens": [
+      {
+        "kind": 1,
+        "id": 1
+      },
+      {
+        "kind": 1,
+        "id": 2
+      }
+    ]
+  },
+  {
+    "sequence": 0,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "state_view",
+    "version_a": 1,
+    "version_b": 1
+  },
+  {
+    "sequence": 0,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "flow_yield",
+    "version_a": 1,
+    "version_b": 1,
+    "accepted": true,
+    "effect_tag": 3,
+    "flow_state": "Active"
+  },
+  {
+    "sequence": 3,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "wal_append",
+    "accepted": true,
+    "effect_tag": 3,
+    "detail": "record_version=1 checkpoint_bytes=781"
+  },
+  {
+    "sequence": 3,
+    "command_id": "transfer-1-2",
+    "agent": 1,
+    "phase": "committed",
+    "version_a": 1,
+    "version_b": 1,
+    "accepted": true,
+    "effect_tag": 3,
+    "new_version_a": 2,
+    "new_version_b": 2,
+    "checkpoint_hash": "d6ace38d6903b19d7f89402121a75086fb2e5db557b33d98ff09aca916e123c3"
+  }
+]

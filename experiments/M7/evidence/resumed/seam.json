@@ -1,0 +1,14 @@
+{
+  "oct_commit": "309da01b60ec0f7917d4fd5efd1707bd71d2d40f",
+  "source": "experiments/M7/runtime/oct/account_agent.oct",
+  "generated_package": "internal/m7generated",
+  "generated_bytes": 80098,
+  "contracts": {
+    "typed_step_and_yield": "pass",
+    "deterministic_checkpoint": "pass",
+    "exact_restore_continuation": "pass",
+    "refinement_host_admission": "pass",
+    "external_go_package_independence": "pass"
+  },
+  "representative_checkpoint_bytes": 779
+}

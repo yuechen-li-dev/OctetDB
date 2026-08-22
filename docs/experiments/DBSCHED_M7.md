@@ -327,3 +327,211 @@ go test ./internal/build -tags=integration `
 ```
 
 Normalized evidence is in [`experiments/M7/summary.json`](../../experiments/M7/summary.json) and [`experiments/M7/evidence`](../../experiments/M7/evidence).
+
+---
+
+# DBSCHED-M7 resumed after FLOW-TURN-M1
+
+This section preserves the initial stop above as historical evidence. It records the resumed implementation against Oct commit `309da01b60ec0f7917d4fd5efd1707bd71d2d40f`.
+
+## 1. Final verdict
+
+Success
+
+Generated Oct flows now own real command admission, transition arbitration, workflow memory, and typed decisions. Go owns keyed queues, concrete conflict identity, authoritative accounts, WAL commit, checkpoint durability, recovery, and publication. The full path runs without Oct source or compiler symbols at runtime, survives restart/truncated tails, stops on corruption, and has competent Go and PostgreSQL controls.
+
+## 2. Lineage
+
+Initial M7 correctly stopped because Oct had no typed turn input, exported facade, or compiled restore. FLOW-TURN-M0/M1 fixed those seams generally. Resumed M7 rebuilt the specimen first, retained the corrected private-board model, and then implemented the host runtime. The Database-Scheduler base revision was `65d1b9a...`; the exact resumed Oct revision is `309da01b...`.
+
+## 3. Final architecture
+
+```text
+typed command envelope
+  -> bounded per-key FIFO mailbox
+  -> canonical typed account-token ownership
+  -> immutable authoritative state view
+  -> resident generated AccountAgent.Step(context)
+  -> typed TransitionDecision
+  -> validate expected versions/effect bounds
+  -> framed WAL record + post-turn logical checkpoint
+  -> sync according to mode
+  -> atomic in-memory effect publication
+  -> retain advanced resident agent
+```
+
+On commit failure the resident flow is restored from its prior committed checkpoint. Normal successful turns do not restore, so this is genuinely a persistent-agent lane rather than ephemeral construction per command.
+
+## 4. Ownership boundary
+
+Oct owns nominal command/status/reason/effect types, the `CommandContext` Concept, positive-amount refinement admission, private workflow board, transition meaning, stateless utility arbitration, and yielded decision. Go owns identity, mailboxes, ordering, concrete account tokens, goroutine scheduling, accounts/ledger, validation, WAL/fsync, idempotency index, recovery, traces, and Octagon publication. No Go map is presented as an Oct board, and no authoritative account mutation occurs inside Oct.
+
+## 5. `.oct` behavioral source
+
+The source is [`account_agent.oct`](../../experiments/M7/runtime/oct/account_agent.oct). The key decision shape is:
+
+```oct
+fn DecideCode(input: CommandContext, pending: Bool, pendingTarget: Int, pendingAmount: Int) -> Int {
+    return when utility {
+        case 12 when input.Kind == CommandKind.Confirm and
+            (not pending or pendingTarget != input.AccountB or pendingAmount != input.Amount) score 110
+        case 13 when (input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm) and
+            input.Amount <= 0 score 100
+        case 17 when input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm score 10
+        else 0
+    }
+}
+```
+
+The outcome code is mapped through one closed `switch` to one nominal `TransitionDecision`. Direct record-valued utility candidates compiled but cost about 1.05 µs and 4,240 B/turn; integer arbitration plus one construction reduced this to about 300 ns and 576 B/turn.
+
+## 6. Generated host seam
+
+Representative real host usage is:
+
+```go
+turn, err := entry.machine.Step(generated.Main_CommandContext{...})
+decision, err := turn.Yielded()
+checkpoint, err := entry.machine.Checkpoint()
+restored, err := generated.RestoreAccountAgent(checkpoint)
+```
+
+The retained generated package is 80,098 bytes. Direct seam tests prove typed step/yield, deterministic checkpoint bytes, refinement rejection, restore, and identical next-turn continuation.
+
+## 7. Agent registry
+
+Identity is `AccountID -> agentEntry`. Creation is lazy; entries retain one generated machine, its last committed checkpoint, and a mailbox. There is no eviction and no hard registry cap in M0. At 100k active checkpointed identities the measured delta was 159,981,104 heap bytes and 600,290 objects: about 1.60 KB and six objects per identity. Lookup rose from about 8.85 ns at 1k to 15.84 ns at 100k.
+
+## 8. Mailboxes
+
+Each active key has one FIFO Go channel with configurable fixed capacity (64 by default). One lazy worker consumes it serially. Non-blocking enqueue returns categorized `mailbox_full`; queues never silently grow. Per-key FIFO is deterministic for accepted enqueue order. Cross-key order is intentionally scheduler-dependent.
+
+## 9. Authoritative state
+
+Go stores `map[AccountID]Account`, where `Account` contains ID, balance, status, and version, plus a ledger slice. Reads produce immutable copied observations. Only validated committed log records mutate the map. Canonical snapshot export sorts account IDs and emits stable nominal Octagon text.
+
+## 10. Conflict scheduling
+
+Static command shape remains closed in Oct; the host projects runtime identities into structured `Token{Kind: AccountToken, ID}` values. Tokens are sorted by kind and ID before acquisition. Transfer/Confirm acquire both accounts before reading authority or stepping the flow. The concurrency test blocks two independent agents at `state_view` simultaneously, while hot and many-to-one workloads intentionally serialize.
+
+## 11. Transition/effect model
+
+For `Transfer(1,2,25)`, Go reads versions 1/1 and balances 100/10, then Oct yields accepted effect tag 3 with balances 75/35 and expected versions 1/1. Go validates identity, versions, nonnegative balances, and referenced accounts, embeds the post-yield checkpoint in WAL sequence 3, syncs, applies both account versions to 2, appends one ledger entry, and retains the advanced agent. The inspectable trace is [`transfer.json`](../../experiments/M7/traces/transfer.json).
+
+## 12. Atomic commit
+
+The authoritative boundary is one WAL record containing one command result, the complete bounded effect, expected versions, and the post-turn agent checkpoint. In `SyncEach`, a successful return means the complete checksummed record was synced before state became visible. In-memory application is prevalidated and infallible under held conflict ownership. A crash after WAL sync but before memory publication replays the record. A sync/write error is an uncertain external durability outcome in the general filesystem model; clients resolve it by command ID after restart. M0 does not claim isolation for readers that bypass the Store API or broad ACID.
+
+## 13. Durability log
+
+The log uses `big-endian uint32 length | deterministic JSON payload | CRC32`. Payload version is 1 and includes sequence, agent/command identity, effect, expected/new state, result, and embedded checkpoint. Records are bounded to 1 MiB. Recovery accepts complete valid records, truncates an incomplete final frame, and stops on invalid length, JSON, version, ordering, or checksum failure. Modes are memory-only, batch sync every 64 records, and fsync per commit.
+
+## 14. Checkpoints
+
+Every logged turn embeds its post-yield FLOW-TURN logical checkpoint, prioritizing recovery simplicity. Representative account-agent checkpoints are 779–782 bytes. Export measured 1.03–1.24 µs, 1,249 B, two allocations; restore measured 5.55–5.57 µs, 1,328 B, 18 allocations. This is substantial log amplification and an explicit M0 tradeoff.
+
+## 15. Recovery
+
+M0 is log-only: scan valid frames, apply authoritative effects in sequence, validate and restore each embedded generated checkpoint, rebuild the duplicate-result index and registry, truncate an incomplete tail, then reopen for append. Tests cover clean multi-agent restart, transfer, workflow continuation, truncated tail, corrupt checksum, and incompatible checkpoint categories. Periodic snapshots and compaction are not implemented.
+
+## 16. Correctness
+
+Tests prove transfer conservation, both account versions advance together, frozen withdrawal has no authoritative effect, insufficient/invalid/missing operations reject, duplicate command IDs replay without a second ledger entry, durability failure publishes neither state nor flow progress, and the utility table matches the direct Go control across create/deposit/withdraw/transfer/freeze/workflow cases. FLOW-TURN private board state survives `BeginTransfer -> restart -> Confirm` and its transition count continues exactly.
+
+## 17. PostgreSQL baseline
+
+The real PostgreSQL 17 control uses pgx transactions, canonical `SELECT ... FOR UPDATE` row order, checked balances, account versions, ledger, pending workflow rows, and a command-result idempotency table. Its integration test passed against the repository's healthy container. At eight clients and 500 measured commands: independent deposits reached 1,843/s (p50 3.93 ms, p99 17.14 ms), random transfers 1,871/s (p50 3.84 ms, p99 17.98 ms), hot account 403/s, and many-to-one 405/s. PostgreSQL commits have its normal database durability semantics and are not byte-for-byte equivalent to the M0 WAL.
+
+## 18. Go baseline
+
+The Go control uses the same account representation, typed conflict tokens, WAL framing/fsync modes, idempotency policy, and workflow semantics, but implements decisions directly with ordinary typed Go. Behavioral equivalence tests pass. It is not deliberately weakened: its smaller decision path is the relevant control.
+
+## 19. Throughput/latency
+
+At 128 accounts, eight submitters, and seed 7737, representative commands/s were:
+
+| Workload | Oct memory | Go memory | Oct batch-64 | Go batch-64 | Oct fsync | Go fsync |
+|---|---:|---:|---:|---:|---:|---:|
+| independent deposits | 383,811 | 1,297,185 | 55,370 | 76,604 | 2,989 | 3,412 |
+| hot account | 237,823 | 1,290,822 | 64,975 | 89,471 | 3,240 | 3,492 |
+| random transfers | 425,731 | 752,417 | 54,740 | 91,928 | 3,358 | 3,538 |
+| many-to-one | 176,236 | 1,239,772 | 52,124 | 99,151 | 3,405 | 3,436 |
+
+Fsync p50 was roughly 2.0–2.6 ms and p99 3.1–7.8 ms. Windows clock quantization censored many memory/batch p50 samples to zero; throughput and upper percentiles remain usable, but those zero medians must not be read as zero latency. Full raw evidence is [`benchmarks.json`](../../experiments/M7/evidence/resumed/benchmarks.json).
+
+## 20. Contention
+
+Independent work reaches Oct decisions concurrently. Hot source and hot destination workloads serialize at typed ownership as intended. In memory-only mode the persistent Oct lane fell from 383,811/s independent to 176,236/s many-to-one; fsync collapsed the difference because the single durable append boundary dominated. This experiment did not implement a separate naive-lock ablation, so it proves correct upstream scheduling and concurrency, not that scheduling outperforms every locking design.
+
+## 21. Persistent flow value
+
+The long-lived flow carries pending transfer target/amount and transition count privately. `BeginTransfer` commits no account effect but commits the workflow checkpoint; after process restart, `Confirm` validates the later input against that private state and yields the transfer. That is behavior a pure one-shot decision function cannot provide without a separate host-owned state machine. The cost is real: checkpoints and resident machines dominate per-agent memory.
+
+## 22. Memory behavior
+
+At scale, active checkpointed entries measured about 1.60 KB and six objects each; 100k used about 160 MB. Generated Step/Yield measured 576 B and one allocation because the nominal record yield is boxed in the generated last-yield slot. End-to-end Oct memory-only turns measured about 3.67 KB and 14 allocations versus roughly 0.75 KB and eight for Go. No unsafe, cgo, arena, slab, or custom allocator was introduced.
+
+## 23. Write-to-Read publication seam
+
+The trace workload publishes [`accounts.octagon`](../../experiments/M7/publication/accounts.octagon) with SHA-256 `f03c6591...01082d`. Tests prove uninterrupted and recovered state produce identical bytes/hash, and a subsequent committed deposit changes the logical hash. This proves the stable canonical boundary expected by compiled-data publication; it does not rerun the full M6 read benchmark.
+
+## 24. Architecture ablations
+
+Persistent Oct vs direct Go is measured: direct Go is about 0.74–0.76 µs per memory-only hot turn versus 6.07–6.18 µs end-to-end Oct, while fsync narrows throughput to within roughly 1–14%. The accidental restore-every-turn prototype was removed before final measurement because it was the ephemeral-flow ablation, not the target architecture. Direct record-valued utility candidates were also ablated against integer outcome scoring; the latter cut Step/Yield allocation from 4,240 B to 576 B.
+
+## 25. Oct pressure findings
+
+Three retained findings are in [`oct-pressure.json`](../../experiments/M7/evidence/resumed/oct-pressure.json):
+
+- **Bug:** a flow-local record bound by `let` and yielded passed checking but generated `f.decision` without a field.
+- **Compiler gap:** record-valued `when utility` candidates materialize excessive data; score scalar outcome codes and construct one winner.
+- **Host ABI gap:** typed nominal record yields still pass through an internal `any` slot and allocate once.
+
+The issues were not patched in Oct because none blocked M7 after narrow source workarounds.
+
+## 26. OctetDB Write identity
+
+1. “Agent/state-machine database” describes its behavior layer but overstates the storage layer.
+2. The real primitive is a durable keyed command processor.
+3. Authoritative state is separate from agents.
+4. One flow should own one behavioral/workflow key, not necessarily one physical row and not the entire database.
+5. Mailboxes are central scheduling/backpressure infrastructure, not language semantics.
+6. Explicit effect/commit separation is worth the complexity because it makes rollback and recovery defensible.
+7. Transition logging is right for M0, but needs snapshot/compaction work.
+8. Upstream conflict scheduling is correct and exposes concurrency; superiority over ordinary locking remains unproven.
+9. Persistent state is justified for real multi-turn workflows, not for every one-shot entity.
+10. Compile command/effect types, admission, transition structure, utility policy, and static conflict shape.
+11. Keep key identity, contention, capacity, ordering, commit, fsync, and recovery host-dynamic.
+12. Never make mailboxes, shared mutable boards, locks, WAL/fsync, or database storage syntax part of Oct merely to hide the host.
+
+## 27. Memory-management interpretation
+
+Explicit topology and ownership produced competitive durable performance using ordinary safe Go: at fsync-each, Oct was close to Go because storage dominated. Manual memory manipulation would not address that bottleneck. In memory-only mode, however, generated typed-record boxing, checkpoint copies, envelopes, response channels, and traces/IDs create measurable allocation and GC pressure. The evidence supports optimizing representation and lifetime first; it does not support a general claim that manual allocation never matters.
+
+## 28. Remaining limitations
+
+M0 has no periodic state snapshot, log compaction, eviction, hard registry capacity, cross-process coordination, replication, MVCC, or reader transactions beyond canonical Store snapshots. WAL append is one serialized boundary. Batch mode may acknowledge records not yet synced. The exact syscall failure point can make a failed commit outcome uncertain until restart; command IDs are the resolution mechanism. The PostgreSQL duplicate path is tested sequentially, not under same-ID concurrent races. Persistent controller-policy utility state and the resume slot were already proven by FLOW-TURN-M1 but are not duplicated in this domain; M7 uses stateless utility scoring and private-board workflow persistence. Latency decomposition below end-to-end, Step/checkpoint microbenchmarks, and trace phases is incomplete.
+
+## 29. Exactly one next recommendation
+
+OctetDB Write M1 durability/storage refinement.
+
+Add periodic canonical state snapshots, log compaction, explicit poisoned-log handling for uncertain write/sync failures, and checkpoint cadence experiments while retaining the exact Oct/Go ownership boundary demonstrated here.
+
+## Resumed reproduction
+
+```powershell
+# Generate the independent Go facade from exact Oct source/revision.
+cd experiments/M7/runtime/generator
+go run . ../oct/account_agent.oct ../../../../internal/m7generated/account_agent.generated.go
+
+# Core and optional real PostgreSQL correctness.
+cd ../../../..
+go test ./...
+$env:DBSCHED_POSTGRES_DSN='postgres://dbsched:dbsched@localhost:54329/dbsched?sslmode=disable'
+go test -v ./internal/m7write -run TestPostgreSQLBaseline -count=1
+
+# Seeded A/B/C evidence and deterministic trace/publication.
+go run ./cmd/m7bench -operations 2000 -accounts 128 -workers 8 -out experiments/M7/evidence/resumed/benchmarks.json
+go run ./cmd/m7trace
+```

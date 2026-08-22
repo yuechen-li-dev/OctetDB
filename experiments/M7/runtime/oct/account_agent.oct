@@ -1,0 +1,177 @@
+package Main
+
+enum CommandKind {
+    Create
+    Deposit
+    Withdraw
+    Transfer
+    Freeze
+    Unfreeze
+    BeginTransfer
+    Confirm
+    Cancel
+}
+
+enum AccountStatus {
+    Missing
+    Open
+    Frozen
+}
+
+enum DecisionReason {
+    Applied
+    AwaitingConfirmation
+    Cancelled
+    InvalidAmount
+    AccountMissing
+    AccountExists
+    AccountFrozen
+    InsufficientFunds
+    InvalidWorkflow
+}
+
+enum EffectKind {
+    None
+    Create
+    SetBalance
+    Transfer
+    SetStatus
+}
+
+concept PositiveAmount = Int {
+    Require(Self > 0, "amount must be positive")
+}
+
+concept CommandContext {
+    Kind: CommandKind
+    AccountA: Int
+    AccountB: Int
+    Amount: Int
+    ExistsA: Bool
+    ExistsB: Bool
+    BalanceA: Int
+    BalanceB: Int
+    StatusA: AccountStatus
+    StatusB: AccountStatus
+    VersionA: Int
+    VersionB: Int
+}
+
+record TransitionDecision {
+    Accepted: Bool
+    Reason: DecisionReason
+    Effect: EffectKind
+    AccountA: Int
+    AccountB: Int
+    Amount: Int
+    NewBalanceA: Int
+    NewBalanceB: Int
+    NewStatus: AccountStatus
+    ExpectedVersionA: Int
+    ExpectedVersionB: Int
+    TransitionCount: Int
+}
+
+flow AmountAdmission() accepts amount: PositiveAmount yields Int -> Void {
+    state Active {
+        yield amount
+        goto Active
+    }
+}
+
+fn Decision(input: CommandContext, accepted: Bool, reason: DecisionReason, effect: EffectKind, balanceA: Int, balanceB: Int, status: AccountStatus, count: Int) -> TransitionDecision {
+    return TransitionDecision { Accepted: accepted Reason: reason Effect: effect AccountA: input.AccountA AccountB: input.AccountB Amount: input.Amount NewBalanceA: balanceA NewBalanceB: balanceB NewStatus: status ExpectedVersionA: input.VersionA ExpectedVersionB: input.VersionB TransitionCount: count }
+}
+
+fn DecideCode(input: CommandContext, pending: Bool, pendingTarget: Int, pendingAmount: Int) -> Int {
+    return when utility {
+        case 1 when input.Kind == CommandKind.Create and input.ExistsA score 100
+        case 2 when input.Kind == CommandKind.Create and input.Amount < 0 score 90
+        case 3 when input.Kind == CommandKind.Create score 10
+
+        case 4 when input.Kind == CommandKind.Deposit and input.Amount <= 0 score 100
+        case 5 when input.Kind == CommandKind.Deposit and not input.ExistsA score 90
+        case 6 when input.Kind == CommandKind.Deposit score 10
+
+        case 7 when input.Kind == CommandKind.Withdraw and input.Amount <= 0 score 100
+        case 8 when input.Kind == CommandKind.Withdraw and not input.ExistsA score 90
+        case 9 when input.Kind == CommandKind.Withdraw and input.StatusA == AccountStatus.Frozen score 80
+        case 10 when input.Kind == CommandKind.Withdraw and input.BalanceA < input.Amount score 70
+        case 11 when input.Kind == CommandKind.Withdraw score 10
+
+        case 12 when input.Kind == CommandKind.Confirm and (not pending or pendingTarget != input.AccountB or pendingAmount != input.Amount) score 110
+        case 13 when (input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm) and input.Amount <= 0 score 100
+        case 14 when (input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm) and (not input.ExistsA or not input.ExistsB) score 90
+        case 15 when (input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm) and input.StatusA == AccountStatus.Frozen score 80
+        case 16 when (input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm) and input.BalanceA < input.Amount score 70
+        case 17 when input.Kind == CommandKind.Transfer or input.Kind == CommandKind.Confirm score 10
+
+        case 18 when input.Kind == CommandKind.Freeze and not input.ExistsA score 100
+        case 19 when input.Kind == CommandKind.Freeze score 10
+        case 20 when input.Kind == CommandKind.Unfreeze and not input.ExistsA score 100
+        case 21 when input.Kind == CommandKind.Unfreeze score 10
+
+        case 22 when input.Kind == CommandKind.BeginTransfer and input.Amount <= 0 score 100
+        case 23 when input.Kind == CommandKind.BeginTransfer score 10
+        case 24 when input.Kind == CommandKind.Cancel score 10
+        else 0
+    }
+}
+
+fn Decide(input: CommandContext, count: Int, pending: Bool, pendingTarget: Int, pendingAmount: Int) -> TransitionDecision {
+    let code = DecideCode(input, pending, pendingTarget, pendingAmount)
+    return switch code {
+        case 1 => Decision(input, false, DecisionReason.AccountExists, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 2 => Decision(input, false, DecisionReason.InvalidAmount, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 3 => Decision(input, true, DecisionReason.Applied, EffectKind.Create, input.Amount, input.BalanceB, AccountStatus.Open, count)
+        case 4 => Decision(input, false, DecisionReason.InvalidAmount, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 5 => Decision(input, false, DecisionReason.AccountMissing, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 6 => Decision(input, true, DecisionReason.Applied, EffectKind.SetBalance, input.BalanceA + input.Amount, input.BalanceB, input.StatusA, count)
+        case 7 => Decision(input, false, DecisionReason.InvalidAmount, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 8 => Decision(input, false, DecisionReason.AccountMissing, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 9 => Decision(input, false, DecisionReason.AccountFrozen, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 10 => Decision(input, false, DecisionReason.InsufficientFunds, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 11 => Decision(input, true, DecisionReason.Applied, EffectKind.SetBalance, input.BalanceA - input.Amount, input.BalanceB, input.StatusA, count)
+        case 12 => Decision(input, false, DecisionReason.InvalidWorkflow, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 13 => Decision(input, false, DecisionReason.InvalidAmount, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 14 => Decision(input, false, DecisionReason.AccountMissing, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 15 => Decision(input, false, DecisionReason.AccountFrozen, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 16 => Decision(input, false, DecisionReason.InsufficientFunds, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 17 => Decision(input, true, DecisionReason.Applied, EffectKind.Transfer, input.BalanceA - input.Amount, input.BalanceB + input.Amount, input.StatusA, count)
+        case 18 => Decision(input, false, DecisionReason.AccountMissing, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 19 => Decision(input, true, DecisionReason.Applied, EffectKind.SetStatus, input.BalanceA, input.BalanceB, AccountStatus.Frozen, count)
+        case 20 => Decision(input, false, DecisionReason.AccountMissing, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 21 => Decision(input, true, DecisionReason.Applied, EffectKind.SetStatus, input.BalanceA, input.BalanceB, AccountStatus.Open, count)
+        case 22 => Decision(input, false, DecisionReason.InvalidAmount, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 23 => Decision(input, true, DecisionReason.AwaitingConfirmation, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        case 24 => Decision(input, true, DecisionReason.Cancelled, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+        else => Decision(input, false, DecisionReason.InvalidWorkflow, EffectKind.None, input.BalanceA, input.BalanceB, input.StatusA, count)
+    }
+}
+
+flow AccountAgent(owner: Int) accepts input: CommandContext yields TransitionDecision -> Void {
+    board {
+        TransitionCount: Int
+        Pending: Bool
+        WasPending: Bool
+        PendingTarget: Int
+        PendingAmount: Int
+    }
+
+    state Active {
+        board.TransitionCount = board.TransitionCount + 1
+        board.WasPending = board.Pending
+        if input.Kind == CommandKind.BeginTransfer and input.Amount > 0 {
+            board.Pending = true
+            board.PendingTarget = input.AccountB
+            board.PendingAmount = input.Amount
+        }
+        if input.Kind == CommandKind.Confirm or input.Kind == CommandKind.Cancel {
+            board.Pending = false
+        }
+        yield Decide(input, board.TransitionCount, board.WasPending, board.PendingTarget, board.PendingAmount)
+        goto Active
+    }
+}
+
+fn Main() -> Void {}

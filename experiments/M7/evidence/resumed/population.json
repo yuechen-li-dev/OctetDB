@@ -1,0 +1,11 @@
+{
+  "method": "fresh registry per population; capacity-1 mailbox; one resident generated AccountAgent and logical checkpoint per identity; forced GC before measurement",
+  "checkpoint_bytes": 779,
+  "results": [
+    {"agents": 1, "heap_delta_bytes": null, "heap_note": "single-object delta was below background runtime noise", "objects_delta": 225, "lookup_ns": 5.16},
+    {"agents": 1000, "heap_delta_bytes": 1619088, "objects_delta": 6024, "lookup_ns": 8.85},
+    {"agents": 10000, "heap_delta_bytes": 16081216, "objects_delta": 60075, "lookup_ns": 9.59},
+    {"agents": 100000, "heap_delta_bytes": 159981104, "objects_delta": 600290, "lookup_ns": 15.84}
+  ],
+  "interpretation": "The measured shape is about 1.60 KB and six heap objects per active checkpointed identity at scale. No arenas, unsafe code, cgo, slabs, or custom allocators were used."
+}
