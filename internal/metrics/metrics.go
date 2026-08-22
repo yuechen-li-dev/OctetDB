@@ -185,7 +185,7 @@ func percentiles(values []time.Duration) Percentiles {
 func recovery(samples []Sample, overloadEnd time.Time) *float64 {
 	steady := []time.Duration{}
 	for _, s := range samples {
-		if s.Phase == "normal_before" && !s.Failed && !s.Rejected {
+		if (s.Phase == "normal_before" || s.Phase == "steady_low") && !s.Failed && !s.Rejected {
 			steady = append(steady, s.Latency)
 		}
 	}

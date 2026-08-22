@@ -1,4 +1,10 @@
-# Database Scheduler — DBSCHED-M0 / M1 / M2 / M3
+# Database Scheduler — DBSCHED-M0 through M4
+
+DBSCHED-M4 measures PostgreSQL feedback delay and evaluates a bounded Oct
+observer, persistence, linear extrapolation, and one filtered reactive
+concurrency actuator. Prediction did not beat persistence, so predictive
+authority remains disabled and H is retained. See
+`docs/experiments/DBSCHED_M4.md` and `experiments/M4/summary.json`.
 
 DBSCHED-M3 adds persistent zero-allocation Oct policy controllers and compares
 conventional and utility-scored priority/aging above the M2 mechanism. See
@@ -19,6 +25,9 @@ evidence are in `docs/experiments/DBSCHED_M1.md` and `experiments/M1`.
 docker compose up -d --wait
 go test ./...
 go run ./cmd/bench -output experiments/M1/evidence/run-local
+
+# M4 nonstationary characterization and H/J/K0 lanes
+go run ./cmd/bench -m4 -lanes h,j,k0 -output experiments/M4/evidence/run-local
 ```
 
 Regenerate the M1 plan explicitly from the Oct repository:

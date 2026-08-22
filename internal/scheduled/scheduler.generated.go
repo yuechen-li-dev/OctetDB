@@ -9,6 +9,23 @@ type octResult_Int struct {
 	IsErr bool
 }
 
+type Scheduler_M4ObserverState struct {
+	Initialized     bool
+	QueueMilli      int
+	ArrivalMilli    int
+	CompletionMilli int
+	Delay           float64
+	PreviousDelay   float64
+}
+
+type Scheduler_M4ObserverOutput struct {
+	State                 Scheduler_M4ObserverState
+	PersistenceQueueMilli int
+	LinearQueueMilli      int
+	PersistenceDelay      float64
+	LinearDelay           float64
+}
+
 type Scheduler_SchedulerDecisionBoardSnapshot struct {
 	Decision int
 }
@@ -534,6 +551,228 @@ func fn_Scheduler_OutcomeCode(__oct_user_0 Scheduler_SchedulerOutcome) int {
 			continue
 		case 9:
 			panic("non-exhaustive match reached in compiled mode")
+		}
+	}
+}
+
+func fn_Scheduler_M4NonNegative(__oct_user_0 int) int {
+	var __oct_internal_tmp_0 bool
+	_ = __oct_internal_tmp_0
+	var __oct_internal_tmp_1 int
+	_ = __oct_internal_tmp_1
+	__oct_internal_pc := 0
+	for {
+		switch __oct_internal_pc {
+		case 0:
+			__oct_internal_tmp_0 = (__oct_user_0 < 0)
+			if __oct_internal_tmp_0 {
+				__oct_internal_pc = 1
+			} else {
+				__oct_internal_pc = 2
+			}
+			continue
+		case 1:
+			__oct_internal_tmp_1 = 0
+			__oct_internal_pc = 3
+			continue
+		case 2:
+			__oct_internal_tmp_1 = __oct_user_0
+			__oct_internal_pc = 3
+			continue
+		case 3:
+			return __oct_internal_tmp_1
+		}
+	}
+}
+
+func fn_Scheduler_M4NonNegativeDuration(__oct_user_0 float64) float64 {
+	var __oct_internal_tmp_0 bool
+	_ = __oct_internal_tmp_0
+	var __oct_internal_tmp_1 float64
+	_ = __oct_internal_tmp_1
+	__oct_internal_pc := 0
+	for {
+		switch __oct_internal_pc {
+		case 0:
+			__oct_internal_tmp_0 = (__oct_user_0 < 0.0)
+			if __oct_internal_tmp_0 {
+				__oct_internal_pc = 1
+			} else {
+				__oct_internal_pc = 2
+			}
+			continue
+		case 1:
+			__oct_internal_tmp_1 = 0.0
+			__oct_internal_pc = 3
+			continue
+		case 2:
+			__oct_internal_tmp_1 = __oct_user_0
+			__oct_internal_pc = 3
+			continue
+		case 3:
+			return __oct_internal_tmp_1
+		}
+	}
+}
+
+func fn_Scheduler_M4ObserverUpdate(__oct_user_0 Scheduler_M4ObserverState, __oct_user_1 int, __oct_user_2 int, __oct_user_3 int, __oct_user_4 float64, __oct_user_5 int) Scheduler_M4ObserverOutput {
+	var __oct_internal_tmp_0 int
+	_ = __oct_internal_tmp_0
+	var __oct_internal_tmp_1 int
+	_ = __oct_internal_tmp_1
+	var __oct_internal_tmp_10 int
+	_ = __oct_internal_tmp_10
+	var __oct_internal_tmp_11 int
+	_ = __oct_internal_tmp_11
+	var __oct_internal_tmp_12 int
+	_ = __oct_internal_tmp_12
+	var __oct_internal_tmp_13 int
+	_ = __oct_internal_tmp_13
+	var __oct_internal_tmp_14 float64
+	_ = __oct_internal_tmp_14
+	var __oct_internal_tmp_15 float64
+	_ = __oct_internal_tmp_15
+	var __oct_internal_tmp_16 float64
+	_ = __oct_internal_tmp_16
+	var __oct_internal_tmp_17 float64
+	_ = __oct_internal_tmp_17
+	var __oct_internal_tmp_18 float64
+	_ = __oct_internal_tmp_18
+	var __oct_internal_tmp_19 Scheduler_M4ObserverState
+	_ = __oct_internal_tmp_19
+	var __oct_internal_tmp_2 int
+	_ = __oct_internal_tmp_2
+	var __oct_internal_tmp_20 Scheduler_M4ObserverState
+	_ = __oct_internal_tmp_20
+	var __oct_internal_tmp_21 Scheduler_M4ObserverState
+	_ = __oct_internal_tmp_21
+	var __oct_internal_tmp_22 int
+	_ = __oct_internal_tmp_22
+	var __oct_internal_tmp_23 int
+	_ = __oct_internal_tmp_23
+	var __oct_internal_tmp_24 int
+	_ = __oct_internal_tmp_24
+	var __oct_internal_tmp_25 int
+	_ = __oct_internal_tmp_25
+	var __oct_internal_tmp_26 int
+	_ = __oct_internal_tmp_26
+	var __oct_internal_tmp_27 int
+	_ = __oct_internal_tmp_27
+	var __oct_internal_tmp_28 int
+	_ = __oct_internal_tmp_28
+	var __oct_internal_tmp_29 float64
+	_ = __oct_internal_tmp_29
+	var __oct_internal_tmp_3 bool
+	_ = __oct_internal_tmp_3
+	var __oct_internal_tmp_30 float64
+	_ = __oct_internal_tmp_30
+	var __oct_internal_tmp_31 float64
+	_ = __oct_internal_tmp_31
+	var __oct_internal_tmp_32 float64
+	_ = __oct_internal_tmp_32
+	var __oct_internal_tmp_33 float64
+	_ = __oct_internal_tmp_33
+	var __oct_internal_tmp_34 float64
+	_ = __oct_internal_tmp_34
+	var __oct_internal_tmp_35 float64
+	_ = __oct_internal_tmp_35
+	var __oct_internal_tmp_36 float64
+	_ = __oct_internal_tmp_36
+	var __oct_internal_tmp_37 float64
+	_ = __oct_internal_tmp_37
+	var __oct_internal_tmp_38 Scheduler_M4ObserverOutput
+	_ = __oct_internal_tmp_38
+	var __oct_internal_tmp_4 int
+	_ = __oct_internal_tmp_4
+	var __oct_internal_tmp_5 int
+	_ = __oct_internal_tmp_5
+	var __oct_internal_tmp_6 int
+	_ = __oct_internal_tmp_6
+	var __oct_internal_tmp_7 int
+	_ = __oct_internal_tmp_7
+	var __oct_internal_tmp_8 int
+	_ = __oct_internal_tmp_8
+	var __oct_internal_tmp_9 int
+	_ = __oct_internal_tmp_9
+	var __oct_user_10 int
+	_ = __oct_user_10
+	var __oct_user_11 float64
+	_ = __oct_user_11
+	var __oct_user_12 float64
+	_ = __oct_user_12
+	var __oct_user_6 int
+	_ = __oct_user_6
+	var __oct_user_7 int
+	_ = __oct_user_7
+	var __oct_user_8 int
+	_ = __oct_user_8
+	var __oct_user_9 Scheduler_M4ObserverState
+	_ = __oct_user_9
+	__oct_internal_pc := 0
+	for {
+		switch __oct_internal_pc {
+		case 0:
+			__oct_internal_tmp_0 = (__oct_user_1 * 1000)
+			__oct_user_6 = __oct_internal_tmp_0
+			__oct_internal_tmp_1 = (__oct_user_2 * 1000)
+			__oct_user_7 = __oct_internal_tmp_1
+			__oct_internal_tmp_2 = (__oct_user_3 * 1000)
+			__oct_user_8 = __oct_internal_tmp_2
+			__oct_internal_tmp_3 = __oct_user_0.Initialized
+			__oct_internal_tmp_4 = __oct_user_0.QueueMilli
+			__oct_internal_tmp_5 = (3 * __oct_internal_tmp_4)
+			__oct_internal_tmp_6 = (__oct_internal_tmp_5 + __oct_user_6)
+			__oct_internal_tmp_7 = func(__a int, __b int) int { return __a / __b }(__oct_internal_tmp_6, 4)
+			__oct_internal_tmp_8 = __oct_user_0.ArrivalMilli
+			__oct_internal_tmp_9 = (__oct_internal_tmp_8 + __oct_user_7)
+			__oct_internal_tmp_10 = func(__a int, __b int) int { return __a / __b }(__oct_internal_tmp_9, 2)
+			__oct_internal_tmp_11 = __oct_user_0.CompletionMilli
+			__oct_internal_tmp_12 = (__oct_internal_tmp_11 + __oct_user_8)
+			__oct_internal_tmp_13 = func(__a int, __b int) int { return __a / __b }(__oct_internal_tmp_12, 2)
+			__oct_internal_tmp_14 = __oct_user_0.Delay
+			__oct_internal_tmp_15 = (3.0 * __oct_internal_tmp_14)
+			__oct_internal_tmp_16 = (__oct_internal_tmp_15 + __oct_user_4)
+			__oct_internal_tmp_17 = func(__a float64, __b float64) float64 { return __a / __b }(__oct_internal_tmp_16, 4.0)
+			__oct_internal_tmp_18 = __oct_user_0.Delay
+			__oct_internal_tmp_19 = Scheduler_M4ObserverState{Initialized: true, QueueMilli: __oct_internal_tmp_7, ArrivalMilli: __oct_internal_tmp_10, CompletionMilli: __oct_internal_tmp_13, Delay: __oct_internal_tmp_17, PreviousDelay: __oct_internal_tmp_18}
+			__oct_internal_tmp_20 = Scheduler_M4ObserverState{Initialized: true, QueueMilli: __oct_user_6, ArrivalMilli: __oct_user_7, CompletionMilli: __oct_user_8, Delay: __oct_user_4, PreviousDelay: __oct_user_4}
+			if __oct_internal_tmp_3 {
+				__oct_internal_pc = 1
+			} else {
+				__oct_internal_pc = 2
+			}
+			continue
+		case 1:
+			__oct_internal_tmp_21 = __oct_internal_tmp_19
+			__oct_internal_pc = 3
+			continue
+		case 2:
+			__oct_internal_tmp_21 = __oct_internal_tmp_20
+			__oct_internal_pc = 3
+			continue
+		case 3:
+			__oct_user_9 = __oct_internal_tmp_21
+			__oct_internal_tmp_22 = __oct_user_9.QueueMilli
+			__oct_internal_tmp_23 = __oct_user_9.ArrivalMilli
+			__oct_internal_tmp_24 = __oct_user_9.CompletionMilli
+			__oct_internal_tmp_25 = (__oct_internal_tmp_23 - __oct_internal_tmp_24)
+			__oct_internal_tmp_26 = (__oct_user_5 * __oct_internal_tmp_25)
+			__oct_internal_tmp_27 = (__oct_internal_tmp_22 + __oct_internal_tmp_26)
+			__oct_internal_tmp_28 = fn_Scheduler_M4NonNegative(__oct_internal_tmp_27)
+			__oct_user_10 = __oct_internal_tmp_28
+			__oct_internal_tmp_29 = __oct_user_9.Delay
+			__oct_internal_tmp_30 = __oct_user_9.PreviousDelay
+			__oct_internal_tmp_31 = (__oct_internal_tmp_29 - __oct_internal_tmp_30)
+			__oct_user_11 = __oct_internal_tmp_31
+			__oct_internal_tmp_32 = __oct_user_9.Delay
+			__oct_internal_tmp_33 = float64(__oct_user_5)
+			__oct_internal_tmp_34 = (__oct_internal_tmp_33 * __oct_user_11)
+			__oct_internal_tmp_35 = (__oct_internal_tmp_32 + __oct_internal_tmp_34)
+			__oct_internal_tmp_36 = fn_Scheduler_M4NonNegativeDuration(__oct_internal_tmp_35)
+			__oct_user_12 = __oct_internal_tmp_36
+			__oct_internal_tmp_37 = __oct_user_9.Delay
+			__oct_internal_tmp_38 = Scheduler_M4ObserverOutput{State: __oct_user_9, PersistenceQueueMilli: __oct_user_6, LinearQueueMilli: __oct_user_10, PersistenceDelay: __oct_internal_tmp_37, LinearDelay: __oct_user_12}
+			return __oct_internal_tmp_38
 		}
 	}
 }

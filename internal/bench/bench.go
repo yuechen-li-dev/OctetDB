@@ -2,12 +2,15 @@ package bench
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
 	"runtime"
 	"runtime/debug"
+	"sort"
+	"strconv"
 	"sync"
 	"time"
 
@@ -22,6 +25,7 @@ type Phase struct {
 	Name     string                  `json:"name"`
 	Duration time.Duration           `json:"duration"`
 	Rate     int                     `json:"rate_per_second"`
+	EndRate  int                     `json:"end_rate_per_second,omitempty"`
 	Regime   workload.ConflictRegime `json:"conflict_regime"`
 }
 
@@ -42,7 +46,7 @@ func DefaultConfig() Config {
 	return Config{
 		Seed: 20260821, PoolSize: 8, SchedulerCapacity: 128, MaxBatch: 8, BatchWait: 2 * time.Millisecond,
 		RequestTimeout: 30 * time.Second, WarmupOperations: 5000, DatasetCustomers: 100, DatasetProducts: 20,
-		Phases: []Phase{{"low", 10 * time.Second, 750, workload.LowContention}, {"mixed", 10 * time.Second, 1500, workload.MixedContention}, {"normal_before", 10 * time.Second, 750, workload.LowContention}, {"overload", 8 * time.Second, 5000, workload.HotKeyContention}, {"normal_after", 12 * time.Second, 750, workload.LowContention}},
+		Phases: []Phase{{Name: "low", Duration: 10 * time.Second, Rate: 750, Regime: workload.LowContention}, {Name: "mixed", Duration: 10 * time.Second, Rate: 1500, Regime: workload.MixedContention}, {Name: "normal_before", Duration: 10 * time.Second, Rate: 750, Regime: workload.LowContention}, {Name: "overload", Duration: 8 * time.Second, Rate: 5000, Regime: workload.HotKeyContention}, {Name: "normal_after", Duration: 12 * time.Second, Rate: 750, Regime: workload.LowContention}},
 	}
 }
 
@@ -81,6 +85,7 @@ type Result struct {
 	PeakQueueDepth   int64                           `json:"peak_queue_depth"`
 	SchedulerCPUTime time.Duration                   `json:"scheduler_cpu_time"`
 	Conflict         scheduled.ConflictMetrics       `json:"conflict"`
+	Observer         scheduled.ObserverMetrics       `json:"observer"`
 }
 
 type laneResult struct {
@@ -134,6 +139,12 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	case "priority", "h":
 		scheduler = scheduled.NewPriority(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
+	case "shadow", "k0":
+		scheduler = scheduled.NewObserverShadow(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
+	case "reactive", "j":
+		scheduler = scheduled.NewReactiveObserver(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		impl = scheduledAdapter{scheduler}
 	case "utility", "f1":
 		scheduler = scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		impl = scheduledAdapter{scheduler}
@@ -172,9 +183,9 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 	maxInUse := int32(0)
 	for _, phase := range cfg.Phases {
 		phaseStart := time.Now()
-		phaseCount := int(phase.Duration.Seconds() * float64(phase.Rate))
-		for emitted := 0; emitted < phaseCount && opIndex < len(ops); emitted++ {
-			due := phaseStart.Add(time.Duration(emitted) * time.Second / time.Duration(phase.Rate))
+		schedule := phaseSchedule(phase)
+		for emitted := 0; emitted < len(schedule) && opIndex < len(ops); emitted++ {
+			due := phaseStart.Add(schedule[emitted])
 			if wait := time.Until(due); wait > 0 {
 				timer := time.NewTimer(wait)
 				select {
@@ -204,7 +215,7 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 				maxInUse = inUse
 			}
 		}
-		if phase.Name == "overload" {
+		if phase.Name == "overload" || phase.Name == "sustained_overload" {
 			overloadEnd = time.Now()
 		}
 	}
@@ -227,6 +238,7 @@ func Run(ctx context.Context, name string, cfg Config, store *db.Store) (Result,
 		result.PeakQueueDepth = scheduler.PeakQueueDepth()
 		result.SchedulerCPUTime = scheduler.PolicyCPUTime()
 		result.Conflict = scheduler.ConflictMetrics()
+		result.Observer = scheduler.ObserverMetrics()
 	}
 	return result, nil
 }
@@ -240,7 +252,7 @@ func divide(value, denominator float64) float64 {
 
 func errorsIsRejected(err error) bool { return err == scheduled.ErrRejected }
 func batchMax(name string, cfg Config) int {
-	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" || name == "conflict" || name == "f0" || name == "priority" || name == "h" || name == "utility" || name == "f1" || name == "agentic" {
+	if name == "batch" || name == "runtime" || name == "static" || name == "scheduled" || name == "conflict" || name == "f0" || name == "priority" || name == "h" || name == "shadow" || name == "k0" || name == "reactive" || name == "j" || name == "utility" || name == "f1" || name == "agentic" {
 		return cfg.MaxBatch
 	}
 	return 1
@@ -249,12 +261,12 @@ func batchMax(name string, cfg Config) int {
 func generatePhasedOps(cfg Config) []workload.Operation {
 	total := 0
 	for _, p := range cfg.Phases {
-		total += int(p.Duration.Seconds() * float64(p.Rate))
+		total += len(phaseSchedule(p))
 	}
 	ops := make([]workload.Operation, 0, total)
 	base := time.Unix(1_800_000_000, 0).UTC()
 	for phaseIndex, p := range cfg.Phases {
-		count := int(p.Duration.Seconds() * float64(p.Rate))
+		count := len(phaseSchedule(p))
 		part := workload.GenerateRegime(cfg.Seed^uint64(phaseIndex+1)*0x9e3779b9, count, base.Add(time.Duration(len(ops))*time.Microsecond), p.Regime)
 		for i := range part {
 			part[i].Sequence = int64(len(ops) + i)
@@ -263,6 +275,36 @@ func generatePhasedOps(cfg Config) []workload.Operation {
 		ops = append(ops, part...)
 	}
 	return ops
+}
+
+// phaseSchedule uses deterministic 100 ms buckets for genuine linear ramps.
+// Constant phases retain the original evenly spaced schedule exactly.
+func phaseSchedule(phase Phase) []time.Duration {
+	if phase.EndRate <= 0 || phase.EndRate == phase.Rate {
+		count := int(phase.Duration.Seconds() * float64(phase.Rate))
+		out := make([]time.Duration, count)
+		for i := range out {
+			out[i] = time.Duration(i) * time.Second / time.Duration(phase.Rate)
+		}
+		return out
+	}
+	bucket := 100 * time.Millisecond
+	buckets := int((phase.Duration + bucket - 1) / bucket)
+	out := make([]time.Duration, 0, int(phase.Duration.Seconds()*float64(phase.Rate+phase.EndRate)/2))
+	for b := 0; b < buckets; b++ {
+		start := time.Duration(b) * bucket
+		width := bucket
+		if start+width > phase.Duration {
+			width = phase.Duration - start
+		}
+		fraction := (float64(b) + 0.5) / float64(buckets)
+		rate := float64(phase.Rate) + fraction*float64(phase.EndRate-phase.Rate)
+		count := int(rate*width.Seconds() + 0.5)
+		for i := 0; i < count; i++ {
+			out = append(out, start+time.Duration(i)*width/time.Duration(count))
+		}
+	}
+	return out
 }
 
 type Correctness struct {
@@ -309,6 +351,12 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 		"priority": func() *scheduled.Scheduler {
 			return scheduled.NewPriority(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		},
+		"shadow": func() *scheduled.Scheduler {
+			return scheduled.NewObserverShadow(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
+		"reactive": func() *scheduled.Scheduler {
+			return scheduled.NewReactiveObserver(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+		},
 		"utility": func() *scheduled.Scheduler {
 			return scheduled.NewUtility(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
 		},
@@ -318,7 +366,7 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 	}
 	equal := true
 	var ss db.State
-	for _, name := range []string{"batch", "runtime", "static", "conflict", "f0", "priority", "utility", "agentic"} {
+	for _, name := range []string{"batch", "runtime", "static", "conflict", "f0", "priority", "shadow", "reactive", "utility", "agentic"} {
 		if err := store.Reset(ctx); err != nil {
 			return Correctness{}, err
 		}
@@ -341,9 +389,229 @@ func CheckCorrectness(ctx context.Context, cfg Config, store *db.Store) (Correct
 	return Correctness{Equal: equal, Operations: len(ops), BaselineState: bs, ScheduledState: ss, States: states}, nil
 }
 
+type ObserverTrace struct {
+	Phases  []PlantPhase              `json:"phases"`
+	Events  []scheduled.ObserverEvent `json:"events"`
+	Metrics scheduled.ObserverMetrics `json:"metrics"`
+}
+
+type ObserverSummary struct {
+	Phases  []PlantPhase              `json:"phases"`
+	Metrics scheduled.ObserverMetrics `json:"metrics"`
+}
+
+func WriteObserverTraceCSV(path string, trace ObserverTrace) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := csv.NewWriter(f)
+	if err := w.Write([]string{"tick", "at_ns", "raw_queue", "filtered_queue_milli", "arrivals", "completions", "mean_dispatch_delay_us", "persistence_queue_milli", "linear_queue_milli", "persistence_delay_us", "linear_delay_us", "actual_queue_milli", "actual_delay_us", "matured_persistence_queue_milli", "matured_linear_queue_milli", "matured_persistence_delay_us", "matured_linear_delay_us", "matured", "reactive_would_limit", "predictive_would_limit"}); err != nil {
+		return err
+	}
+	for _, e := range trace.Events {
+		row := []string{strconv.FormatInt(e.Tick, 10), strconv.FormatInt(e.AtNS, 10), strconv.Itoa(e.RawQueue), strconv.Itoa(e.FilteredQueueMilli), strconv.Itoa(e.Arrivals), strconv.Itoa(e.Completions), strconv.Itoa(e.MeanDispatchDelayMicros), strconv.Itoa(e.PersistenceQueueMilli), strconv.Itoa(e.LinearQueueMilli), strconv.Itoa(e.PersistenceDelayMicros), strconv.Itoa(e.LinearDelayMicros), strconv.Itoa(e.ActualQueueMilli), strconv.Itoa(e.ActualDelayMicros), strconv.Itoa(e.MaturedPersistenceQueueMilli), strconv.Itoa(e.MaturedLinearQueueMilli), strconv.Itoa(e.MaturedPersistenceDelayMicros), strconv.Itoa(e.MaturedLinearDelayMicros), strconv.FormatBool(e.Matured), strconv.FormatBool(e.ReactiveWouldLimit), strconv.FormatBool(e.PredictiveWouldLimit)}
+		if err := w.Write(row); err != nil {
+			return err
+		}
+	}
+	w.Flush()
+	return w.Error()
+}
+
+// CaptureObserverTrace runs K0 with the same H eligibility and fairness path;
+// only the observer is active, and its bounded trace is outside timed lanes.
+func CaptureObserverTrace(ctx context.Context, cfg Config, store *db.Store) (ObserverTrace, error) {
+	if err := store.Reset(ctx); err != nil {
+		return ObserverTrace{}, err
+	}
+	s := scheduled.NewObserverShadow(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+	defer s.Close()
+	if err := runCorrectnessOps(ctx, workload.Generate(cfg.Seed^0x4d35, 500, time.Unix(1_750_000_000, 0).UTC()), cfg.SchedulerCapacity/2, scheduledAdapter{s}); err != nil {
+		return ObserverTrace{}, fmt.Errorf("observer warmup: %w", err)
+	}
+	if err := store.Reset(ctx); err != nil {
+		return ObserverTrace{}, err
+	}
+	s.EnableObserverTrace()
+	ops := generatePhasedOps(cfg)
+	opIndex := 0
+	var wg sync.WaitGroup
+	out := ObserverTrace{Phases: make([]PlantPhase, 0, len(cfg.Phases))}
+	for _, phase := range cfg.Phases {
+		phaseStart := time.Now()
+		schedule := phaseSchedule(phase)
+		for emitted := 0; emitted < len(schedule) && opIndex < len(ops); emitted++ {
+			due := phaseStart.Add(schedule[emitted])
+			if wait := time.Until(due); wait > 0 {
+				timer := time.NewTimer(wait)
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return ObserverTrace{}, ctx.Err()
+				case <-timer.C:
+				}
+			}
+			op := ops[opIndex]
+			opIndex++
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				reqCtx, cancel := context.WithTimeout(ctx, cfg.RequestTimeout)
+				defer cancel()
+				_ = s.Submit(reqCtx, op)
+			}()
+		}
+		out.Phases = append(out.Phases, PlantPhase{Name: phase.Name, StartNS: phaseStart.UnixNano(), EndNS: time.Now().UnixNano(), Offered: len(schedule), ConflictRegime: fmt.Sprint(phase.Regime)})
+	}
+	wg.Wait()
+	out.Events = s.ObserverTrace()
+	out.Metrics = s.ObserverMetrics()
+	return out, nil
+}
+
 type DiagnosticTrace struct {
 	Utility []scheduled.TraceEvent `json:"utility"`
 	Agentic []scheduled.TraceEvent `json:"agentic"`
+}
+
+type PlantPhase struct {
+	Name           string `json:"name"`
+	StartNS        int64  `json:"start_ns"`
+	EndNS          int64  `json:"end_ns"`
+	Offered        int    `json:"offered"`
+	ConflictRegime string `json:"conflict_regime"`
+}
+
+type PlantTrace struct {
+	Phases []PlantPhase           `json:"phases"`
+	Events []scheduled.PlantEvent `json:"events"`
+}
+
+type PlantPhaseSummary struct {
+	Name                    string  `json:"name"`
+	Completions             int     `json:"completions"`
+	DispatchCompletionP50MS float64 `json:"dispatch_completion_p50_ms"`
+	DispatchCompletionP95MS float64 `json:"dispatch_completion_p95_ms"`
+	DispatchCompletionP99MS float64 `json:"dispatch_completion_p99_ms"`
+	QueueP95MS              float64 `json:"queue_p95_ms"`
+	PeakPending             int     `json:"peak_pending"`
+	PeakActive              int     `json:"peak_active"`
+}
+
+type PlantSummary struct {
+	EventCount int                 `json:"event_count"`
+	Phases     []PlantPhaseSummary `json:"phases"`
+}
+
+func SummarizePlantTrace(trace PlantTrace) PlantSummary {
+	out := PlantSummary{EventCount: len(trace.Events), Phases: make([]PlantPhaseSummary, 0, len(trace.Phases))}
+	for _, phase := range trace.Phases {
+		var delays, queues []float64
+		item := PlantPhaseSummary{Name: phase.Name}
+		for _, event := range trace.Events {
+			if event.AtNS < phase.StartNS || event.AtNS > phase.EndNS {
+				continue
+			}
+			if event.Pending > item.PeakPending {
+				item.PeakPending = event.Pending
+			}
+			if event.Active > item.PeakActive {
+				item.PeakActive = event.Active
+			}
+			if event.Kind == "completion" {
+				item.Completions++
+				delays = append(delays, float64(event.DispatchDelayNS)/float64(time.Millisecond))
+				queues = append(queues, float64(event.QueueNS)/float64(time.Millisecond))
+			}
+		}
+		sort.Float64s(delays)
+		sort.Float64s(queues)
+		item.DispatchCompletionP50MS = percentileFloat(delays, .50)
+		item.DispatchCompletionP95MS = percentileFloat(delays, .95)
+		item.DispatchCompletionP99MS = percentileFloat(delays, .99)
+		item.QueueP95MS = percentileFloat(queues, .95)
+		out.Phases = append(out.Phases, item)
+	}
+	return out
+}
+
+func percentileFloat(values []float64, percentile float64) float64 {
+	if len(values) == 0 {
+		return 0
+	}
+	return values[int(percentile*float64(len(values)-1))]
+}
+
+func WritePlantTraceCSV(path string, trace PlantTrace) error {
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	w := csv.NewWriter(f)
+	if err := w.Write([]string{"at_ns", "event", "request_id", "command", "pending", "active", "admitted", "batch_size", "queue_ns", "service_ns", "dispatch_completion_ns"}); err != nil {
+		return err
+	}
+	for _, e := range trace.Events {
+		row := []string{strconv.FormatInt(e.AtNS, 10), e.Kind, strconv.FormatInt(e.RequestID, 10), e.CommandKind, strconv.Itoa(e.Pending), strconv.Itoa(e.Active), strconv.FormatInt(e.Admitted, 10), strconv.Itoa(e.BatchSize), strconv.FormatInt(e.QueueNS, 10), strconv.FormatInt(e.ServiceNS, 10), strconv.FormatInt(e.DispatchDelayNS, 10)}
+		if err := w.Write(row); err != nil {
+			return err
+		}
+	}
+	w.Flush()
+	return w.Error()
+}
+
+// CapturePlantTrace exercises the real H scheduler and PostgreSQL path with
+// diagnostics enabled. It is deliberately separate from Run so lifecycle
+// tracing cannot contaminate authoritative timed lane measurements.
+func CapturePlantTrace(ctx context.Context, cfg Config, store *db.Store) (PlantTrace, error) {
+	if err := store.Reset(ctx); err != nil {
+		return PlantTrace{}, err
+	}
+	s := scheduled.NewPlantCharacterization(store, cfg.SchedulerCapacity, cfg.MaxBatch, int(cfg.PoolSize), cfg.BatchWait)
+	defer s.Close()
+	if err := runCorrectnessOps(ctx, workload.Generate(cfg.Seed^0x4d34, 500, time.Unix(1_750_000_000, 0).UTC()), cfg.SchedulerCapacity/2, scheduledAdapter{s}); err != nil {
+		return PlantTrace{}, fmt.Errorf("plant warmup: %w", err)
+	}
+	if err := store.Reset(ctx); err != nil {
+		return PlantTrace{}, err
+	}
+	ops := generatePhasedOps(cfg)
+	opIndex := 0
+	var wg sync.WaitGroup
+	out := PlantTrace{Phases: make([]PlantPhase, 0, len(cfg.Phases))}
+	for _, phase := range cfg.Phases {
+		phaseStart := time.Now()
+		schedule := phaseSchedule(phase)
+		for emitted := 0; emitted < len(schedule) && opIndex < len(ops); emitted++ {
+			due := phaseStart.Add(schedule[emitted])
+			if wait := time.Until(due); wait > 0 {
+				timer := time.NewTimer(wait)
+				select {
+				case <-ctx.Done():
+					timer.Stop()
+					return PlantTrace{}, ctx.Err()
+				case <-timer.C:
+				}
+			}
+			op := ops[opIndex]
+			opIndex++
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				reqCtx, cancel := context.WithTimeout(ctx, cfg.RequestTimeout)
+				defer cancel()
+				_ = s.Submit(reqCtx, op)
+			}()
+		}
+		out.Phases = append(out.Phases, PlantPhase{Name: phase.Name, StartNS: phaseStart.UnixNano(), EndNS: time.Now().UnixNano(), Offered: len(schedule), ConflictRegime: fmt.Sprint(phase.Regime)})
+	}
+	wg.Wait()
+	out.Events = s.PlantTrace()
+	return out, nil
 }
 
 // CaptureTrace runs a bounded diagnostic workload outside authoritative

@@ -130,6 +130,70 @@ flow PersistentFairController() -> Int {
     }
 }
 
+// M4 uses a deliberately small database-specific observer. Values are fixed
+// point (x1000) so the generated Go path stays typed and allocation-free.
+// Physical scheduler state remains authoritative; these records carry only
+// filtered estimates and shadow predictions.
+record M4ObserverState {
+    Initialized: Bool
+    QueueMilli: Int
+    ArrivalMilli: Int
+    CompletionMilli: Int
+    Delay: Float<s>
+    PreviousDelay: Float<s>
+}
+
+record M4ObserverOutput {
+    State: M4ObserverState
+    PersistenceQueueMilli: Int
+    LinearQueueMilli: Int
+    PersistenceDelay: Float<s>
+    LinearDelay: Float<s>
+}
+
+fn M4NonNegative(value: Int) -> Int {
+    return if value < 0 { 0 } else { value }
+}
+
+fn M4NonNegativeDuration(value: Float<s>) -> Float<s> {
+    return if value < 0.0s { 0.0s } else { value }
+}
+
+fn M4ObserverUpdate(state: M4ObserverState, rawQueue: Int, arrivals: Int, completions: Int, meanDelay: Float<s>, horizonTicks: Int) -> M4ObserverOutput {
+    let q = rawQueue * 1000
+    let a = arrivals * 1000
+    let c = completions * 1000
+    let initialized = if state.Initialized {
+        M4ObserverState {
+            Initialized: true
+            QueueMilli: (3 * state.QueueMilli + q) / 4
+            ArrivalMilli: (state.ArrivalMilli + a) / 2
+            CompletionMilli: (state.CompletionMilli + c) / 2
+            Delay: (3.0 * state.Delay + meanDelay) / 4.0
+            PreviousDelay: state.Delay
+        }
+    } else {
+        M4ObserverState {
+            Initialized: true
+            QueueMilli: q
+            ArrivalMilli: a
+            CompletionMilli: c
+            Delay: meanDelay
+            PreviousDelay: meanDelay
+        }
+    }
+    let predictedQueue = M4NonNegative(initialized.QueueMilli + horizonTicks * (initialized.ArrivalMilli - initialized.CompletionMilli))
+    let delaySlope = initialized.Delay - initialized.PreviousDelay
+    let predictedDelay = M4NonNegativeDuration(initialized.Delay + Float(horizonTicks) * delaySlope)
+    return M4ObserverOutput {
+        State: initialized
+        PersistenceQueueMilli: q
+        LinearQueueMilli: predictedQueue
+        PersistenceDelay: initialized.Delay
+        LinearDelay: predictedDelay
+    }
+}
+
 fn Main() -> Int {
     let controller = SchedulerDecision(0, 64, 0, 0, 0, 8)
     Step(controller)

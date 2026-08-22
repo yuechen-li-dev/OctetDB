@@ -1,0 +1,85 @@
+{
+  "phases": [
+    {
+      "name": "steady_low",
+      "start_ns": 1787349454169363400,
+      "end_ns": 1787349456166417900,
+      "offered": 500,
+      "conflict_regime": "0"
+    },
+    {
+      "name": "ramp_up",
+      "start_ns": 1787349456166417900,
+      "end_ns": 1787349458165904000,
+      "offered": 2050,
+      "conflict_regime": "1"
+    },
+    {
+      "name": "sharp_burst",
+      "start_ns": 1787349458165904000,
+      "end_ns": 1787349459166078500,
+      "offered": 3500,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "sustained_overload",
+      "start_ns": 1787349459166078500,
+      "end_ns": 1787349461165928700,
+      "offered": 10000,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "ramp_down",
+      "start_ns": 1787349461165928700,
+      "end_ns": 1787349463163311600,
+      "offered": 2050,
+      "conflict_regime": "1"
+    },
+    {
+      "name": "hot_key_relief",
+      "start_ns": 1787349463163311600,
+      "end_ns": 1787349465159443600,
+      "offered": 500,
+      "conflict_regime": "0"
+    },
+    {
+      "name": "adversarial_burst",
+      "start_ns": 1787349465159443600,
+      "end_ns": 1787349465659283700,
+      "offered": 2250,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "adversarial_relief",
+      "start_ns": 1787349465659283700,
+      "end_ns": 1787349467155723400,
+      "offered": 375,
+      "conflict_regime": "0"
+    }
+  ],
+  "metrics": {
+    "samples": 13200,
+    "queue_persistence_mae": 1.054090909090909,
+    "queue_linear_mae": 1.2697825757575758,
+    "queue_persistence_bias": 0.007272727272727273,
+    "queue_linear_bias": 0.10827454545454546,
+    "queue_linear_wins": 3370,
+    "delay_samples": 6793,
+    "delay_persistence_mae_us": 342.3499190343,
+    "delay_linear_mae_us": 375.582953039894,
+    "delay_persistence_bias_us": -3.184307375239217,
+    "delay_linear_bias_us": -0.860444575298101,
+    "delay_linear_wins": 1831,
+    "raw_queue_variance": 20.63110243495767,
+    "filtered_queue_variance": 19.39544271025452,
+    "would_limit_reactive": 5,
+    "would_limit_predictive": 26,
+    "control_actions": 0,
+    "target_changes": 0,
+    "limited_ticks": 0,
+    "minimum_exposure": 0,
+    "maximum_exposure": 0,
+    "horizon_ticks": 2,
+    "tick_micros": 1000
+  }
+}

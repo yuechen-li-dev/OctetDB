@@ -24,6 +24,7 @@ func run() error {
 	dsn := flag.String("dsn", "postgres://dbsched:dbsched@localhost:54329/dbsched?sslmode=disable", "PostgreSQL connection string")
 	output := flag.String("output", "experiments/M0/runs/latest", "result directory")
 	quick := flag.Bool("quick", false, "run a short smoke experiment")
+	m4 := flag.Bool("m4", false, "run M4 nonstationary lanes and plant characterization")
 	lanes := flag.String("lanes", "conventional,batch,static,conflict,f0,priority,f1", "comma-separated lane order")
 	flag.Parse()
 	cfg := benchrun.DefaultConfig()
@@ -34,6 +35,18 @@ func run() error {
 			{Name: "normal_before", Duration: time.Second, Rate: 250},
 			{Name: "overload", Duration: 2 * time.Second, Rate: 2500, Regime: 2},
 			{Name: "normal_after", Duration: 2 * time.Second, Rate: 250},
+		}
+	}
+	if *m4 {
+		cfg.Phases = []benchrun.Phase{
+			{Name: "steady_low", Duration: 2 * time.Second, Rate: 250},
+			{Name: "ramp_up", Duration: 2 * time.Second, Rate: 250, EndRate: 1800, Regime: 1},
+			{Name: "sharp_burst", Duration: time.Second, Rate: 3500, Regime: 2},
+			{Name: "sustained_overload", Duration: 2 * time.Second, Rate: 5000, Regime: 2},
+			{Name: "ramp_down", Duration: 2 * time.Second, Rate: 1800, EndRate: 250, Regime: 1},
+			{Name: "hot_key_relief", Duration: 2 * time.Second, Rate: 250},
+			{Name: "adversarial_burst", Duration: 500 * time.Millisecond, Rate: 4500, Regime: 2},
+			{Name: "adversarial_relief", Duration: 1500 * time.Millisecond, Rate: 250},
 		}
 	}
 	if err := os.MkdirAll(*output, 0o755); err != nil {
@@ -58,6 +71,28 @@ func run() error {
 	}
 	if !correctness.Equal {
 		return fmt.Errorf("lane final states differ; see correctness.json")
+	}
+	if *m4 {
+		plant, err := benchrun.CapturePlantTrace(ctx, cfg, store)
+		if err != nil {
+			return fmt.Errorf("plant characterization: %w", err)
+		}
+		if err := benchrun.WritePlantTraceCSV(filepath.Join(*output, "plant-trace.csv"), plant); err != nil {
+			return err
+		}
+		if err := benchrun.WriteJSON(filepath.Join(*output, "plant-summary.json"), benchrun.SummarizePlantTrace(plant)); err != nil {
+			return err
+		}
+		observer, err := benchrun.CaptureObserverTrace(ctx, cfg, store)
+		if err != nil {
+			return fmt.Errorf("observer shadow trace: %w", err)
+		}
+		if err := benchrun.WriteObserverTraceCSV(filepath.Join(*output, "observer-trace.csv"), observer); err != nil {
+			return err
+		}
+		if err := benchrun.WriteJSON(filepath.Join(*output, "observer-summary.json"), benchrun.ObserverSummary{Phases: observer.Phases, Metrics: observer.Metrics}); err != nil {
+			return err
+		}
 	}
 	trace, err := benchrun.CaptureTrace(ctx, cfg, store)
 	if err != nil {

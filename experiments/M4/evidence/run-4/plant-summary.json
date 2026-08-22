@@ -1,0 +1,85 @@
+{
+  "event_count": 53539,
+  "phases": [
+    {
+      "name": "steady_low",
+      "completions": 499,
+      "dispatch_completion_p50_ms": 0.3475,
+      "dispatch_completion_p95_ms": 1.5371,
+      "dispatch_completion_p99_ms": 1.5945,
+      "queue_p95_ms": 3.0201,
+      "peak_pending": 2,
+      "peak_active": 2
+    },
+    {
+      "name": "ramp_up",
+      "completions": 1233,
+      "dispatch_completion_p50_ms": 0.0676,
+      "dispatch_completion_p95_ms": 1.5589,
+      "dispatch_completion_p99_ms": 1.6546,
+      "queue_p95_ms": 2.8158,
+      "peak_pending": 7,
+      "peak_active": 4
+    },
+    {
+      "name": "sharp_burst",
+      "completions": 2790,
+      "dispatch_completion_p50_ms": 1.0161,
+      "dispatch_completion_p95_ms": 2.0435,
+      "dispatch_completion_p99_ms": 2.2102,
+      "queue_p95_ms": 2.1899,
+      "peak_pending": 11,
+      "peak_active": 7
+    },
+    {
+      "name": "sustained_overload",
+      "completions": 7740,
+      "dispatch_completion_p50_ms": 1.0439,
+      "dispatch_completion_p95_ms": 2.076,
+      "dispatch_completion_p99_ms": 2.1515,
+      "queue_p95_ms": 9.0888,
+      "peak_pending": 30,
+      "peak_active": 8
+    },
+    {
+      "name": "ramp_down",
+      "completions": 1238,
+      "dispatch_completion_p50_ms": 0.0649,
+      "dispatch_completion_p95_ms": 1.535,
+      "dispatch_completion_p99_ms": 1.5779,
+      "queue_p95_ms": 3.032,
+      "peak_pending": 12,
+      "peak_active": 6
+    },
+    {
+      "name": "hot_key_relief",
+      "completions": 499,
+      "dispatch_completion_p50_ms": 0.3217,
+      "dispatch_completion_p95_ms": 1.5413,
+      "dispatch_completion_p99_ms": 1.5659,
+      "queue_p95_ms": 2.8587,
+      "peak_pending": 2,
+      "peak_active": 2
+    },
+    {
+      "name": "adversarial_burst",
+      "completions": 1772,
+      "dispatch_completion_p50_ms": 1.0567,
+      "dispatch_completion_p95_ms": 2.1874,
+      "dispatch_completion_p99_ms": 2.6991,
+      "queue_p95_ms": 7.8579,
+      "peak_pending": 23,
+      "peak_active": 8
+    },
+    {
+      "name": "adversarial_relief",
+      "completions": 389,
+      "dispatch_completion_p50_ms": 0.2907,
+      "dispatch_completion_p95_ms": 1.5515,
+      "dispatch_completion_p99_ms": 2.0976,
+      "queue_p95_ms": 3.0916,
+      "peak_pending": 14,
+      "peak_active": 5
+    }
+  ]
+}

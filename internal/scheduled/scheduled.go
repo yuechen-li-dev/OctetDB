@@ -33,36 +33,47 @@ type request struct {
 	agent        requestAgent
 }
 
-type batch struct{ requests []*request }
+type batch struct {
+	requests   []*request
+	dispatched time.Time
+	pending    int
+	active     int
+}
 
 type Scheduler struct {
-	store          *db.Store
-	capacity       int64
-	maxBatch       int
-	batchWait      time.Duration
-	workers        int
-	used           atomic.Int64
-	input          chan *request
-	jobs           chan batch
-	completions    chan completion
-	closed         chan struct{}
-	closeOnce      sync.Once
-	wg             sync.WaitGroup
-	plan           planLookup
-	plainBatch     bool
-	initialization InitializationMetrics
-	peakQueue      atomic.Int64
-	policyNanos    atomic.Int64
-	strategy       controlStrategy
-	parityPolicy   *__octFlow_Scheduler_PersistentParityController
-	fairPolicy     *__octFlow_Scheduler_PersistentFairController
-	goFairPolicy   conventionalPolicy
-	conflicts      conflictCounters
-	traceMu        sync.Mutex
-	traceEvents    []TraceEvent
-	traceEnabled   atomic.Bool
-	executeOne     func(context.Context, workload.Operation) error
-	executeBatch   func(context.Context, []workload.Operation) error
+	store                *db.Store
+	capacity             int64
+	maxBatch             int
+	batchWait            time.Duration
+	workers              int
+	used                 atomic.Int64
+	input                chan *request
+	jobs                 chan batch
+	completions          chan completion
+	closed               chan struct{}
+	closeOnce            sync.Once
+	wg                   sync.WaitGroup
+	plan                 planLookup
+	plainBatch           bool
+	initialization       InitializationMetrics
+	peakQueue            atomic.Int64
+	policyNanos          atomic.Int64
+	strategy             controlStrategy
+	parityPolicy         *__octFlow_Scheduler_PersistentParityController
+	fairPolicy           *__octFlow_Scheduler_PersistentFairController
+	goFairPolicy         conventionalPolicy
+	conflicts            conflictCounters
+	traceMu              sync.Mutex
+	traceEvents          []TraceEvent
+	traceEnabled         atomic.Bool
+	plantMu              sync.Mutex
+	plantEvents          []PlantEvent
+	observerMu           sync.Mutex
+	observerEvents       []ObserverEvent
+	observerSummary      ObserverMetrics
+	observerTraceEnabled atomic.Bool
+	executeOne           func(context.Context, workload.Operation) error
+	executeBatch         func(context.Context, []workload.Operation) error
 }
 
 func New(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
@@ -104,6 +115,21 @@ func NewPriority(store *db.Store, capacity, maxBatch, workers int, batchWait tim
 	return newScheduler(store, capacity, maxBatch, workers, batchWait, "priority")
 }
 
+func NewObserverShadow(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	validateStaticEnvelope(capacity, maxBatch, workers)
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "shadow")
+}
+
+func NewPlantCharacterization(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	validateStaticEnvelope(capacity, maxBatch, workers)
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "plant")
+}
+
+func NewReactiveObserver(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
+	validateStaticEnvelope(capacity, maxBatch, workers)
+	return newScheduler(store, capacity, maxBatch, workers, batchWait, "reactive")
+}
+
 func NewAgentic(store *db.Store, capacity, maxBatch, workers int, batchWait time.Duration) *Scheduler {
 	validateStaticEnvelope(capacity, maxBatch, workers)
 	return newScheduler(store, capacity, maxBatch, workers, batchWait, "agentic")
@@ -131,7 +157,7 @@ func newScheduler(store *db.Store, capacity, maxBatch, workers int, batchWait ti
 	var plan planLookup
 	if mode == "runtime" {
 		plan = buildRuntimePlan(capacity, maxBatch, workers)
-	} else if mode == "static" || mode == "conflict" || mode == "f0" || mode == "priority" || mode == "f1" || mode == "agentic" {
+	} else if mode == "static" || mode == "conflict" || mode == "f0" || mode == "priority" || mode == "plant" || mode == "shadow" || mode == "reactive" || mode == "f1" || mode == "agentic" {
 		plan = staticPlanLookup{plan: &staticExecutionPlan}
 	}
 	metadataTime := time.Since(metadataStarted)
@@ -162,6 +188,15 @@ func newScheduler(store *db.Store, capacity, maxBatch, workers int, batchWait ti
 		s.conflicts.controllerConstructions.Add(1)
 	case "priority":
 		s.strategy = controlPriority
+		s.conflicts.controllerConstructions.Add(1)
+	case "plant":
+		s.strategy = controlPlantCharacterization
+		s.conflicts.controllerConstructions.Add(1)
+	case "shadow":
+		s.strategy = controlObserverShadow
+		s.conflicts.controllerConstructions.Add(1)
+	case "reactive":
+		s.strategy = controlReactive
 		s.conflicts.controllerConstructions.Add(1)
 	case "f1":
 		s.strategy = controlUtility
@@ -251,6 +286,12 @@ func (s *Scheduler) PolicyCPUTime() time.Duration { return time.Duration(s.polic
 func (s *Scheduler) ConflictMetrics() ConflictMetrics { return s.conflicts.snapshot() }
 
 func (s *Scheduler) EnableTrace() { s.traceEnabled.Store(true) }
+
+func (s *Scheduler) PlantTrace() []PlantEvent {
+	s.plantMu.Lock()
+	defer s.plantMu.Unlock()
+	return append([]PlantEvent(nil), s.plantEvents...)
+}
 
 func (s *Scheduler) Trace() []TraceEvent {
 	s.traceMu.Lock()

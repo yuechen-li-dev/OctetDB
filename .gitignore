@@ -38,3 +38,12 @@ go.work.sum
 # Machine-specific benchmark scratch runs. Selected evidence is retained under
 # experiments/M0/evidence/.
 experiments/M0/runs/
+
+# M4 lifecycle/observer traces are reproducible local diagnostics. Retain
+# normalized summaries and selected lane results, not high-volume raw events.
+experiments/M4/**/plant-trace.*
+experiments/M4/**/observer-trace.*
+experiments/M4/**/trace.json
+experiments/M4/characterization/
+experiments/M4/shadow/
+experiments/M4/prediction/

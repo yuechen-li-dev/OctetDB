@@ -1,0 +1,85 @@
+{
+  "phases": [
+    {
+      "name": "steady_low",
+      "start_ns": 1787349610052820400,
+      "end_ns": 1787349612048970500,
+      "offered": 500,
+      "conflict_regime": "0"
+    },
+    {
+      "name": "ramp_up",
+      "start_ns": 1787349612048970500,
+      "end_ns": 1787349614048476200,
+      "offered": 2050,
+      "conflict_regime": "1"
+    },
+    {
+      "name": "sharp_burst",
+      "start_ns": 1787349614048476200,
+      "end_ns": 1787349615048489200,
+      "offered": 3500,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "sustained_overload",
+      "start_ns": 1787349615048489200,
+      "end_ns": 1787349617048295600,
+      "offered": 10000,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "ramp_down",
+      "start_ns": 1787349617048295600,
+      "end_ns": 1787349619045167100,
+      "offered": 2050,
+      "conflict_regime": "1"
+    },
+    {
+      "name": "hot_key_relief",
+      "start_ns": 1787349619045167100,
+      "end_ns": 1787349621041599200,
+      "offered": 500,
+      "conflict_regime": "0"
+    },
+    {
+      "name": "adversarial_burst",
+      "start_ns": 1787349621041599200,
+      "end_ns": 1787349621541383600,
+      "offered": 2250,
+      "conflict_regime": "2"
+    },
+    {
+      "name": "adversarial_relief",
+      "start_ns": 1787349621541383600,
+      "end_ns": 1787349623037940000,
+      "offered": 375,
+      "conflict_regime": "0"
+    }
+  ],
+  "metrics": {
+    "samples": 13199,
+    "queue_persistence_mae": 1.034775361769831,
+    "queue_linear_mae": 1.24825115539056,
+    "queue_persistence_bias": 0.0039396924009394655,
+    "queue_linear_bias": 0.10088862792635805,
+    "queue_linear_wins": 3308,
+    "delay_samples": 6784,
+    "delay_persistence_mae_us": 340.8004127358491,
+    "delay_linear_mae_us": 379.0053066037736,
+    "delay_persistence_bias_us": -1.9089033018867925,
+    "delay_linear_bias_us": 1.7712264150943395,
+    "delay_linear_wins": 1758,
+    "raw_queue_variance": 14.50305363223746,
+    "filtered_queue_variance": 13.302669916329176,
+    "would_limit_reactive": 0,
+    "would_limit_predictive": 16,
+    "control_actions": 0,
+    "target_changes": 0,
+    "limited_ticks": 0,
+    "minimum_exposure": 0,
+    "maximum_exposure": 0,
+    "horizon_ticks": 2,
+    "tick_micros": 1000
+  }
+}

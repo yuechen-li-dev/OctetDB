@@ -1,0 +1,87 @@
+{
+  "verdict": "Success",
+  "runs": 4,
+  "seed": 20260821,
+  "worker_maximum": 8,
+  "observer_tick_ms": 1,
+  "prediction_horizon_ms": 2,
+  "characterization": {
+    "steady_low_dispatch_completion_p95_ms": 1.534,
+    "sustained_overload_dispatch_completion_p95_ms": 2.075,
+    "steady_low_queue_p95_ms": 3.089,
+    "sustained_overload_queue_p95_ms": 8.869,
+    "sustained_overload_peak_pending_mean": 29.8
+  },
+  "filter": {
+    "queue_ema_alpha": 0.25,
+    "delay_ema_alpha": 0.25,
+    "rate_ema_alpha": 0.5,
+    "nominal_queue_delay_lag_ms": 3,
+    "raw_queue_variance": 23.39,
+    "filtered_queue_variance": 18.98,
+    "variance_reduction_percent": 18.9
+  },
+  "prediction": {
+    "queue_persistence_mae": 1.382,
+    "queue_linear_mae": 1.701,
+    "delay_persistence_mae_us": 342.4,
+    "delay_linear_mae_us": 380.6,
+    "linear_delay_threshold_true_positives": 0,
+    "linear_delay_threshold_false_positives": 9,
+    "linear_delay_threshold_false_negatives": 43,
+    "linear_delay_threshold_true_negatives": 5802,
+    "linear_delay_threshold_precision": 0,
+    "linear_delay_threshold_recall": 0,
+    "control_gate": "failed; K0 remained shadow-only"
+  },
+  "lanes": {
+    "H": {
+      "completed_mean": 21225,
+      "throughput_per_sec_mean": 1634.06,
+      "latency_p99_ms_mean": 12.540,
+      "queue_p99_ms_mean": 11.690,
+      "database_service_p99_ms_mean": 2.147,
+      "allocations_per_op_mean": 37.349
+    },
+    "J": {
+      "completed_mean": 21225,
+      "throughput_per_sec_mean": 1634.11,
+      "latency_p99_ms_mean": 14.392,
+      "queue_p99_ms_mean": 13.440,
+      "database_service_p99_ms_mean": 2.162,
+      "allocations_per_op_mean": 37.373,
+      "target_changes_mean": 2.0,
+      "limited_ticks_mean": 11.75,
+      "minimum_exposure": 6,
+      "maximum_exposure": 8
+    },
+    "K0": {
+      "completed_mean": 21225,
+      "throughput_per_sec_mean": 1634.11,
+      "latency_p99_ms_mean": 12.567,
+      "queue_p99_ms_mean": 11.652,
+      "database_service_p99_ms_mean": 2.132,
+      "allocations_per_op_mean": 37.323,
+      "authority": "shadow-only"
+    }
+  },
+  "stability": {
+    "recovery_seconds_mean": {
+      "H": 1.0,
+      "J": 1.0,
+      "K0": 1.0
+    },
+    "oscillation": "none observed; J changed target at most twice per run",
+    "persistent_underutilization": false,
+    "ownership_leaks": 0,
+    "double_releases": 0
+  },
+  "correctness": {
+    "all_four_runs_equal_final_postgresql_state": true,
+    "observer_microbenchmark_ns_per_update_range": [30.94, 31.93],
+    "observer_microbenchmark_allocations_per_update": 0
+  },
+  "shadow_hsfm_verdict": "Useful inspiration only",
+  "smith_predictor_verdict": "Not useful for databases in the measured scheduler/plant",
+  "next_recommendation": "Stop prediction work and retain H unchanged."
+}

@@ -53,6 +53,9 @@ const (
 	controlCentralized
 	controlParity
 	controlPriority
+	controlPlantCharacterization
+	controlObserverShadow
+	controlReactive
 	controlUtility
 	controlAgentic
 )
@@ -219,6 +222,36 @@ type TraceEvent struct {
 	Reason    string `json:"reason"`
 }
 
+// PlantEvent keeps physical scheduler facts separate from later observer
+// estimates and predictions. It is populated only when plant tracing is
+// explicitly enabled and is bounded to prevent diagnostics from becoming an
+// unbounded workload artifact.
+type PlantEvent struct {
+	AtNS            int64  `json:"at_ns"`
+	Kind            string `json:"kind"`
+	RequestID       int64  `json:"request_id,omitempty"`
+	CommandKind     string `json:"command_kind,omitempty"`
+	Pending         int    `json:"pending"`
+	Active          int    `json:"active"`
+	Admitted        int64  `json:"admitted"`
+	BatchSize       int    `json:"batch_size,omitempty"`
+	QueuedAtNS      int64  `json:"queued_at_ns,omitempty"`
+	DispatchedAtNS  int64  `json:"dispatched_at_ns,omitempty"`
+	StartedAtNS     int64  `json:"started_at_ns,omitempty"`
+	CompletedAtNS   int64  `json:"completed_at_ns,omitempty"`
+	QueueNS         int64  `json:"queue_ns,omitempty"`
+	ServiceNS       int64  `json:"service_ns,omitempty"`
+	DispatchDelayNS int64  `json:"dispatch_to_completion_ns,omitempty"`
+}
+
+func (s *Scheduler) recordPlant(event PlantEvent) {
+	s.plantMu.Lock()
+	defer s.plantMu.Unlock()
+	if len(s.plantEvents) < 65536 {
+		s.plantEvents = append(s.plantEvents, event)
+	}
+}
+
 type owner struct {
 	request    *request
 	acquiredAt time.Time
@@ -236,6 +269,11 @@ func (s *Scheduler) conflictDispatch() {
 	pending := make([]*request, 0, s.capacity)
 	owned := make(map[ConflictToken]owner, s.workers)
 	active := 0
+	exposure := s.workers
+	arrivalsSinceTick, completionsSinceTick := 0, 0
+	dispatchDelaySinceTick := int64(0)
+	var observer observerRuntime
+	observerActive := s.strategy == controlObserverShadow || s.strategy == controlReactive
 	tickEvery := s.batchWait / 2
 	if tickEvery <= 0 || tickEvery > time.Millisecond {
 		tickEvery = time.Millisecond
@@ -244,7 +282,7 @@ func (s *Scheduler) conflictDispatch() {
 	defer ticker.Stop()
 
 	dispatchReady := func(now time.Time) {
-		for active < s.workers {
+		for active < exposure {
 			index := s.selectRequest(pending, owned, now)
 			if index < 0 {
 				return
@@ -280,23 +318,40 @@ func (s *Scheduler) conflictDispatch() {
 				s.trace(r, "Dispatch", fmt.Sprintf("batch=%d", len(group)))
 			}
 			active++
-			s.jobs <- batch{requests: group}
+			if s.strategy == controlPlantCharacterization {
+				s.recordPlant(PlantEvent{AtNS: now.UnixNano(), Kind: "dispatch", RequestID: first.op.Sequence, CommandKind: first.op.Kind.String(), Pending: len(pending), Active: active, Admitted: s.used.Load(), BatchSize: len(group), QueuedAtNS: first.queuedAt.UnixNano(), DispatchedAtNS: now.UnixNano()})
+			}
+			s.jobs <- batch{requests: group, dispatched: now, pending: len(pending), active: active}
 		}
 	}
 
 	for {
 		select {
 		case r := <-s.input:
+			if observerActive {
+				arrivalsSinceTick++
+			}
 			r.token, _ = conflictToken(s.plan, r.op)
 			if s.strategy == controlAgentic {
 				r.agent = newRequestAgent()
 			}
 			pending = append(pending, r)
 			sort.SliceStable(pending, func(i, j int) bool { return pending[i].op.Sequence < pending[j].op.Sequence })
-			dispatchReady(time.Now())
+			now := time.Now()
+			if s.strategy == controlPlantCharacterization {
+				s.recordPlant(PlantEvent{AtNS: now.UnixNano(), Kind: "arrival", RequestID: r.op.Sequence, CommandKind: r.op.Kind.String(), Pending: len(pending), Active: active, Admitted: s.used.Load(), QueuedAtNS: r.queuedAt.UnixNano()})
+			}
+			dispatchReady(now)
 		case done := <-s.completions:
+			if observerActive {
+				completionsSinceTick += len(done.job.requests)
+				dispatchDelaySinceTick += done.finished.Sub(done.job.dispatched).Microseconds() * int64(len(done.job.requests))
+			}
 			active--
 			now := done.finished
+			if s.strategy == controlPlantCharacterization {
+				s.recordPlant(PlantEvent{AtNS: now.UnixNano(), Kind: "completion", RequestID: done.job.requests[0].op.Sequence, CommandKind: done.job.requests[0].op.Kind.String(), Pending: len(pending), Active: active, Admitted: s.used.Load(), BatchSize: len(done.job.requests), QueuedAtNS: done.job.requests[0].queuedAt.UnixNano(), DispatchedAtNS: done.job.dispatched.UnixNano(), StartedAtNS: done.started.UnixNano(), CompletedAtNS: done.finished.UnixNano(), QueueNS: done.started.Sub(done.job.requests[0].queuedAt).Nanoseconds(), ServiceNS: done.finished.Sub(done.started).Nanoseconds(), DispatchDelayNS: done.finished.Sub(done.job.dispatched).Nanoseconds()})
+			}
 			for _, r := range done.job.requests {
 				if r.token.valid() {
 					o, ok := owned[r.token]
@@ -331,6 +386,23 @@ func (s *Scheduler) conflictDispatch() {
 			}
 			dispatchReady(now)
 		case now := <-ticker.C:
+			if observerActive {
+				meanDelay := 0
+				if completionsSinceTick > 0 {
+					meanDelay = int(dispatchDelaySinceTick / int64(completionsSinceTick))
+				}
+				event := observer.update(len(pending), arrivalsSinceTick, completionsSinceTick, meanDelay)
+				event.AtNS = now.UnixNano()
+				if s.strategy == controlReactive {
+					previous := exposure
+					exposure = reactiveExposure(exposure, s.workers, event.PersistenceDelayMicros)
+					observer.recordControl(exposure, s.workers, exposure != previous)
+				}
+				s.recordObserver(event, observer.metrics())
+			}
+			if observerActive {
+				arrivalsSinceTick, completionsSinceTick, dispatchDelaySinceTick = 0, 0, 0
+			}
 			dispatchReady(now)
 		case <-s.closed:
 			if len(owned) != 0 {
@@ -448,7 +520,7 @@ func (s *Scheduler) selectRequest(pending []*request, owned map[ConflictToken]ow
 
 	started := time.Now()
 	chosen := rawAction
-	if s.strategy == controlPriority {
+	if s.strategy == controlPriority || s.strategy == controlPlantCharacterization || s.strategy == controlObserverShadow || s.strategy == controlReactive {
 		chosen = s.goFairPolicy.selectAction(rawAction, rawScore, aged.index >= 0, func(action int) bool {
 			return action == actionOldest || action == actionHighPriority || (action == actionBatch && batchCandidate.index >= 0)
 		}, &s.conflicts)

@@ -1,0 +1,63 @@
+{
+  "seed": 20260821,
+  "pool_size": 8,
+  "scheduler_capacity": 128,
+  "max_batch": 8,
+  "batch_wait": 2000000,
+  "request_timeout": 30000000000,
+  "warmup_operations": 5000,
+  "dataset_customers": 100,
+  "dataset_products": 20,
+  "phases": [
+    {
+      "name": "steady_low",
+      "duration": 2000000000,
+      "rate_per_second": 250,
+      "conflict_regime": 0
+    },
+    {
+      "name": "ramp_up",
+      "duration": 2000000000,
+      "rate_per_second": 250,
+      "end_rate_per_second": 1800,
+      "conflict_regime": 1
+    },
+    {
+      "name": "sharp_burst",
+      "duration": 1000000000,
+      "rate_per_second": 3500,
+      "conflict_regime": 2
+    },
+    {
+      "name": "sustained_overload",
+      "duration": 2000000000,
+      "rate_per_second": 5000,
+      "conflict_regime": 2
+    },
+    {
+      "name": "ramp_down",
+      "duration": 2000000000,
+      "rate_per_second": 1800,
+      "end_rate_per_second": 250,
+      "conflict_regime": 1
+    },
+    {
+      "name": "hot_key_relief",
+      "duration": 2000000000,
+      "rate_per_second": 250,
+      "conflict_regime": 0
+    },
+    {
+      "name": "adversarial_burst",
+      "duration": 500000000,
+      "rate_per_second": 4500,
+      "conflict_regime": 2
+    },
+    {
+      "name": "adversarial_relief",
+      "duration": 1500000000,
+      "rate_per_second": 250,
+      "conflict_regime": 0
+    }
+  ]
+}
