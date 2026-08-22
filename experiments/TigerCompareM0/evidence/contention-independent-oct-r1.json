@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T14:07:42.62931127Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "oct",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 5000,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 12001,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 79,
+    "elapsed_seconds": 0.127283695,
+    "operations_per_second": 39282.32913100142,
+    "batches_per_second": 620.6608002698224,
+    "p50_us": 1537.41,
+    "p95_us": 2050.822,
+    "p99_us": 2777.872,
+    "p99_9_us": 2777.872,
+    "max_us": 2777.872,
+    "go_runtime_cpu_seconds": 1.0240580000000001,
+    "process_cpu_seconds": 0.1,
+    "process_cpu_cores": 0.7856465826200285,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 41387384,
+      "allocations": 162518,
+      "bytes_per_op": 8277.4768,
+      "allocs_per_op": 32.5036,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.022814588999999996,
+      "gc_cpu_percent_of_go_capacity": 2.2278610195906867,
+      "pause_total_us": 49.435,
+      "max_pause_us": 49.435,
+      "live_heap_bytes": 32511864,
+      "heap_goal_bytes": 66305362,
+      "rss_bytes": 61734912
+    },
+    "storage": {
+      "wal_bytes": 2672196,
+      "wal_bytes_per_op": 534.4392,
+      "syncs": 80,
+      "commands_per_sync": 62.5
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "c311a47724fbf26b4eb7139c99c40dbdcdbef0108b1c71b3e996c3885ba27efd",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

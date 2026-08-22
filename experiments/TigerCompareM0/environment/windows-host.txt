@@ -1,0 +1,12 @@
+Host OS: Windows (Codex benchmark environment), Linux lanes run under WSL2
+CPU: AMD Ryzen 7 7700X, 8 physical cores / 16 logical processors
+Physical storage model: SHPP41-2000GM
+Physical storage size: 2,000,396,321,280 bytes
+Host filesystem: NTFS
+Linux benchmark filesystem: WSL2 native ext4 on /dev/sdf
+Memory exposed to WSL2: 15 GiB
+Swap exposed to WSL2: 4 GiB (unused during captured environment snapshot)
+
+The physical storage model was captured with Win32_DiskDrive. Linux-visible
+storage is a WSL2 virtual disk backed by that host device, so raw bare-metal
+NVMe conclusions are out of scope.

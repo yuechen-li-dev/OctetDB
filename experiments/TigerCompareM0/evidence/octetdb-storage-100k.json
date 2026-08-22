@@ -1,0 +1,113 @@
+{
+  "generated_at": "2026-08-22T13:44:31Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "operations": 100000,
+  "flow_scenarios": [
+    {
+      "name": "accepted_create",
+      "full_checkpoint_bytes": 782,
+      "delta_bytes": 58,
+      "delta_to_full_ratio": 0.0741687979539642
+    },
+    {
+      "name": "one_shot_turn_counter",
+      "full_checkpoint_bytes": 780,
+      "delta_bytes": 54,
+      "delta_to_full_ratio": 0.06923076923076923
+    },
+    {
+      "name": "rejected_command",
+      "full_checkpoint_bytes": 784,
+      "delta_bytes": 55,
+      "delta_to_full_ratio": 0.07015306122448979
+    },
+    {
+      "name": "begin_transfer",
+      "full_checkpoint_bytes": 781,
+      "delta_bytes": 57,
+      "delta_to_full_ratio": 0.07298335467349552
+    },
+    {
+      "name": "confirm_board_change",
+      "full_checkpoint_bytes": 781,
+      "delta_bytes": 56,
+      "delta_to_full_ratio": 0.07170294494238157
+    }
+  ],
+  "flow_wal_ablation": [
+    {
+      "name": "full_checkpoint_wal",
+      "operations": 100000,
+      "wal_bytes": 146129737,
+      "wal_bytes_per_op": 1461.29737,
+      "flow_delta_bytes": 0,
+      "flow_bytes_per_op": 0,
+      "dedupe_bytes": 2075439,
+      "snapshot_bytes": 11226037,
+      "snapshot_pause_ms": 151.243,
+      "recovery_ms": 80.541,
+      "recovery_allocs": 203424,
+      "recovery_bytes": 105674520,
+      "dedupe_decode_ms": 32.81,
+      "agents": 128,
+      "checkpoint_bytes": 101032,
+      "hash": "95341cbd3150907ddda2c30027755891f9371474e5c089206a7e8ee94229c3ca"
+    },
+    {
+      "name": "semantic_delta_wal",
+      "operations": 100000,
+      "wal_bytes": 48665305,
+      "wal_bytes_per_op": 486.65305,
+      "flow_delta_bytes": 5726957,
+      "flow_bytes_per_op": 57.26957,
+      "dedupe_bytes": 2075439,
+      "snapshot_bytes": 11226037,
+      "snapshot_pause_ms": 112.418,
+      "recovery_ms": 76.868,
+      "recovery_allocs": 203419,
+      "recovery_bytes": 105663528,
+      "dedupe_decode_ms": 26.567,
+      "agents": 128,
+      "checkpoint_bytes": 101032,
+      "hash": "95341cbd3150907ddda2c30027755891f9371474e5c089206a7e8ee94229c3ca"
+    }
+  ],
+  "dedupe_snapshot_ablation": [
+    {
+      "name": "json_dedupe_snapshot",
+      "operations": 100000,
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "flow_delta_bytes": 0,
+      "flow_bytes_per_op": 0,
+      "dedupe_bytes": 17275072,
+      "snapshot_bytes": 25733844,
+      "snapshot_pause_ms": 203.023,
+      "recovery_ms": 149.285,
+      "recovery_allocs": 203184,
+      "recovery_bytes": 149709648,
+      "dedupe_decode_ms": 20.399,
+      "agents": 128,
+      "checkpoint_bytes": 101032,
+      "hash": "95341cbd3150907ddda2c30027755891f9371474e5c089206a7e8ee94229c3ca"
+    },
+    {
+      "name": "compact_dedupe_snapshot",
+      "operations": 100000,
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "flow_delta_bytes": 0,
+      "flow_bytes_per_op": 0,
+      "dedupe_bytes": 2075439,
+      "snapshot_bytes": 11226037,
+      "snapshot_pause_ms": 101.632,
+      "recovery_ms": 78.192,
+      "recovery_allocs": 203415,
+      "recovery_bytes": 105658896,
+      "dedupe_decode_ms": 28.506,
+      "agents": 128,
+      "checkpoint_bytes": 101032,
+      "hash": "95341cbd3150907ddda2c30027755891f9371474e5c089206a7e8ee94229c3ca"
+    }
+  ]
+}

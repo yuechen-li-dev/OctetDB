@@ -1,0 +1,222 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: cpu
+Time: 2026-08-22 07:12:13 PDT
+Duration: 1.55s, Total samples = 1.12s (72.08%)
+Showing nodes accounting for 1.12s, 100% of 1.12s total
+      flat  flat%   sum%        cum   cum%
+     0.22s 19.64% 19.64%      0.22s 19.64%  internal/runtime/syscall/linux.Syscall6
+     0.12s 10.71% 30.36%      0.12s 10.71%  runtime.futex
+     0.05s  4.46% 34.82%      0.13s 11.61%  encoding/json/v2.makeStructArshaler.func2
+     0.04s  3.57% 38.39%      0.55s 49.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+     0.04s  3.57% 41.96%      0.04s  3.57%  runtime.spanClass.sizeclass (inline)
+     0.03s  2.68% 44.64%      0.04s  3.57%  encoding/json/jsontext.(*encoderState).reset
+     0.03s  2.68% 47.32%      0.03s  2.68%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+     0.02s  1.79% 49.11%      0.02s  1.79%  encoding/json/internal/jsonwire.AppendQuote
+     0.02s  1.79% 50.89%      0.03s  2.68%  runtime.(*unwinder).resolveInternal
+     0.02s  1.79% 52.68%      0.02s  1.79%  runtime.(*waitq).dequeue (inline)
+     0.02s  1.79% 54.46%      0.02s  1.79%  runtime.memmove
+     0.02s  1.79% 56.25%      0.07s  6.25%  runtime.scanObject
+     0.02s  1.79% 58.04%      0.06s  5.36%  runtime.tryDeferToSpanScan
+     0.01s  0.89% 58.93%      0.01s  0.89%  encoding/base64.(*Encoding).EncodedLen (inline)
+     0.01s  0.89% 59.82%      0.01s  0.89%  encoding/json/internal/jsonflags.Flags.Get (inline)
+     0.01s  0.89% 60.71%      0.01s  0.89%  encoding/json/internal/jsonopts.(*Struct).Join
+     0.01s  0.89% 61.61%      0.01s  0.89%  encoding/json/internal/jsonwire.ConsumeSimpleString (inline)
+     0.01s  0.89% 62.50%      0.02s  1.79%  encoding/json/jsontext.(*encoderState).reformatObject
+     0.01s  0.89% 63.39%      0.27s 24.11%  encoding/json/v2.Marshal
+     0.01s  0.89% 64.29%      0.02s  1.79%  encoding/json/v2.makeUintArshaler.func1
+     0.01s  0.89% 65.18%      0.21s 18.75%  encoding/json/v2.marshalEncode
+     0.01s  0.89% 66.07%      0.03s  2.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+     0.01s  0.89% 66.96%      0.03s  2.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*lockTable).acquire
+     0.01s  0.89% 67.86%      0.13s 11.61%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.logRecord.MarshalJSON
+     0.01s  0.89% 68.75%      0.03s  2.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.tokensFor
+     0.01s  0.89% 69.64%      0.01s  0.89%  internal/runtime/maps.ctrlGroup.matchEmptyOrDeleted (inline)
+     0.01s  0.89% 70.54%      0.01s  0.89%  internal/strconv.AppendUint
+     0.01s  0.89% 71.43%      0.03s  2.68%  internal/sync.(*HashTrieMap[go.shape.interface {},go.shape.interface {}]).Load
+     0.01s  0.89% 72.32%      0.01s  0.89%  internal/sync.(*entry[go.shape.interface {},go.shape.interface {}]).lookup (inline)
+     0.01s  0.89% 73.21%      0.01s  0.89%  main.makeTransfers
+     0.01s  0.89% 74.11%      0.01s  0.89%  main.run.func3
+     0.01s  0.89% 75.00%      0.01s  0.89%  memeqbody
+     0.01s  0.89% 75.89%      0.01s  0.89%  reflect.Value.lenNonSlice
+     0.01s  0.89% 76.79%      0.01s  0.89%  reflect.add (inline)
+     0.01s  0.89% 77.68%      0.01s  0.89%  runtime.(*guintptr).cas (inline)
+     0.01s  0.89% 78.57%      0.01s  0.89%  runtime.(*mheap).allocNeedsZero
+     0.01s  0.89% 79.46%      0.01s  0.89%  runtime.(*mspan).moveInlineMarks
+     0.01s  0.89% 80.36%      0.01s  0.89%  runtime.(*mspan).refillAllocCache
+     0.01s  0.89% 81.25%      0.01s  0.89%  runtime.(*spanSet).push
+     0.01s  0.89% 82.14%      0.01s  0.89%  runtime.binarySearchTree
+     0.01s  0.89% 83.04%      0.01s  0.89%  runtime.cansemacquire (inline)
+     0.01s  0.89% 83.93%      0.01s  0.89%  runtime.casgstatus
+     0.01s  0.89% 84.82%      0.01s  0.89%  runtime.chanrecv
+     0.01s  0.89% 85.71%      0.01s  0.89%  runtime.findObject
+     0.01s  0.89% 86.61%      0.01s  0.89%  runtime.getMCache (inline)
+     0.01s  0.89% 87.50%      0.01s  0.89%  runtime.mallocgcSmallNoScanSC4
+     0.01s  0.89% 88.39%      0.01s  0.89%  runtime.mallocgcSmallScanNoHeaderSC5
+     0.01s  0.89% 89.29%      0.02s  1.79%  runtime.mapaccess1_fast64
+     0.01s  0.89% 90.18%      0.02s  1.79%  runtime.mapaccess2_faststr
+     0.01s  0.89% 91.07%      0.01s  0.89%  runtime.memclrNoHeapPointers
+     0.01s  0.89% 91.96%      0.01s  0.89%  runtime.nextFreeFast (inline)
+     0.01s  0.89% 92.86%      0.02s  1.79%  runtime.procyield (inline)
+     0.01s  0.89% 93.75%      0.01s  0.89%  runtime.procyieldAsm
+     0.01s  0.89% 94.64%      0.01s  0.89%  runtime.readvarint (inline)
+     0.01s  0.89% 95.54%      0.03s  2.68%  runtime.scanblock
+     0.01s  0.89% 96.43%      0.01s  0.89%  runtime.typePointers.next
+     0.01s  0.89% 97.32%      0.09s  8.04%  runtime.wakep
+     0.01s  0.89% 98.21%      0.01s  0.89%  sync/atomic.(*Bool).Load (inline)
+     0.01s  0.89% 99.11%      0.01s  0.89%  sync/atomic.(*Pointer[go.shape.struct { internal/sync.isEntry bool }]).Load (inline)
+     0.01s  0.89%   100%      0.23s 20.54%  syscall.RawSyscall6
+         0     0%   100%      0.02s  1.79%  _.goready.func1
+         0     0%   100%      0.01s  0.89%  bytes.Clone (inline)
+         0     0%   100%      0.01s  0.89%  encoding/base64.(*Encoding).AppendEncode
+         0     0%   100%      0.27s 24.11%  encoding/json.Marshal (inline)
+         0     0%   100%      0.02s  1.79%  encoding/json/jsontext.(*Encoder).WriteValue (inline)
+         0     0%   100%      0.01s  0.89%  encoding/json/jsontext.(*encoderState).AppendRaw
+         0     0%   100%      0.02s  1.79%  encoding/json/jsontext.(*encoderState).WriteValue
+         0     0%   100%      0.02s  1.79%  encoding/json/jsontext.(*encoderState).reformatValue
+         0     0%   100%      0.04s  3.57%  encoding/json/jsontext.export.GetBufferedEncoder (inline)
+         0     0%   100%      0.04s  3.57%  encoding/json/jsontext.getBufferedEncoder
+         0     0%   100%      0.01s  0.89%  encoding/json/v2.isLegacyEmpty
+         0     0%   100%      0.03s  2.68%  encoding/json/v2.lookupArshaler
+         0     0%   100%      0.01s  0.89%  encoding/json/v2.makeBytesArshaler.func1
+         0     0%   100%      0.01s  0.89%  encoding/json/v2.makeBytesArshaler.func1.1
+         0     0%   100%      0.01s  0.89%  encoding/json/v2.makeIntArshaler.func1
+         0     0%   100%      0.15s 13.39%  encoding/json/v2.makeMethodArshaler.func3
+         0     0%   100%      0.02s  1.79%  encoding/json/v2.makeStringArshaler.func1
+         0     0%   100%      0.05s  4.46%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%      0.01s  0.89%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+         0     0%   100%      0.22s 19.64%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+         0     0%   100%      0.15s 13.39%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).processGoM1
+         0     0%   100%      0.03s  2.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+         0     0%   100%      0.22s 19.64%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0%   100%      0.55s 49.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%      0.41s 36.61%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*m1Storage).appendGroup
+         0     0%   100%      0.01s  0.89%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*m1Storage).closeSegment
+         0     0%   100%      0.18s 16.07%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.frame
+         0     0%   100%      0.07s  6.25%  internal/poll.(*FD).Fsync
+         0     0%   100%      0.07s  6.25%  internal/poll.(*FD).Fsync.func1 (inline)
+         0     0%   100%      0.16s 14.29%  internal/poll.(*FD).Write
+         0     0%   100%      0.07s  6.25%  internal/poll.ignoringEINTR (inline)
+         0     0%   100%      0.16s 14.29%  internal/poll.ignoringEINTRIO (inline)
+         0     0%   100%      0.01s  0.89%  internal/reflectlite.Swapper
+         0     0%   100%      0.01s  0.89%  internal/runtime/maps.(*table).rehash
+         0     0%   100%      0.01s  0.89%  internal/runtime/maps.(*table).split
+         0     0%   100%      0.01s  0.89%  internal/runtime/maps.(*table).uncheckedPutSlot
+         0     0%   100%      0.01s  0.89%  internal/strconv.AppendInt
+         0     0%   100%      0.01s  0.89%  internal/sync.(*Mutex).Lock (inline)
+         0     0%   100%      0.01s  0.89%  internal/sync.(*Mutex).lockSlow
+         0     0%   100%      0.01s  0.89%  internal/sync.runtime_SemacquireMutex
+         0     0%   100%      0.05s  4.46%  main.(*octExecutor).executeBatch.func1
+         0     0%   100%      0.02s  1.79%  main.main
+         0     0%   100%      0.02s  1.79%  main.run
+         0     0%   100%      0.07s  6.25%  os.(*File).Sync
+         0     0%   100%      0.16s 14.29%  os.(*File).Write
+         0     0%   100%      0.16s 14.29%  os.(*File).write (inline)
+         0     0%   100%      0.01s  0.89%  reflect.New
+         0     0%   100%      0.01s  0.89%  reflect.Value.Field
+         0     0%   100%      0.01s  0.89%  reflect.Value.Len (inline)
+         0     0%   100%      0.01s  0.89%  reflect.unsafe_New
+         0     0%   100%      0.03s  2.68%  runtime.(*mcache).nextFree
+         0     0%   100%      0.01s  0.89%  runtime.(*mcache).prepareForSweep
+         0     0%   100%      0.03s  2.68%  runtime.(*mcache).refill
+         0     0%   100%      0.01s  0.89%  runtime.(*mcache).releaseAll
+         0     0%   100%      0.03s  2.68%  runtime.(*mcentral).cacheSpan
+         0     0%   100%      0.02s  1.79%  runtime.(*mcentral).grow
+         0     0%   100%      0.01s  0.89%  runtime.(*mcentral).uncacheSpan
+         0     0%   100%      0.01s  0.89%  runtime.(*mheap).alloc
+         0     0%   100%      0.01s  0.89%  runtime.(*mheap).alloc.func1
+         0     0%   100%      0.01s  0.89%  runtime.(*mheap).allocSpan
+         0     0%   100%      0.01s  0.89%  runtime.(*mheap).initSpan
+         0     0%   100%      0.01s  0.89%  runtime.(*mspan).initHeapBits
+         0     0%   100%      0.01s  0.89%  runtime.(*stackScanState).buildIndex (inline)
+         0     0%   100%      0.02s  1.79%  runtime.(*sweepLocked).sweep
+         0     0%   100%      0.01s  0.89%  runtime.(*unwinder).init (inline)
+         0     0%   100%      0.01s  0.89%  runtime.(*unwinder).initAt
+         0     0%   100%      0.02s  1.79%  runtime.(*unwinder).next
+         0     0%   100%      0.01s  0.89%  runtime.(*wbBuf).get2 (inline)
+         0     0%   100%      0.01s  0.89%  runtime.bgsweep
+         0     0%   100%      0.01s  0.89%  runtime.chanrecv1
+         0     0%   100%      0.06s  5.36%  runtime.chansend
+         0     0%   100%      0.03s  2.68%  runtime.chansend1
+         0     0%   100%      0.01s  0.89%  runtime.convTnoptr
+         0     0%   100%      0.02s  1.79%  runtime.copystack
+         0     0%   100%      0.01s  0.89%  runtime.execute
+         0     0%   100%      0.03s  2.68%  runtime.findRunnable
+         0     0%   100%      0.01s  0.89%  runtime.funcspdelta (inline)
+         0     0%   100%      0.04s  3.57%  runtime.futexsleep
+         0     0%   100%      0.08s  7.14%  runtime.futexwakeup
+         0     0%   100%      0.01s  0.89%  runtime.gcAssistAlloc
+         0     0%   100%      0.01s  0.89%  runtime.gcAssistAlloc.func2
+         0     0%   100%      0.01s  0.89%  runtime.gcAssistAlloc1
+         0     0%   100%      0.15s 13.39%  runtime.gcBgMarkWorker
+         0     0%   100%      0.14s 12.50%  runtime.gcBgMarkWorker.func2
+         0     0%   100%      0.14s 12.50%  runtime.gcDrain
+         0     0%   100%      0.06s  5.36%  runtime.gcDrainMarkWorkerDedicated (inline)
+         0     0%   100%      0.08s  7.14%  runtime.gcDrainMarkWorkerIdle (inline)
+         0     0%   100%      0.01s  0.89%  runtime.gcDrainN
+         0     0%   100%      0.01s  0.89%  runtime.gcMarkDone
+         0     0%   100%      0.01s  0.89%  runtime.gcMarkTermination
+         0     0%   100%      0.01s  0.89%  runtime.gcMarkTermination.func3
+         0     0%   100%      0.05s  4.46%  runtime.goexit0
+         0     0%   100%      0.02s  1.79%  runtime.goready (inline)
+         0     0%   100%      0.03s  2.68%  runtime.growslice
+         0     0%   100%      0.03s  2.68%  runtime.lock (inline)
+         0     0%   100%      0.03s  2.68%  runtime.lock2
+         0     0%   100%      0.03s  2.68%  runtime.lockWithRank (inline)
+         0     0%   100%      0.03s  2.68%  runtime.mPark (inline)
+         0     0%   100%      0.02s  1.79%  runtime.main
+         0     0%   100%      0.01s  0.89%  runtime.makechan
+         0     0%   100%      0.02s  1.79%  runtime.makeslice
+         0     0%   100%      0.07s  6.25%  runtime.mallocgc
+         0     0%   100%      0.01s  0.89%  runtime.mallocgcSmallNoScanSC6
+         0     0%   100%      0.01s  0.89%  runtime.mallocgcSmallNoscan
+         0     0%   100%      0.03s  2.68%  runtime.mallocgcSmallScanNoHeader
+         0     0%   100%      0.01s  0.89%  runtime.mallocgcSmallScanNoHeaderSC2
+         0     0%   100%      0.01s  0.89%  runtime.mallocgcSmallScanSlowPath
+         0     0%   100%      0.01s  0.89%  runtime.mapaccess2_fast64
+         0     0%   100%      0.03s  2.68%  runtime.mapassign_faststr
+         0     0%   100%      0.08s  7.14%  runtime.markroot
+         0     0%   100%      0.08s  7.14%  runtime.markroot.func1
+         0     0%   100%      0.12s 10.71%  runtime.mcall
+         0     0%   100%      0.02s  1.79%  runtime.newobject
+         0     0%   100%      0.01s  0.89%  runtime.newstack
+         0     0%   100%      0.03s  2.68%  runtime.notesleep
+         0     0%   100%      0.08s  7.14%  runtime.notewakeup
+         0     0%   100%      0.07s  6.25%  runtime.park_m
+         0     0%   100%      0.01s  0.89%  runtime.pcvalue
+         0     0%   100%      0.01s  0.89%  runtime.procresize
+         0     0%   100%      0.02s  1.79%  runtime.ready
+         0     0%   100%      0.08s  7.14%  runtime.resetspinning
+         0     0%   100%      0.01s  0.89%  runtime.runqput
+         0     0%   100%      0.03s  2.68%  runtime.scanframeworker
+         0     0%   100%      0.08s  7.14%  runtime.scanstack
+         0     0%   100%      0.12s 10.71%  runtime.schedule
+         0     0%   100%      0.03s  2.68%  runtime.selectnbsend
+         0     0%   100%      0.01s  0.89%  runtime.semacquire1
+         0     0%   100%      0.01s  0.89%  runtime.semasleep
+         0     0%   100%      0.03s  2.68%  runtime.send
+         0     0%   100%      0.01s  0.89%  runtime.sendDirect
+         0     0%   100%      0.01s  0.89%  runtime.shrinkstack
+         0     0%   100%      0.01s  0.89%  runtime.stackalloc
+         0     0%   100%      0.01s  0.89%  runtime.stackcacherefill
+         0     0%   100%      0.01s  0.89%  runtime.stackcacherelease
+         0     0%   100%      0.01s  0.89%  runtime.stackfree
+         0     0%   100%      0.01s  0.89%  runtime.startTheWorldWithSema
+         0     0%   100%      0.08s  7.14%  runtime.startm
+         0     0%   100%      0.01s  0.89%  runtime.step
+         0     0%   100%      0.03s  2.68%  runtime.stopm
+         0     0%   100%      0.01s  0.89%  runtime.sweepone
+         0     0%   100%      0.20s 17.86%  runtime.systemstack
+         0     0%   100%      0.01s  0.89%  runtime.typeBitsBulkBarrier
+         0     0%   100%      0.01s  0.89%  runtime.wbBufFlush
+         0     0%   100%      0.01s  0.89%  runtime.wbBufFlush.func1
+         0     0%   100%      0.01s  0.89%  runtime.wbBufFlush1
+         0     0%   100%      0.02s  1.79%  sort.Slice
+         0     0%   100%      0.01s  0.89%  sort.partition_func
+         0     0%   100%      0.01s  0.89%  sort.pdqsort_func
+         0     0%   100%      0.01s  0.89%  strconv.AppendInt (inline)
+         0     0%   100%      0.03s  2.68%  sync.(*Map).Load (inline)
+         0     0%   100%      0.01s  0.89%  sync.(*Mutex).Lock (inline)
+         0     0%   100%      0.07s  6.25%  syscall.Fsync
+         0     0%   100%      0.23s 20.54%  syscall.Syscall
+         0     0%   100%      0.16s 14.29%  syscall.Write (inline)
+         0     0%   100%      0.16s 14.29%  syscall.write

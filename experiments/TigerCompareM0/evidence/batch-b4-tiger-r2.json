@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T14:05:41.631454962Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "Go 0.17.9 client over loopback TCP; one production-mode TigerBeetle 0.17.9 replica",
+    "operations": 5000,
+    "accounts": 1000,
+    "offered_batch": 4,
+    "seed": 8170,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 1250,
+    "elapsed_seconds": 5.732227837,
+    "operations_per_second": 872.261211902,
+    "batches_per_second": 218.0653029755,
+    "p50_us": 5202.57,
+    "p95_us": 5395.315,
+    "p99_us": 7862.47,
+    "p99_9_us": 28059.81,
+    "max_us": 44283.397,
+    "go_runtime_cpu_seconds": 0,
+    "process_cpu_seconds": 0.24,
+    "process_cpu_cores": 0.041868538171295995,
+    "external_process": {
+      "pid": 32694,
+      "cpu_seconds": 0.2600000000000001,
+      "utilized_cores": 0.04535758301890402,
+      "rss_bytes": 3085533184
+    },
+    "gc": {
+      "allocated_bytes": 1351424,
+      "allocations": 8869,
+      "bytes_per_op": 270.2848,
+      "allocs_per_op": 1.7738,
+      "gc_cycles": 0,
+      "gc_cpu_seconds": 0,
+      "gc_cpu_percent_of_go_capacity": 0,
+      "pause_total_us": 0,
+      "max_pause_us": 0,
+      "live_heap_bytes": 438792,
+      "heap_goal_bytes": 4194304,
+      "rss_bytes": 33423360
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "c311a47724fbf26b4eb7139c99c40dbdcdbef0108b1c71b3e996c3885ba27efd",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

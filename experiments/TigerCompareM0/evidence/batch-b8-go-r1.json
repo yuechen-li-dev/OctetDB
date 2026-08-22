@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T14:06:01.936289584Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "go",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 5000,
+    "accounts": 1000,
+    "offered_batch": 8,
+    "seed": 8209,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 625,
+    "elapsed_seconds": 0.743912432,
+    "operations_per_second": 6721.2211880335935,
+    "batches_per_second": 840.1526485041992,
+    "p50_us": 1109.16,
+    "p95_us": 1430.978,
+    "p99_us": 1590.517,
+    "p99_9_us": 2145.715,
+    "max_us": 2145.715,
+    "go_runtime_cpu_seconds": 10.051913312,
+    "process_cpu_seconds": 0.23,
+    "process_cpu_cores": 0.30917617464954533,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 24118848,
+      "allocations": 138375,
+      "bytes_per_op": 4823.7696,
+      "allocs_per_op": 27.675,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.005458588,
+      "gc_cpu_percent_of_go_capacity": 0.054303970105706374,
+      "pause_total_us": 56.149,
+      "max_pause_us": 56.149,
+      "live_heap_bytes": 30583216,
+      "heap_goal_bytes": 62195874,
+      "rss_bytes": 50630656
+    },
+    "storage": {
+      "wal_bytes": 2471436,
+      "wal_bytes_per_op": 494.2872,
+      "syncs": 626,
+      "commands_per_sync": 7.987220447284345
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "c311a47724fbf26b4eb7139c99c40dbdcdbef0108b1c71b3e996c3885ba27efd",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

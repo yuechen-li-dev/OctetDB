@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T14:06:44.838759394Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "Go 0.17.9 client over loopback TCP; one production-mode TigerBeetle 0.17.9 replica",
+    "operations": 25600,
+    "accounts": 1000,
+    "offered_batch": 128,
+    "seed": 9410,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 25600,
+    "batches": 200,
+    "elapsed_seconds": 0.340045441,
+    "operations_per_second": 75284.05593298338,
+    "batches_per_second": 588.1566869764326,
+    "p50_us": 1578.46,
+    "p95_us": 1793.856,
+    "p99_us": 5025.839,
+    "p99_9_us": 6823.214,
+    "max_us": 6823.214,
+    "go_runtime_cpu_seconds": 3.0683656960000008,
+    "process_cpu_seconds": 0.03,
+    "process_cpu_cores": 0.0882235030464649,
+    "external_process": {
+      "pid": 34155,
+      "cpu_seconds": 0.05999999999999994,
+      "utilized_cores": 0.17644700609292963,
+      "rss_bytes": 3085447168
+    },
+    "gc": {
+      "allocated_bytes": 5738408,
+      "allocations": 1535,
+      "bytes_per_op": 224.1565625,
+      "allocs_per_op": 0.0599609375,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.000594439,
+      "gc_cpu_percent_of_go_capacity": 0.019373147104822797,
+      "pause_total_us": 41.239,
+      "max_pause_us": 41.239,
+      "live_heap_bytes": 831744,
+      "heap_goal_bytes": 4194304,
+      "rss_bytes": 36306944
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 25600,
+      "rejected": 0,
+      "state_digest": "9e25071d89322dca02348414bb6d68e7b32a7409b8a0628944ae1d966b683705",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

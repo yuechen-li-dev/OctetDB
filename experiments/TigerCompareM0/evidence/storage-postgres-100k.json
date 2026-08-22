@@ -1,0 +1,67 @@
+{
+  "generated_at": "2026-08-22T13:59:03.153147817Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "postgres",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst; each logical transfer is a separate SQL transaction",
+    "topology": "Go pgx over loopback TCP; native PostgreSQL 18.6",
+    "operations": 100000,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 19000,
+    "duration": "0s"
+  },
+  "result": {
+    "operations": 100000,
+    "batches": 1563,
+    "elapsed_seconds": 13.649452314,
+    "operations_per_second": 7326.301282977617,
+    "batches_per_second": 114.51008905294016,
+    "p50_us": 8585.509,
+    "p95_us": 9307.639,
+    "p99_us": 10149.446,
+    "p99_9_us": 29484.495,
+    "max_us": 30302.865,
+    "go_runtime_cpu_seconds": 217.259337616,
+    "process_cpu_seconds": 46.43,
+    "process_cpu_cores": 3.4016016856865074,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 386063448,
+      "allocations": 9837731,
+      "bytes_per_op": 3860.63448,
+      "allocs_per_op": 98.37731,
+      "gc_cycles": 197,
+      "gc_cpu_seconds": 0.621501336,
+      "gc_cpu_percent_of_go_capacity": 0.28606426900669596,
+      "pause_total_us": 47738.823,
+      "max_pause_us": 552.328,
+      "live_heap_bytes": 3491728,
+      "heap_goal_bytes": 7379306,
+      "rss_bytes": 24211456
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 100000,
+      "rejected": 0,
+      "state_digest": "18576ae8e6201d01636379198b03a187369e2819aa1965811bd1d0846d71f190",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

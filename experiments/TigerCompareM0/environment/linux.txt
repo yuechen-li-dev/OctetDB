@@ -1,0 +1,177 @@
+2026-08-22T07:12:52-07:00
+Linux DESKTOP-AKFI9N2 6.6.87.2-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025 x86_64 GNU/Linux
+NAME="Arch Linux"
+PRETTY_NAME="Arch Linux"
+ID=arch
+BUILD_ID=rolling
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://archlinux.org/"
+DOCUMENTATION_URL="https://wiki.archlinux.org/"
+SUPPORT_URL="https://bbs.archlinux.org/"
+BUG_REPORT_URL="https://gitlab.archlinux.org/groups/archlinux/-/issues"
+PRIVACY_POLICY_URL="https://terms.archlinux.org/docs/privacy-policy/"
+LOGO=archlinux-logo
+Architecture:                         x86_64
+CPU op-mode(s):                       32-bit, 64-bit
+Address sizes:                        48 bits physical, 48 bits virtual
+Byte Order:                           Little Endian
+CPU(s):                               16
+On-line CPU(s) list:                  0-15
+Vendor ID:                            AuthenticAMD
+Model name:                           AMD Ryzen 7 7700X 8-Core Processor
+CPU family:                           25
+Model:                                97
+Thread(s) per core:                   2
+Core(s) per socket:                   8
+Socket(s):                            1
+Stepping:                             2
+Microcode version:                    0xffffffff
+BogoMIPS:                             8982.92
+Flags:                                fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ht syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid tsc_known_freq pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm cmp_legacy svm cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext perfctr_core ssbd ibrs ibpb stibp vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx512_bf16 clzero xsaveerptr arat npt nrip_save tsc_scale vmcb_clean flushbyasid decodeassists pausefilter pfthreshold v_vmsave_vmload avx512vbmi umip avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid fsrm
+Virtualization:                       AMD-V
+Hypervisor vendor:                    Microsoft
+Virtualization type:                  full
+L1d cache:                            256 KiB (8 instances)
+L1i cache:                            256 KiB (8 instances)
+L2 cache:                             8 MiB (8 instances)
+L3 cache:                             32 MiB (1 instance)
+NUMA node(s):                         1
+NUMA node0 CPU(s):                    0-15
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          Not affected
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Not affected
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Not affected
+Vulnerability Spec rstack overflow:   Vulnerable: Safe RET, no microcode
+Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:             Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:             Mitigation; Retpolines; IBPB conditional; IBRS_FW; STIBP always-on; RSB filling; PBRSB-eIBRS Not affected; BHI Not affected
+Vulnerability Srbds:                  Not affected
+Vulnerability Tsx async abort:        Not affected
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       1.2Gi       6.2Gi       142Mi       8.1Gi        13Gi
+Swap:          4.0Gi          0B       4.0Gi
+SOURCE   FSTYPE OPTIONS
+/dev/sdf ext4   rw,relatime,discard,errors=remount-ro,data=ordered
+NAME  MODEL        TYPE   SIZE FSTYPE  MOUNTPOINTS
+loop0              loop 735.1M iso9660 /mnt/wsl/docker-desktop/cli-tools
+loop1              loop 695.8M iso9660 
+sda   Virtual Disk disk 388.4M ext4    
+sdb   Virtual Disk disk   186M ext4    
+sdc   Virtual Disk disk     4G swap    [SWAP]
+sdd   Virtual Disk disk 143.9M ext4    /mnt/wsl/docker-desktop/docker-desktop-user-distro
+sde   Virtual Disk disk   256G ext4    
+sdf   Virtual Disk disk     1T ext4    /mnt/wslg/distro
+                                       /
+go version go1.27.0-X:nodwarf5 linux/amd64
+3bfa3a7f3a71ec51a9cd3432f18c7b10c6e29f29
+TigerBeetle version 0.17.9+cc1c06a
+
+build.mode=builtin.OptimizeMode.ReleaseSafe
+build.zig_version=0.14.1
+
+cluster.cache_line_size=64
+cluster.clients_max=64
+cluster.pipeline_prepare_queue_max=8
+cluster.view_change_headers_suffix_max=9
+cluster.quorum_replication_max=3
+cluster.journal_slot_count=1024
+cluster.message_size_max=1048576
+cluster.superblock_copies=4
+cluster.block_size=524288
+cluster.lsm_levels=7
+cluster.lsm_growth_factor=8
+cluster.lsm_compaction_ops=32
+cluster.lsm_snapshots_max=32
+cluster.lsm_manifest_compact_extra_blocks=1
+cluster.lsm_table_coalescing_threshold_percent=50
+cluster.vsr_releases_max=64
+cluster.lsm_scans_max=6
+
+process.log_level=log.Level.info
+process.verify=false
+process.release=0.17.9
+process.release_client_min=0.16.4
+process.git_commit="cc1c06a924e49b11089c521b2209d34c92caaf18"
+process.port=3001
+process.address="127.0.0.1"
+process.storage_size_limit_default=17592186044416
+process.storage_size_limit_max=70368744177664
+process.memory_size_max_default=1073741824
+process.cache_accounts_size_default=134217728
+process.cache_transfers_size_default=0
+process.cache_transfers_pending_size_default=0
+process.client_request_queue_max=2
+process.lsm_manifest_node_size=16384
+process.connection_delay_min=50ms
+process.connection_delay_max=1s
+process.tcp_backlog=64
+process.tcp_rcvbuf=4194304
+process.tcp_keepalive=true
+process.tcp_keepidle=5
+process.tcp_keepintvl=4
+process.tcp_keepcnt=3
+process.tcp_nodelay=true
+process.direct_io=true
+process.journal_iops_read_max=8
+process.journal_iops_write_max=32
+process.client_replies_iops_read_max=1
+process.client_replies_iops_write_max=2
+process.tick_ms=10
+process.rtt=300ms
+process.rtt_max=1m
+process.rtt_multiple=2
+process.backoff_min=10ms
+process.backoff_max=10s
+process.clock_offset_tolerance_max=10s
+process.clock_epoch_max=1m
+process.clock_synchronization_window_min=2s
+process.clock_synchronization_window_max=20s
+process.grid_iops_read_max=32
+process.grid_iops_write_max=32
+process.grid_cache_size_default=1073741824
+process.grid_repair_request_max=4
+process.grid_repair_reads_max=4
+process.grid_missing_blocks_max=30
+process.grid_missing_tables_max=6
+process.grid_scrubber_reads_max=1
+process.grid_scrubber_cycle=25w5d
+process.grid_scrubber_interval_min=50ms
+process.grid_scrubber_interval_max=10s
+process.multiversion_binary_platform_size_max=67108864
+process.multiversion_poll_interval=1s
+
+multiversioning.exe_path=/home/yuech/tigercompare/tools/tigerbeetle
+multiversioning.absolute_exe_path=/home/yuech/tigercompare/tools/tigerbeetle
+multiversioning.releases_bundled={ 0.17.5, 0.17.6, 0.17.7, 0.17.8, 0.17.9 }
+multiversioning.header.checksum_header=79516647870349957112648427868278739848
+multiversioning.header.checksum_binary_without_header=250748362977201375707773972378685119834
+multiversioning.header.current_checksum=90118942914792527608164178771764601312
+multiversioning.header.schema_version=1
+multiversioning.header.vsr_releases_max=64
+multiversioning.header.current_release=0.17.9
+multiversioning.header.current_flags=multiversion.MultiversionHeader.Flags{ .visit = true, .debug = false, .padding = 0 }
+multiversioning.header.current_git_commit=cc1c06a924e49b11089c521b2209d34c92caaf18
+multiversioning.header.current_release_client_min=0.16.4
+multiversioning.header.past.count=4
+multiversioning.header.past.releases={ 0.17.5, 0.17.6, 0.17.7, 0.17.8 }
+multiversioning.header.past.checksums={ 312875709136914676017909878162745140465, 276450540595561573280244747207296128784, 68172061585570025460826555121824534222, 38695719285081728929002803851513577016 }
+multiversioning.header.past.offsets={ 0, 4065848, 8307008, 12569672 }
+multiversioning.header.past.sizes={ 4065848, 4241160, 4262664, 4263544 }
+multiversioning.header.past.flags={ multiversion.MultiversionHeader.Flags{ .visit = true, .debug = false, .padding = 0 }, multiversion.MultiversionHeader.Flags{ .visit = true, .debug = false, .padding = 0 }, multiversion.MultiversionHeader.Flags{ .visit = true, .debug = false, .padding = 0 }, multiversion.MultiversionHeader.Flags{ .visit = true, .debug = false, .padding = 0 } }
+multiversioning.header.past.git_commits.0.17.5=dba17548b3e33af20a68d42a2e469ee573894eb2
+multiversioning.header.past.git_commits.0.17.6=115cc408c125a0f58bf7480ed7b9ce189ca37093
+multiversioning.header.past.git_commits.0.17.7=9a28b54a35206a677c56ceba9e344a9e696583de
+multiversioning.header.past.git_commits.0.17.8=1e2826ecdee2f6ba617c1ee10903dfa01974d437
+multiversioning.header.past.release_client_mins={ 0.16.4, 0.16.4, 0.16.4, 0.16.4 }
+psql (PostgreSQL) 18.6
+PostgreSQL 18.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 16.2.1 20260810, 64-bit
+on
+on
+on
+on
+100
+2

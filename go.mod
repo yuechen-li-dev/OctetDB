@@ -2,7 +2,10 @@ module github.com/yuechen-li-dev/database-scheduler
 
 go 1.26
 
-require github.com/jackc/pgx/v5 v5.7.6
+require (
+	github.com/jackc/pgx/v5 v5.7.6
+	github.com/tigerbeetle/tigerbeetle-go v0.17.9
+)
 
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect

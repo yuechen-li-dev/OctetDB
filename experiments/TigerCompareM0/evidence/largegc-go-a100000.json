@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T14:22:51.934000008Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "go",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 500000,
+    "accounts": 100000,
+    "offered_batch": 128,
+    "seed": 14502,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 500000,
+    "batches": 3907,
+    "elapsed_seconds": 11.768467535,
+    "operations_per_second": 42486.415373367476,
+    "batches_per_second": 331.98884972749346,
+    "p50_us": 2390.695,
+    "p95_us": 4916.872,
+    "p99_us": 5685.7,
+    "p99_9_us": 20692.229,
+    "max_us": 33277.153,
+    "go_runtime_cpu_seconds": 185.884617088,
+    "process_cpu_seconds": 11.079999999999998,
+    "process_cpu_cores": 0.9414989646738231,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 2584356200,
+      "allocations": 13126024,
+      "bytes_per_op": 5168.7124,
+      "allocs_per_op": 26.252048,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.6803599470000004,
+      "gc_cpu_percent_of_go_capacity": 0.36601196896132066,
+      "pause_total_us": 87.81,
+      "max_pause_us": 87.81,
+      "live_heap_bytes": 2992556768,
+      "heap_goal_bytes": 6060102714,
+      "rss_bytes": 4210978816
+    },
+    "storage": {
+      "wal_bytes": 250947232,
+      "wal_bytes_per_op": 501.894464,
+      "syncs": 5111,
+      "commands_per_sync": 97.82821365681863
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 500000,
+      "rejected": 0,
+      "state_digest": "10f252e4497c83ccc77e748569b84376a745d69e966a2db2541dc5a09c8a185f",
+      "detail": "sum=100000000000000000 expected=100000000000000000"
+    }
+  }
+}

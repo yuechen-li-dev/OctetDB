@@ -1,0 +1,56 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: alloc_space
+Time: 2026-08-22 07:12:11 PDT
+Showing nodes accounting for 554.58MB, 98.54% of 562.81MB total
+Dropped 23 nodes (cum <= 2.81MB)
+      flat  flat%   sum%        cum   cum%
+   84.57MB 15.03% 15.03%    84.57MB 15.03%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.AccountAgentCheckpoint.Bytes (inline)
+   76.06MB 13.52% 28.54%    76.06MB 13.52%  bytes.Clone (inline)
+   62.53MB 11.11% 39.65%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.__octUtilSelect[go.shape.int]
+   54.51MB  9.69% 49.34%   392.21MB 69.69%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+   35.01MB  6.22% 55.56%   145.09MB 25.78%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*AccountAgent).Checkpoint
+   33.65MB  5.98% 61.54%    33.65MB  5.98%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+   33.01MB  5.87% 67.40%    33.01MB  5.87%  reflect.unsafe_New
+   31.73MB  5.64% 73.04%    31.73MB  5.64%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+   29.01MB  5.15% 78.20%    94.39MB 16.77%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+   27.68MB  4.92% 83.12%    27.68MB  4.92%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   20.50MB  3.64% 86.76%    48.18MB  8.56%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+      15MB  2.67% 89.42%       20MB  3.55%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.exportAccountAgentPayloadDelta
+       9MB  1.60% 91.02%        9MB  1.60%  main.(*octExecutor).executeBatch
+    7.51MB  1.33% 92.36%     7.51MB  1.33%  runtime.mallocgc
+       7MB  1.24% 93.60%        7MB  1.24%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.AccountAgentDelta.Bytes (inline)
+    6.50MB  1.15% 94.76%     6.50MB  1.15%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*lockTable).acquire
+       5MB  0.89% 95.64%        5MB  0.89%  bytes.NewBuffer (inline)
+       5MB  0.89% 96.53%       12MB  2.13%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.tokensFor
+    4.78MB  0.85% 97.38%    17.01MB  3.02%  main.run
+    4.50MB   0.8% 98.18%        7MB  1.24%  internal/reflectlite.Swapper
+    1.50MB  0.27% 98.45%        3MB  0.53%  fmt.Sprintf
+    0.50MB 0.089% 98.54%    21.50MB  3.82%  main.(*octExecutor).executeBatch.func1
+         0     0% 98.54%   110.08MB 19.56%  encoding/json.Marshal (inline)
+         0     0% 98.54%   110.08MB 19.56%  encoding/json/v2.Marshal
+         0     0% 98.54%    34.01MB  6.04%  encoding/json/v2.marshalEncode
+         0     0% 98.54%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*AccountAgent).Step
+         0     0% 98.54%   145.09MB 25.78%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*DurableAccountAgent).Checkpoint (inline)
+         0     0% 98.54%       20MB  3.55%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*DurableAccountAgent).ExportDelta
+         0     0% 98.54%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*DurableAccountAgent).Step (inline)
+         0     0% 98.54%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*__octFlow_Main_AccountAgent).__octStep
+         0     0% 98.54%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.fn_Main_Decide
+         0     0% 98.54%    62.53MB 11.11%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.fn_Main_DecideCode
+         0     0% 98.54%   392.21MB 69.69%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0% 98.54%    94.39MB 16.77%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0% 98.54%    30.18MB  5.36%  main.(*octExecutor).setup.func1
+         0     0% 98.54%    17.01MB  3.02%  main.main
+         0     0% 98.54%    33.01MB  5.87%  reflect.New
+         0     0% 98.54%     5.51MB  0.98%  runtime.allocm
+         0     0% 98.54%    17.01MB  3.02%  runtime.main
+         0     0% 98.54%     4.51MB   0.8%  runtime.mstart
+         0     0% 98.54%     4.51MB   0.8%  runtime.mstart0
+         0     0% 98.54%     4.51MB   0.8%  runtime.mstart1
+         0     0% 98.54%     5.51MB  0.98%  runtime.newm
+         0     0% 98.54%     7.51MB  1.33%  runtime.newobject
+         0     0% 98.54%     4.51MB   0.8%  runtime.resetspinning
+         0     0% 98.54%     5.01MB  0.89%  runtime.schedule
+         0     0% 98.54%     5.51MB  0.98%  runtime.startm
+         0     0% 98.54%     5.01MB  0.89%  runtime.wakep
+         0     0% 98.54%        7MB  1.24%  sort.Slice

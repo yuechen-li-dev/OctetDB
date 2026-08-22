@@ -1,0 +1,39 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: inuse_space
+Time: 2026-08-22 07:12:15 PDT
+Showing nodes accounting for 62.73MB, 100% of 62.73MB total
+      flat  flat%   sum%        cum   cum%
+   31.30MB 49.90% 49.90%    31.30MB 49.90%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   14.36MB 22.90% 72.80%    14.36MB 22.90%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+    6.40MB 10.20% 83.00%     6.40MB 10.20%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+    6.01MB  9.58% 92.58%     6.01MB  9.58%  runtime.mallocgc
+    2.50MB  3.99% 96.56%        3MB  4.78%  fmt.Sprintf
+    1.16MB  1.84% 98.41%     1.16MB  1.84%  runtime/pprof.StartCPUProfile
+    0.50MB   0.8% 99.20%     0.50MB   0.8%  fmt.init.func1
+    0.50MB   0.8%   100%    31.80MB 50.69%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%     0.50MB   0.8%  fmt.newPrinter
+         0     0%   100%    20.76MB 33.10%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+         0     0%   100%    20.76MB 33.10%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%     2.50MB  3.99%  main.(*octExecutor).executeBatch.func1
+         0     0%   100%    32.30MB 51.49%  main.(*octExecutor).setup.func1
+         0     0%   100%     1.16MB  1.84%  main.main
+         0     0%   100%     1.16MB  1.84%  main.run
+         0     0%   100%     0.50MB   0.8%  runtime.(*scavengerState).init
+         0     0%   100%     4.51MB  7.19%  runtime.allocm
+         0     0%   100%     0.50MB   0.8%  runtime.bgscavenge
+         0     0%   100%     1.16MB  1.84%  runtime.main
+         0     0%   100%        1MB  1.59%  runtime.malg
+         0     0%   100%     4.51MB  7.19%  runtime.mstart
+         0     0%   100%     4.51MB  7.19%  runtime.mstart0
+         0     0%   100%     4.51MB  7.19%  runtime.mstart1
+         0     0%   100%     4.51MB  7.19%  runtime.newm
+         0     0%   100%     6.01MB  9.58%  runtime.newobject
+         0     0%   100%        1MB  1.59%  runtime.newproc.func1
+         0     0%   100%        1MB  1.59%  runtime.newproc1
+         0     0%   100%     4.01MB  6.39%  runtime.resetspinning
+         0     0%   100%     4.51MB  7.19%  runtime.schedule
+         0     0%   100%     4.51MB  7.19%  runtime.startm
+         0     0%   100%        1MB  1.59%  runtime.systemstack
+         0     0%   100%     4.51MB  7.19%  runtime.wakep
+         0     0%   100%     0.50MB   0.8%  sync.(*Pool).Get

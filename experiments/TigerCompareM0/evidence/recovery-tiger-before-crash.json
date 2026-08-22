@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T14:12:45.094407965Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "Go 0.17.9 client over loopback TCP; one production-mode TigerBeetle 0.17.9 replica",
+    "operations": 100000,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 18001,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 100000,
+    "batches": 196,
+    "elapsed_seconds": 0.477849954,
+    "operations_per_second": 209270.71178498009,
+    "batches_per_second": 410.17059509856097,
+    "p50_us": 2054.07,
+    "p95_us": 2349.35,
+    "p99_us": 18223.494,
+    "p99_9_us": 22786.382,
+    "max_us": 22786.382,
+    "go_runtime_cpu_seconds": 7.360340383999999,
+    "process_cpu_seconds": 0.05,
+    "process_cpu_cores": 0.10463535589249005,
+    "external_process": {
+      "pid": 38349,
+      "cpu_seconds": 0.17999999999999994,
+      "utilized_cores": 0.376687281212964,
+      "rss_bytes": 3085266944
+    },
+    "gc": {
+      "allocated_bytes": 22940472,
+      "allocations": 1541,
+      "bytes_per_op": 229.40472,
+      "allocs_per_op": 0.01541,
+      "gc_cycles": 9,
+      "gc_cpu_seconds": 0.007833225000000001,
+      "gc_cpu_percent_of_go_capacity": 0.10642476558594988,
+      "pause_total_us": 693.066,
+      "max_pause_us": 127.383,
+      "live_heap_bytes": 2294984,
+      "heap_goal_bytes": 4826618,
+      "rss_bytes": 37859328
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 100000,
+      "rejected": 0,
+      "state_digest": "7a3057ec9a20e75c2664ebb80e395fd4ac98cccd77e43078c95ce6e9961cc78c",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

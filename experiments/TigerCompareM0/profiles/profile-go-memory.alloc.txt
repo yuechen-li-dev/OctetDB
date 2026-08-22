@@ -1,0 +1,47 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: alloc_space
+Time: 2026-08-22 07:12:13 PDT
+Showing nodes accounting for 251.53MB, 98.18% of 256.18MB total
+Dropped 17 nodes (cum <= 1.28MB)
+      flat  flat%   sum%        cum   cum%
+   54.01MB 21.08% 21.08%    64.51MB 25.18%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).processGoM1
+   38.51MB 15.03% 36.11%    38.51MB 15.03%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+   31.38MB 12.25% 48.36%    31.38MB 12.25%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+   29.75MB 11.61% 59.97%    29.75MB 11.61%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   23.01MB  8.98% 68.95%    92.89MB 36.26%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+   21.50MB  8.39% 77.35%    51.25MB 20.01%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+   10.50MB  4.10% 81.45%    10.50MB  4.10%  main.(*octExecutor).executeBatch
+       7MB  2.73% 84.18%        7MB  2.73%  bytes.Clone (inline)
+    6.50MB  2.54% 86.72%     7.50MB  2.93%  internal/reflectlite.Swapper
+    5.85MB  2.28% 89.00%    20.02MB  7.81%  main.run
+    5.50MB  2.15% 91.15%       13MB  5.07%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.tokensFor
+    5.01MB  1.96% 93.10%     5.01MB  1.96%  runtime.mallocgc
+    4.50MB  1.76% 94.86%     4.50MB  1.76%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*lockTable).acquire
+    3.50MB  1.37% 96.23%     3.50MB  1.37%  reflect.unsafe_New
+    2.51MB  0.98% 97.21%     2.51MB  0.98%  main.makeTransfers
+       1MB  0.39% 97.60%     3.50MB  1.37%  fmt.Sprintf
+       1MB  0.39% 97.99%    23.50MB  9.17%  main.(*octExecutor).executeBatch.func1
+    0.50MB   0.2% 98.18%    32.75MB 12.78%  main.(*octExecutor).setup.func1
+         0     0% 98.18%    10.50MB  4.10%  encoding/json.Marshal (inline)
+         0     0% 98.18%    10.50MB  4.10%  encoding/json/v2.Marshal
+         0     0% 98.18%     3.50MB  1.37%  encoding/json/v2.marshalEncode
+         0     0% 98.18%     1.50MB  0.59%  fmt.newPrinter
+         0     0% 98.18%    82.01MB 32.01%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+         0     0% 98.18%    82.01MB 32.01%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0% 98.18%    92.89MB 36.26%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0% 98.18%    20.02MB  7.81%  main.main
+         0     0% 98.18%     3.50MB  1.37%  reflect.New
+         0     0% 98.18%     4.51MB  1.76%  runtime.allocm
+         0     0% 98.18%    20.02MB  7.81%  runtime.main
+         0     0% 98.18%     4.01MB  1.56%  runtime.mstart
+         0     0% 98.18%     4.01MB  1.56%  runtime.mstart0
+         0     0% 98.18%     4.01MB  1.56%  runtime.mstart1
+         0     0% 98.18%     4.51MB  1.76%  runtime.newm
+         0     0% 98.18%     5.01MB  1.96%  runtime.newobject
+         0     0% 98.18%     4.01MB  1.56%  runtime.resetspinning
+         0     0% 98.18%     4.51MB  1.76%  runtime.schedule
+         0     0% 98.18%     4.51MB  1.76%  runtime.startm
+         0     0% 98.18%     4.51MB  1.76%  runtime.wakep
+         0     0% 98.18%     7.50MB  2.93%  sort.Slice
+         0     0% 98.18%     1.50MB  0.59%  sync.(*Pool).Get

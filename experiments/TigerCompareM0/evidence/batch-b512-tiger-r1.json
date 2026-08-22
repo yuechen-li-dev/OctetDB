@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T14:07:04.622565953Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "Go 0.17.9 client over loopback TCP; one production-mode TigerBeetle 0.17.9 replica",
+    "operations": 102400,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 13249,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 102400,
+    "batches": 200,
+    "elapsed_seconds": 0.452933727,
+    "operations_per_second": 226081.64041623689,
+    "batches_per_second": 441.56570393796267,
+    "p50_us": 1880.149,
+    "p95_us": 2976.24,
+    "p99_us": 12789.37,
+    "p99_9_us": 21649.025,
+    "max_us": 21649.025,
+    "go_runtime_cpu_seconds": 6.849294927999999,
+    "process_cpu_seconds": 0.060000000000000005,
+    "process_cpu_cores": 0.1324697111813888,
+    "external_process": {
+      "pid": 34628,
+      "cpu_seconds": 0.17000000000000004,
+      "utilized_cores": 0.3753308483472683,
+      "rss_bytes": 3085307904
+    },
+    "gc": {
+      "allocated_bytes": 23373536,
+      "allocations": 1556,
+      "bytes_per_op": 228.2571875,
+      "allocs_per_op": 0.0151953125,
+      "gc_cycles": 9,
+      "gc_cpu_seconds": 0.004887555,
+      "gc_cpu_percent_of_go_capacity": 0.0713585128305633,
+      "pause_total_us": 459.01,
+      "max_pause_us": 61.88,
+      "live_heap_bytes": 2321600,
+      "heap_goal_bytes": 4880146,
+      "rss_bytes": 37662720
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 102400,
+      "rejected": 0,
+      "state_digest": "f2f1d221425d05e71e7cbf6ff01e2ca7eab9083f05ecaad994226273e8e1067d",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T14:06:47.315348922Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "Go 0.17.9 client over loopback TCP; one production-mode TigerBeetle 0.17.9 replica",
+    "operations": 25600,
+    "accounts": 1000,
+    "offered_batch": 128,
+    "seed": 9411,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 25600,
+    "batches": 200,
+    "elapsed_seconds": 0.331865956,
+    "operations_per_second": 77139.57860745439,
+    "batches_per_second": 602.6529578707374,
+    "p50_us": 1572.293,
+    "p95_us": 1704.771,
+    "p99_us": 4228.368,
+    "p99_9_us": 5864.46,
+    "max_us": 5864.46,
+    "go_runtime_cpu_seconds": 2.941879631999999,
+    "process_cpu_seconds": 0.02,
+    "process_cpu_cores": 0.06026529578707374,
+    "external_process": {
+      "pid": 34226,
+      "cpu_seconds": 0.06999999999999995,
+      "utilized_cores": 0.21092853525475794,
+      "rss_bytes": 3085533184
+    },
+    "gc": {
+      "allocated_bytes": 5738408,
+      "allocations": 1535,
+      "bytes_per_op": 224.1565625,
+      "allocs_per_op": 0.0599609375,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.000525298,
+      "gc_cpu_percent_of_go_capacity": 0.017855863111669288,
+      "pause_total_us": 48.335,
+      "max_pause_us": 48.335,
+      "live_heap_bytes": 831632,
+      "heap_goal_bytes": 4194304,
+      "rss_bytes": 36831232
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 25600,
+      "rejected": 0,
+      "state_digest": "9e25071d89322dca02348414bb6d68e7b32a7409b8a0628944ae1d966b683705",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

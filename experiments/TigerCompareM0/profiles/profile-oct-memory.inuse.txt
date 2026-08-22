@@ -1,0 +1,57 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: inuse_space
+Time: 2026-08-22 07:12:11 PDT
+Showing nodes accounting for 62.22MB, 100% of 62.22MB total
+      flat  flat%   sum%        cum   cum%
+   27.68MB 44.49% 44.49%    27.68MB 44.49%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   14.91MB 23.96% 68.45%    14.91MB 23.96%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+    7.51MB 12.07% 80.52%     7.51MB 12.07%  runtime.mallocgc
+    6.40MB 10.28% 90.80%     6.40MB 10.28%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+    1.72MB  2.77% 93.57%     1.72MB  2.77%  runtime/pprof.StartCPUProfile
+    1.50MB  2.41% 95.98%        2MB  3.21%  fmt.Sprintf
+       1MB  1.61% 97.59%    22.31MB 35.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+    0.50MB   0.8% 98.39%     0.50MB   0.8%  encoding/json/v2.makeStructFields
+    0.50MB   0.8% 99.20%     0.50MB   0.8%  fmt.init.func1
+    0.50MB   0.8%   100%    28.18MB 45.29%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%     0.50MB   0.8%  encoding/json.Marshal (inline)
+         0     0%   100%     0.50MB   0.8%  encoding/json/v2.Marshal
+         0     0%   100%     0.50MB   0.8%  encoding/json/v2.makeStructArshaler.func1
+         0     0%   100%     0.50MB   0.8%  encoding/json/v2.makeStructArshaler.func2
+         0     0%   100%     0.50MB   0.8%  encoding/json/v2.marshalEncode
+         0     0%   100%     0.50MB   0.8%  fmt.newPrinter
+         0     0%   100%     0.50MB   0.8%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*AccountAgent).Checkpoint
+         0     0%   100%     0.50MB   0.8%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.(*DurableAccountAgent).Checkpoint (inline)
+         0     0%   100%     0.50MB   0.8%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+         0     0%   100%     0.50MB   0.8%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0%   100%    22.31MB 35.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%     1.50MB  2.41%  main.(*octExecutor).executeBatch.func1
+         0     0%   100%    28.68MB 46.10%  main.(*octExecutor).setup.func1
+         0     0%   100%     1.72MB  2.77%  main.main
+         0     0%   100%     1.72MB  2.77%  main.run
+         0     0%   100%     0.50MB   0.8%  runtime.(*scavengerState).init
+         0     0%   100%     5.51MB  8.86%  runtime.allocm
+         0     0%   100%     0.50MB   0.8%  runtime.bgscavenge
+         0     0%   100%     0.50MB   0.8%  runtime.entersyscallblock.func2
+         0     0%   100%     0.50MB   0.8%  runtime.handoffp
+         0     0%   100%     1.72MB  2.77%  runtime.main
+         0     0%   100%        2MB  3.22%  runtime.malg
+         0     0%   100%     0.50MB  0.81%  runtime.mcall
+         0     0%   100%     0.50MB   0.8%  runtime.mcommoninit
+         0     0%   100%     0.50MB   0.8%  runtime.mpreinit (inline)
+         0     0%   100%     4.51MB  7.25%  runtime.mstart
+         0     0%   100%     4.51MB  7.25%  runtime.mstart0
+         0     0%   100%     4.51MB  7.25%  runtime.mstart1
+         0     0%   100%     5.51MB  8.86%  runtime.newm
+         0     0%   100%     7.51MB 12.07%  runtime.newobject
+         0     0%   100%     1.50MB  2.41%  runtime.newproc.func1
+         0     0%   100%     1.50MB  2.41%  runtime.newproc1
+         0     0%   100%     0.50MB  0.81%  runtime.park_m
+         0     0%   100%     4.51MB  7.25%  runtime.resetspinning
+         0     0%   100%     5.01MB  8.05%  runtime.schedule
+         0     0%   100%     5.51MB  8.86%  runtime.startm
+         0     0%   100%        2MB  3.22%  runtime.systemstack
+         0     0%   100%     5.01MB  8.05%  runtime.wakep
+         0     0%   100%     0.50MB   0.8%  sync.(*Once).Do
+         0     0%   100%     0.50MB   0.8%  sync.(*Once).doSlow
+         0     0%   100%     0.50MB   0.8%  sync.(*Pool).Get

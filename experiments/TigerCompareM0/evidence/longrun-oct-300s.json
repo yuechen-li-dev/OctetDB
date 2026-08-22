@@ -1,0 +1,2980 @@
+{
+  "generated_at": "2026-08-22T14:17:53.716563148Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "oct",
+    "durability": "group",
+    "workload": "hotset",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 363392,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 13000,
+    "duration": "5m0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 363392,
+    "batches": 5678,
+    "elapsed_seconds": 300.07121831,
+    "operations_per_second": 1211.0191775359942,
+    "batches_per_second": 18.92217464899991,
+    "p50_us": 60376.471,
+    "p95_us": 75861.024,
+    "p99_us": 81874.954,
+    "p99_9_us": 92207.463,
+    "max_us": 94510.01,
+    "go_runtime_cpu_seconds": 4758.667630816,
+    "process_cpu_seconds": 23.46,
+    "process_cpu_cores": 0.07818144016652658,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 2977378344,
+      "allocations": 12203367,
+      "bytes_per_op": 8193.296341141247,
+      "allocs_per_op": 33.58182623723142,
+      "gc_cycles": 53,
+      "gc_cpu_seconds": 0.682234917,
+      "gc_cpu_percent_of_go_capacity": 0.01433667929615443,
+      "pause_total_us": 5740.732,
+      "max_pause_us": 259.873,
+      "live_heap_bytes": 87781712,
+      "heap_goal_bytes": 176601642,
+      "rss_bytes": 191737856
+    },
+    "storage": {
+      "wal_bytes": 199450446,
+      "wal_bytes_per_op": 548.8575587794999,
+      "syncs": 75322,
+      "commands_per_sync": 4.824513422373277
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": false,
+      "accepted": 363392,
+      "rejected": 0,
+      "state_digest": "6dbd5def41fd3ef267d1eb018810a116ebe355eb4c3191807fc265b03bce29a4",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    },
+    "time_series": [
+      {
+        "seconds": 1.002535827,
+        "operations": 2240,
+        "operations_per_second": 2234.334115223595,
+        "p99_us": 32845.465,
+        "gc_cycles": 0,
+        "live_heap_bytes": 31378632,
+        "rss_bytes": 51290112,
+        "wal_bytes": 1208030
+      },
+      {
+        "seconds": 2.021704747,
+        "operations": 4544,
+        "operations_per_second": 2260.665484186861,
+        "p99_us": 33089.038,
+        "gc_cycles": 1,
+        "live_heap_bytes": 32237024,
+        "rss_bytes": 54042624,
+        "wal_bytes": 2451030
+      },
+      {
+        "seconds": 3.048917926,
+        "operations": 6720,
+        "operations_per_second": 2118.3528837883027,
+        "p99_us": 36175.614,
+        "gc_cycles": 2,
+        "live_heap_bytes": 33356968,
+        "rss_bytes": 56008704,
+        "wal_bytes": 3625083
+      },
+      {
+        "seconds": 4.070028517,
+        "operations": 8960,
+        "operations_per_second": 2193.689909538897,
+        "p99_us": 36019.424,
+        "gc_cycles": 3,
+        "live_heap_bytes": 33606000,
+        "rss_bytes": 64397312,
+        "wal_bytes": 4838527
+      },
+      {
+        "seconds": 5.072695468,
+        "operations": 11072,
+        "operations_per_second": 2106.382381401539,
+        "p99_us": 32374.584,
+        "gc_cycles": 3,
+        "live_heap_bytes": 33606000,
+        "rss_bytes": 64790528,
+        "wal_bytes": 5984401
+      },
+      {
+        "seconds": 6.077780465,
+        "operations": 13184,
+        "operations_per_second": 2101.3148204419967,
+        "p99_us": 33011.205,
+        "gc_cycles": 4,
+        "live_heap_bytes": 34835776,
+        "rss_bytes": 67543040,
+        "wal_bytes": 7130230
+      },
+      {
+        "seconds": 7.088520578,
+        "operations": 15296,
+        "operations_per_second": 2089.5579119060844,
+        "p99_us": 35962.478,
+        "gc_cycles": 4,
+        "live_heap_bytes": 34835776,
+        "rss_bytes": 67543040,
+        "wal_bytes": 8276460
+      },
+      {
+        "seconds": 8.091923818,
+        "operations": 17408,
+        "operations_per_second": 2104.8367354285206,
+        "p99_us": 34633.464,
+        "gc_cycles": 5,
+        "live_heap_bytes": 35732160,
+        "rss_bytes": 71606272,
+        "wal_bytes": 9424353
+      },
+      {
+        "seconds": 9.098145331,
+        "operations": 19520,
+        "operations_per_second": 2098.94140873929,
+        "p99_us": 32846.593,
+        "gc_cycles": 5,
+        "live_heap_bytes": 35732160,
+        "rss_bytes": 71606272,
+        "wal_bytes": 10572354
+      },
+      {
+        "seconds": 10.103094937,
+        "operations": 21696,
+        "operations_per_second": 2165.2827037378825,
+        "p99_us": 33611.339,
+        "gc_cycles": 6,
+        "live_heap_bytes": 36207272,
+        "rss_bytes": 72392704,
+        "wal_bytes": 11755066
+      },
+      {
+        "seconds": 11.12471077,
+        "operations": 23872,
+        "operations_per_second": 2129.959158532344,
+        "p99_us": 32515.986,
+        "gc_cycles": 6,
+        "live_heap_bytes": 36207272,
+        "rss_bytes": 73834496,
+        "wal_bytes": 12937847
+      },
+      {
+        "seconds": 12.149509786,
+        "operations": 26048,
+        "operations_per_second": 2123.3431785418497,
+        "p99_us": 34684.897,
+        "gc_cycles": 7,
+        "live_heap_bytes": 36783096,
+        "rss_bytes": 74227712,
+        "wal_bytes": 14120537
+      },
+      {
+        "seconds": 13.174121021,
+        "operations": 28224,
+        "operations_per_second": 2123.7323246801993,
+        "p99_us": 32172.909,
+        "gc_cycles": 8,
+        "live_heap_bytes": 39726952,
+        "rss_bytes": 74752000,
+        "wal_bytes": 15303267
+      },
+      {
+        "seconds": 14.195472894,
+        "operations": 30400,
+        "operations_per_second": 2130.5096289768103,
+        "p99_us": 32481.855,
+        "gc_cycles": 8,
+        "live_heap_bytes": 39726952,
+        "rss_bytes": 77111296,
+        "wal_bytes": 16485984
+      },
+      {
+        "seconds": 15.198619751,
+        "operations": 32512,
+        "operations_per_second": 2105.374686928815,
+        "p99_us": 33024.736,
+        "gc_cycles": 8,
+        "live_heap_bytes": 39726952,
+        "rss_bytes": 77897728,
+        "wal_bytes": 17633954
+      },
+      {
+        "seconds": 16.207864012,
+        "operations": 34688,
+        "operations_per_second": 2156.068737853343,
+        "p99_us": 32573.65,
+        "gc_cycles": 9,
+        "live_heap_bytes": 40470448,
+        "rss_bytes": 80912384,
+        "wal_bytes": 18816645
+      },
+      {
+        "seconds": 17.239093064,
+        "operations": 36864,
+        "operations_per_second": 2110.10346903997,
+        "p99_us": 35749.9,
+        "gc_cycles": 9,
+        "live_heap_bytes": 40470448,
+        "rss_bytes": 83140608,
+        "wal_bytes": 19999403
+      },
+      {
+        "seconds": 18.262010633,
+        "operations": 39104,
+        "operations_per_second": 2189.814768935697,
+        "p99_us": 32420.863,
+        "gc_cycles": 10,
+        "live_heap_bytes": 41305336,
+        "rss_bytes": 83271680,
+        "wal_bytes": 21216924
+      },
+      {
+        "seconds": 19.28117828,
+        "operations": 41344,
+        "operations_per_second": 2197.871966004431,
+        "p99_us": 34955.179,
+        "gc_cycles": 10,
+        "live_heap_bytes": 41305336,
+        "rss_bytes": 83402752,
+        "wal_bytes": 22434393
+      },
+      {
+        "seconds": 20.300609544,
+        "operations": 43584,
+        "operations_per_second": 2197.303613399873,
+        "p99_us": 32015.739,
+        "gc_cycles": 11,
+        "live_heap_bytes": 41385696,
+        "rss_bytes": 84320256,
+        "wal_bytes": 23651959
+      },
+      {
+        "seconds": 21.315885029,
+        "operations": 45696,
+        "operations_per_second": 2080.2235759686446,
+        "p99_us": 34705.665,
+        "gc_cycles": 11,
+        "live_heap_bytes": 41385696,
+        "rss_bytes": 85368832,
+        "wal_bytes": 24799911
+      },
+      {
+        "seconds": 22.327982694,
+        "operations": 47872,
+        "operations_per_second": 2149.990139538559,
+        "p99_us": 32043.974,
+        "gc_cycles": 12,
+        "live_heap_bytes": 42465552,
+        "rss_bytes": 88252416,
+        "wal_bytes": 25982668
+      },
+      {
+        "seconds": 23.34786887,
+        "operations": 50048,
+        "operations_per_second": 2133.5714231702655,
+        "p99_us": 33459.571,
+        "gc_cycles": 12,
+        "live_heap_bytes": 42465552,
+        "rss_bytes": 88514560,
+        "wal_bytes": 27165356
+      },
+      {
+        "seconds": 24.36646924,
+        "operations": 52224,
+        "operations_per_second": 2136.264686414752,
+        "p99_us": 34330.788,
+        "gc_cycles": 13,
+        "live_heap_bytes": 42665152,
+        "rss_bytes": 89038848,
+        "wal_bytes": 28348139
+      },
+      {
+        "seconds": 25.380442723,
+        "operations": 54336,
+        "operations_per_second": 2082.8947062316815,
+        "p99_us": 40598.941,
+        "gc_cycles": 13,
+        "live_heap_bytes": 42665152,
+        "rss_bytes": 89169920,
+        "wal_bytes": 29496057
+      },
+      {
+        "seconds": 26.384622786,
+        "operations": 56448,
+        "operations_per_second": 2103.2084561511556,
+        "p99_us": 34007.539,
+        "gc_cycles": 14,
+        "live_heap_bytes": 45946144,
+        "rss_bytes": 89694208,
+        "wal_bytes": 30644007
+      },
+      {
+        "seconds": 27.411615498,
+        "operations": 58624,
+        "operations_per_second": 2118.807635705987,
+        "p99_us": 35813.452,
+        "gc_cycles": 14,
+        "live_heap_bytes": 45946144,
+        "rss_bytes": 89825280,
+        "wal_bytes": 31826716
+      },
+      {
+        "seconds": 28.438420448,
+        "operations": 60736,
+        "operations_per_second": 2056.8658146807725,
+        "p99_us": 33621.703,
+        "gc_cycles": 15,
+        "live_heap_bytes": 49687312,
+        "rss_bytes": 94019584,
+        "wal_bytes": 32974695
+      },
+      {
+        "seconds": 29.464673655,
+        "operations": 62912,
+        "operations_per_second": 2120.334421522544,
+        "p99_us": 34850.102,
+        "gc_cycles": 15,
+        "live_heap_bytes": 49687312,
+        "rss_bytes": 94281728,
+        "wal_bytes": 34157398
+      },
+      {
+        "seconds": 30.489161724,
+        "operations": 65088,
+        "operations_per_second": 2123.9876440181365,
+        "p99_us": 32699.114,
+        "gc_cycles": 15,
+        "live_heap_bytes": 49687312,
+        "rss_bytes": 94937088,
+        "wal_bytes": 35340165
+      },
+      {
+        "seconds": 31.500130208,
+        "operations": 67328,
+        "operations_per_second": 2215.6971611391996,
+        "p99_us": 31879.53,
+        "gc_cycles": 16,
+        "live_heap_bytes": 49761464,
+        "rss_bytes": 99262464,
+        "wal_bytes": 36557625
+      },
+      {
+        "seconds": 32.506323507,
+        "operations": 69568,
+        "operations_per_second": 2226.212400963326,
+        "p99_us": 31730.082,
+        "gc_cycles": 16,
+        "live_heap_bytes": 49761464,
+        "rss_bytes": 99393536,
+        "wal_bytes": 37775166
+      },
+      {
+        "seconds": 33.52074733,
+        "operations": 71808,
+        "operations_per_second": 2208.1500347414453,
+        "p99_us": 32334.509,
+        "gc_cycles": 16,
+        "live_heap_bytes": 49761464,
+        "rss_bytes": 99524608,
+        "wal_bytes": 38992732
+      },
+      {
+        "seconds": 34.545765713,
+        "operations": 74112,
+        "operations_per_second": 2247.7645652136566,
+        "p99_us": 32387.49,
+        "gc_cycles": 17,
+        "live_heap_bytes": 49966352,
+        "rss_bytes": 100966400,
+        "wal_bytes": 40244998
+      },
+      {
+        "seconds": 35.573514032,
+        "operations": 76416,
+        "operations_per_second": 2241.7939853618964,
+        "p99_us": 34413.803,
+        "gc_cycles": 17,
+        "live_heap_bytes": 49966352,
+        "rss_bytes": 105291776,
+        "wal_bytes": 41497325
+      },
+      {
+        "seconds": 36.583119728,
+        "operations": 78656,
+        "operations_per_second": 2218.6879579570045,
+        "p99_us": 31906.105,
+        "gc_cycles": 18,
+        "live_heap_bytes": 51468520,
+        "rss_bytes": 105422848,
+        "wal_bytes": 42714810
+      },
+      {
+        "seconds": 37.606452541,
+        "operations": 80832,
+        "operations_per_second": 2126.3854460220464,
+        "p99_us": 32817.525,
+        "gc_cycles": 18,
+        "live_heap_bytes": 51468520,
+        "rss_bytes": 105553920,
+        "wal_bytes": 43901250
+      },
+      {
+        "seconds": 38.616961023,
+        "operations": 82944,
+        "operations_per_second": 2090.036885014489,
+        "p99_us": 38027.042,
+        "gc_cycles": 18,
+        "live_heap_bytes": 51468520,
+        "rss_bytes": 105553920,
+        "wal_bytes": 45053388
+      },
+      {
+        "seconds": 39.638883389,
+        "operations": 85120,
+        "operations_per_second": 2129.320261887682,
+        "p99_us": 32743.098,
+        "gc_cycles": 19,
+        "live_heap_bytes": 51563920,
+        "rss_bytes": 105816064,
+        "wal_bytes": 46240516
+      },
+      {
+        "seconds": 40.640181206,
+        "operations": 87232,
+        "operations_per_second": 2109.262563188031,
+        "p99_us": 33528.665,
+        "gc_cycles": 19,
+        "live_heap_bytes": 51563920,
+        "rss_bytes": 105947136,
+        "wal_bytes": 47392648
+      },
+      {
+        "seconds": 41.646743161,
+        "operations": 89344,
+        "operations_per_second": 2098.2314993218674,
+        "p99_us": 36443.571,
+        "gc_cycles": 19,
+        "live_heap_bytes": 51563920,
+        "rss_bytes": 106340352,
+        "wal_bytes": 48544849
+      },
+      {
+        "seconds": 42.665224901,
+        "operations": 91520,
+        "operations_per_second": 2136.5135127508524,
+        "p99_us": 33119.245,
+        "gc_cycles": 20,
+        "live_heap_bytes": 51829944,
+        "rss_bytes": 106340352,
+        "wal_bytes": 49731879
+      },
+      {
+        "seconds": 43.674068524,
+        "operations": 93632,
+        "operations_per_second": 2093.4859990684604,
+        "p99_us": 33284.442,
+        "gc_cycles": 20,
+        "live_heap_bytes": 51829944,
+        "rss_bytes": 108175360,
+        "wal_bytes": 50884055
+      },
+      {
+        "seconds": 44.677089436,
+        "operations": 95744,
+        "operations_per_second": 2105.6390497270113,
+        "p99_us": 34889.262,
+        "gc_cycles": 21,
+        "live_heap_bytes": 53648896,
+        "rss_bytes": 113811456,
+        "wal_bytes": 52036215
+      },
+      {
+        "seconds": 45.699653022,
+        "operations": 97920,
+        "operations_per_second": 2127.985026840179,
+        "p99_us": 35259.246,
+        "gc_cycles": 21,
+        "live_heap_bytes": 53648896,
+        "rss_bytes": 113942528,
+        "wal_bytes": 53223309
+      },
+      {
+        "seconds": 46.725656275,
+        "operations": 100160,
+        "operations_per_second": 2183.228945376453,
+        "p99_us": 32452.606,
+        "gc_cycles": 21,
+        "live_heap_bytes": 53648896,
+        "rss_bytes": 114073600,
+        "wal_bytes": 54447434
+      },
+      {
+        "seconds": 47.746348527,
+        "operations": 102336,
+        "operations_per_second": 2131.8864679693875,
+        "p99_us": 32808.21,
+        "gc_cycles": 22,
+        "live_heap_bytes": 53746824,
+        "rss_bytes": 114597888,
+        "wal_bytes": 55636704
+      },
+      {
+        "seconds": 48.755494872,
+        "operations": 104448,
+        "operations_per_second": 2092.8579987078087,
+        "p99_us": 33799.678,
+        "gc_cycles": 22,
+        "live_heap_bytes": 53746824,
+        "rss_bytes": 114597888,
+        "wal_bytes": 56790977
+      },
+      {
+        "seconds": 49.781385726,
+        "operations": 106624,
+        "operations_per_second": 2121.083340898953,
+        "p99_us": 33401.063,
+        "gc_cycles": 22,
+        "live_heap_bytes": 53746824,
+        "rss_bytes": 114991104,
+        "wal_bytes": 57980238
+      },
+      {
+        "seconds": 50.798078278,
+        "operations": 108736,
+        "operations_per_second": 2077.3241584639836,
+        "p99_us": 34238.502,
+        "gc_cycles": 23,
+        "live_heap_bytes": 53924512,
+        "rss_bytes": 115777536,
+        "wal_bytes": 59134553
+      },
+      {
+        "seconds": 51.823937687,
+        "operations": 110912,
+        "operations_per_second": 2121.148357084475,
+        "p99_us": 33228.831,
+        "gc_cycles": 23,
+        "live_heap_bytes": 53924512,
+        "rss_bytes": 116563968,
+        "wal_bytes": 60323749
+      },
+      {
+        "seconds": 52.826464231,
+        "operations": 113024,
+        "operations_per_second": 2106.677386888222,
+        "p99_us": 35052.667,
+        "gc_cycles": 23,
+        "live_heap_bytes": 53924512,
+        "rss_bytes": 116563968,
+        "wal_bytes": 61478062
+      },
+      {
+        "seconds": 53.833370224,
+        "operations": 115136,
+        "operations_per_second": 2097.514579000028,
+        "p99_us": 32919.894,
+        "gc_cycles": 24,
+        "live_heap_bytes": 54301088,
+        "rss_bytes": 117219328,
+        "wal_bytes": 62632313
+      },
+      {
+        "seconds": 54.859237571,
+        "operations": 117376,
+        "operations_per_second": 2183.5181776187287,
+        "p99_us": 32876.165,
+        "gc_cycles": 24,
+        "live_heap_bytes": 54301088,
+        "rss_bytes": 117350400,
+        "wal_bytes": 63856533
+      },
+      {
+        "seconds": 55.874562582,
+        "operations": 119552,
+        "operations_per_second": 2143.1561090540295,
+        "p99_us": 32553.828,
+        "gc_cycles": 25,
+        "live_heap_bytes": 57112248,
+        "rss_bytes": 123596800,
+        "wal_bytes": 65045786
+      },
+      {
+        "seconds": 56.889063653,
+        "operations": 121728,
+        "operations_per_second": 2144.8967006561197,
+        "p99_us": 39444.669,
+        "gc_cycles": 25,
+        "live_heap_bytes": 57112248,
+        "rss_bytes": 123727872,
+        "wal_bytes": 66235054
+      },
+      {
+        "seconds": 57.911057332,
+        "operations": 123904,
+        "operations_per_second": 2129.171681501173,
+        "p99_us": 33440.226,
+        "gc_cycles": 25,
+        "live_heap_bytes": 57112248,
+        "rss_bytes": 123990016,
+        "wal_bytes": 67424304
+      },
+      {
+        "seconds": 58.912879086,
+        "operations": 126080,
+        "operations_per_second": 2172.043071845693,
+        "p99_us": 32629.415,
+        "gc_cycles": 26,
+        "live_heap_bytes": 57962304,
+        "rss_bytes": 124121088,
+        "wal_bytes": 68613581
+      },
+      {
+        "seconds": 59.935106342,
+        "operations": 128192,
+        "operations_per_second": 2066.076782441027,
+        "p99_us": 49674.274,
+        "gc_cycles": 26,
+        "live_heap_bytes": 57962304,
+        "rss_bytes": 124907520,
+        "wal_bytes": 69767825
+      },
+      {
+        "seconds": 60.945201942,
+        "operations": 130368,
+        "operations_per_second": 2154.2515381712383,
+        "p99_us": 35447.194,
+        "gc_cycles": 26,
+        "live_heap_bytes": 57962304,
+        "rss_bytes": 124907520,
+        "wal_bytes": 70958420
+      },
+      {
+        "seconds": 61.976549341,
+        "operations": 132544,
+        "operations_per_second": 2109.8613349002107,
+        "p99_us": 34381.197,
+        "gc_cycles": 26,
+        "live_heap_bytes": 57962304,
+        "rss_bytes": 125038592,
+        "wal_bytes": 72156361
+      },
+      {
+        "seconds": 62.978584789,
+        "operations": 134656,
+        "operations_per_second": 2107.7098661683276,
+        "p99_us": 34372.755,
+        "gc_cycles": 27,
+        "live_heap_bytes": 58941256,
+        "rss_bytes": 125431808,
+        "wal_bytes": 73319083
+      },
+      {
+        "seconds": 63.984527796,
+        "operations": 136768,
+        "operations_per_second": 2099.522522949454,
+        "p99_us": 32721.392,
+        "gc_cycles": 27,
+        "live_heap_bytes": 58941256,
+        "rss_bytes": 125431808,
+        "wal_bytes": 74481803
+      },
+      {
+        "seconds": 64.99584061,
+        "operations": 138880,
+        "operations_per_second": 2088.374606514182,
+        "p99_us": 32981.001,
+        "gc_cycles": 27,
+        "live_heap_bytes": 58941256,
+        "rss_bytes": 125431808,
+        "wal_bytes": 75644568
+      },
+      {
+        "seconds": 65.99884896,
+        "operations": 140992,
+        "operations_per_second": 2105.6654214294426,
+        "p99_us": 35708.22,
+        "gc_cycles": 28,
+        "live_heap_bytes": 60811560,
+        "rss_bytes": 125562880,
+        "wal_bytes": 76807257
+      },
+      {
+        "seconds": 67.010247322,
+        "operations": 142784,
+        "operations_per_second": 1771.804332821334,
+        "p99_us": 79611.459,
+        "gc_cycles": 28,
+        "live_heap_bytes": 60811560,
+        "rss_bytes": 125562880,
+        "wal_bytes": 77793832
+      },
+      {
+        "seconds": 68.075694832,
+        "operations": 143808,
+        "operations_per_second": 961.0984965369153,
+        "p99_us": 77473.667,
+        "gc_cycles": 28,
+        "live_heap_bytes": 60811560,
+        "rss_bytes": 125562880,
+        "wal_bytes": 78357567
+      },
+      {
+        "seconds": 69.086848045,
+        "operations": 144768,
+        "operations_per_second": 949.4110167061299,
+        "p99_us": 80415.057,
+        "gc_cycles": 28,
+        "live_heap_bytes": 60811560,
+        "rss_bytes": 125562880,
+        "wal_bytes": 78886087
+      },
+      {
+        "seconds": 70.131472457,
+        "operations": 145792,
+        "operations_per_second": 980.2566245216179,
+        "p99_us": 79333.651,
+        "gc_cycles": 28,
+        "live_heap_bytes": 60811560,
+        "rss_bytes": 125693952,
+        "wal_bytes": 79449865
+      },
+      {
+        "seconds": 71.176063874,
+        "operations": 146816,
+        "operations_per_second": 980.2875874098821,
+        "p99_us": 79848.534,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 125956096,
+        "wal_bytes": 80013603
+      },
+      {
+        "seconds": 72.213810739,
+        "operations": 147840,
+        "operations_per_second": 986.7531616200065,
+        "p99_us": 77368.103,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 126087168,
+        "wal_bytes": 80577316
+      },
+      {
+        "seconds": 73.256522373,
+        "operations": 148800,
+        "operations_per_second": 920.6764063016103,
+        "p99_us": 82172.298,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 134475776,
+        "wal_bytes": 81105847
+      },
+      {
+        "seconds": 74.27488697,
+        "operations": 149760,
+        "operations_per_second": 942.6879163200133,
+        "p99_us": 76944.647,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 134475776,
+        "wal_bytes": 81634390
+      },
+      {
+        "seconds": 75.275623029,
+        "operations": 150784,
+        "operations_per_second": 1023.2468299615853,
+        "p99_us": 73787.151,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 134606848,
+        "wal_bytes": 82198109
+      },
+      {
+        "seconds": 76.335856616,
+        "operations": 151808,
+        "operations_per_second": 965.8249017534662,
+        "p99_us": 76046.153,
+        "gc_cycles": 29,
+        "live_heap_bytes": 63178448,
+        "rss_bytes": 134868992,
+        "wal_bytes": 82761840
+      },
+      {
+        "seconds": 77.340612423,
+        "operations": 152768,
+        "operations_per_second": 955.4560354981854,
+        "p99_us": 80043.693,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135000064,
+        "wal_bytes": 83290347
+      },
+      {
+        "seconds": 78.38865103,
+        "operations": 153728,
+        "operations_per_second": 915.996790183131,
+        "p99_us": 78898.359,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135000064,
+        "wal_bytes": 83818886
+      },
+      {
+        "seconds": 79.435222557,
+        "operations": 154688,
+        "operations_per_second": 917.2808310119448,
+        "p99_us": 88175.548,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135000064,
+        "wal_bytes": 84347376
+      },
+      {
+        "seconds": 80.476738141,
+        "operations": 155712,
+        "operations_per_second": 983.1826001750924,
+        "p99_us": 72100.614,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135131136,
+        "wal_bytes": 84911119
+      },
+      {
+        "seconds": 81.529456301,
+        "operations": 156800,
+        "operations_per_second": 1033.5149913249336,
+        "p99_us": 69549.828,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135131136,
+        "wal_bytes": 85510079
+      },
+      {
+        "seconds": 82.568583484,
+        "operations": 157824,
+        "operations_per_second": 985.4424143189796,
+        "p99_us": 70944.775,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135262208,
+        "wal_bytes": 86073868
+      },
+      {
+        "seconds": 83.573750976,
+        "operations": 158848,
+        "operations_per_second": 1018.735691464244,
+        "p99_us": 71280.427,
+        "gc_cycles": 30,
+        "live_heap_bytes": 66735432,
+        "rss_bytes": 135917568,
+        "wal_bytes": 86637593
+      },
+      {
+        "seconds": 84.628708778,
+        "operations": 159872,
+        "operations_per_second": 970.6549381014956,
+        "p99_us": 73408.495,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136048640,
+        "wal_bytes": 87202205
+      },
+      {
+        "seconds": 85.671443163,
+        "operations": 160896,
+        "operations_per_second": 982.0334063309901,
+        "p99_us": 79209.534,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136048640,
+        "wal_bytes": 87766963
+      },
+      {
+        "seconds": 86.676322418,
+        "operations": 161856,
+        "operations_per_second": 955.3386590710343,
+        "p99_us": 75309.903,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136048640,
+        "wal_bytes": 88296464
+      },
+      {
+        "seconds": 87.69211918,
+        "operations": 162880,
+        "operations_per_second": 1008.0756685853662,
+        "p99_us": 70810.055,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136179712,
+        "wal_bytes": 88861197
+      },
+      {
+        "seconds": 88.752200194,
+        "operations": 163904,
+        "operations_per_second": 965.9639088678178,
+        "p99_us": 77494.611,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136310784,
+        "wal_bytes": 89425955
+      },
+      {
+        "seconds": 89.75692816,
+        "operations": 164864,
+        "operations_per_second": 955.4825111735768,
+        "p99_us": 73696.342,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136310784,
+        "wal_bytes": 89955425
+      },
+      {
+        "seconds": 90.819445868,
+        "operations": 165888,
+        "operations_per_second": 963.7486437073102,
+        "p99_us": 75844.949,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136310784,
+        "wal_bytes": 90520166
+      },
+      {
+        "seconds": 91.841063819,
+        "operations": 166848,
+        "operations_per_second": 939.6859159143729,
+        "p99_us": 81003.283,
+        "gc_cycles": 31,
+        "live_heap_bytes": 68955648,
+        "rss_bytes": 136310784,
+        "wal_bytes": 91049700
+      },
+      {
+        "seconds": 92.853856152,
+        "operations": 167808,
+        "operations_per_second": 947.874474085301,
+        "p99_us": 78345.187,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137097216,
+        "wal_bytes": 91579150
+      },
+      {
+        "seconds": 93.885297317,
+        "operations": 168832,
+        "operations_per_second": 992.7856621855888,
+        "p99_us": 76066.318,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137490432,
+        "wal_bytes": 92143897
+      },
+      {
+        "seconds": 94.912462974,
+        "operations": 169792,
+        "operations_per_second": 934.6106866577218,
+        "p99_us": 75096.421,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137490432,
+        "wal_bytes": 92673361
+      },
+      {
+        "seconds": 95.956503124,
+        "operations": 170816,
+        "operations_per_second": 980.8051922141117,
+        "p99_us": 82116.608,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137752576,
+        "wal_bytes": 93238159
+      },
+      {
+        "seconds": 96.973004041,
+        "operations": 171840,
+        "operations_per_second": 1007.37734996062,
+        "p99_us": 76003.997,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137752576,
+        "wal_bytes": 93802904
+      },
+      {
+        "seconds": 97.975889397,
+        "operations": 172800,
+        "operations_per_second": 957.2380275138847,
+        "p99_us": 80367.625,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137883648,
+        "wal_bytes": 94332362
+      },
+      {
+        "seconds": 99.029626657,
+        "operations": 173760,
+        "operations_per_second": 911.0430431206353,
+        "p99_us": 94268.345,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137883648,
+        "wal_bytes": 94861813
+      },
+      {
+        "seconds": 100.086396756,
+        "operations": 174720,
+        "operations_per_second": 908.4284281968504,
+        "p99_us": 92582.979,
+        "gc_cycles": 32,
+        "live_heap_bytes": 69982784,
+        "rss_bytes": 137883648,
+        "wal_bytes": 95391340
+      },
+      {
+        "seconds": 101.133960034,
+        "operations": 175680,
+        "operations_per_second": 916.4124212456405,
+        "p99_us": 88784.378,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139718656,
+        "wal_bytes": 95920808
+      },
+      {
+        "seconds": 102.201116104,
+        "operations": 176640,
+        "operations_per_second": 899.5872553112123,
+        "p99_us": 85519.918,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139980800,
+        "wal_bytes": 96450263
+      },
+      {
+        "seconds": 103.243866748,
+        "operations": 177600,
+        "operations_per_second": 920.6419631806048,
+        "p99_us": 74830.131,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139980800,
+        "wal_bytes": 96979717
+      },
+      {
+        "seconds": 104.288621156,
+        "operations": 178560,
+        "operations_per_second": 918.8762379454828,
+        "p99_us": 75724.516,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139980800,
+        "wal_bytes": 97509210
+      },
+      {
+        "seconds": 105.35120885,
+        "operations": 179520,
+        "operations_per_second": 903.4548446408038,
+        "p99_us": 78199.151,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139980800,
+        "wal_bytes": 98038657
+      },
+      {
+        "seconds": 106.376905069,
+        "operations": 180480,
+        "operations_per_second": 935.9496332510122,
+        "p99_us": 75218.536,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 139980800,
+        "wal_bytes": 98568131
+      },
+      {
+        "seconds": 107.438193332,
+        "operations": 181504,
+        "operations_per_second": 964.8650943386529,
+        "p99_us": 74586.541,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 140111872,
+        "wal_bytes": 99132887
+      },
+      {
+        "seconds": 108.477707645,
+        "operations": 182464,
+        "operations_per_second": 923.508207625805,
+        "p99_us": 78128.472,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 140242944,
+        "wal_bytes": 99662398
+      },
+      {
+        "seconds": 109.53544008,
+        "operations": 183424,
+        "operations_per_second": 907.6019305392673,
+        "p99_us": 82982.526,
+        "gc_cycles": 33,
+        "live_heap_bytes": 71178192,
+        "rss_bytes": 143912960,
+        "wal_bytes": 100191843
+      },
+      {
+        "seconds": 110.594074556,
+        "operations": 184384,
+        "operations_per_second": 906.828581312895,
+        "p99_us": 77221.426,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 143912960,
+        "wal_bytes": 100721323
+      },
+      {
+        "seconds": 111.632056188,
+        "operations": 185344,
+        "operations_per_second": 924.8718574626955,
+        "p99_us": 78138.199,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 143912960,
+        "wal_bytes": 101250783
+      },
+      {
+        "seconds": 112.683949279,
+        "operations": 186304,
+        "operations_per_second": 912.6402751513082,
+        "p99_us": 81265.962,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 154398720,
+        "wal_bytes": 101780240
+      },
+      {
+        "seconds": 113.686233633,
+        "operations": 187200,
+        "operations_per_second": 893.9578837324643,
+        "p99_us": 82700.588,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 154398720,
+        "wal_bytes": 102274463
+      },
+      {
+        "seconds": 114.698961541,
+        "operations": 188160,
+        "operations_per_second": 947.9347734139859,
+        "p99_us": 78774.407,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 154398720,
+        "wal_bytes": 102803921
+      },
+      {
+        "seconds": 115.705597902,
+        "operations": 189120,
+        "operations_per_second": 953.671094342677,
+        "p99_us": 81398.265,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 154398720,
+        "wal_bytes": 103333383
+      },
+      {
+        "seconds": 116.763417989,
+        "operations": 190080,
+        "operations_per_second": 907.526725761637,
+        "p99_us": 79010.357,
+        "gc_cycles": 34,
+        "live_heap_bytes": 72484184,
+        "rss_bytes": 154398720,
+        "wal_bytes": 103862830
+      },
+      {
+        "seconds": 117.824178389,
+        "operations": 191104,
+        "operations_per_second": 965.3452372467901,
+        "p99_us": 76701.535,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 154529792,
+        "wal_bytes": 104427635
+      },
+      {
+        "seconds": 118.834952991,
+        "operations": 192064,
+        "operations_per_second": 949.7666424348879,
+        "p99_us": 76210.759,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 154529792,
+        "wal_bytes": 104957092
+      },
+      {
+        "seconds": 119.884872201,
+        "operations": 193024,
+        "operations_per_second": 914.35606745399,
+        "p99_us": 81640.277,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 154660864,
+        "wal_bytes": 105486547
+      },
+      {
+        "seconds": 120.9033454,
+        "operations": 193984,
+        "operations_per_second": 942.5873954686166,
+        "p99_us": 76292.603,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 154660864,
+        "wal_bytes": 106016013
+      },
+      {
+        "seconds": 121.940147639,
+        "operations": 194944,
+        "operations_per_second": 925.9239263660579,
+        "p99_us": 84309.669,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 155054080,
+        "wal_bytes": 106545517
+      },
+      {
+        "seconds": 123.006032929,
+        "operations": 195968,
+        "operations_per_second": 960.7037545287824,
+        "p99_us": 74531.509,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 155054080,
+        "wal_bytes": 107110243
+      },
+      {
+        "seconds": 124.039180558,
+        "operations": 196928,
+        "operations_per_second": 929.1992480582851,
+        "p99_us": 83127.898,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 155054080,
+        "wal_bytes": 107639693
+      },
+      {
+        "seconds": 125.069505989,
+        "operations": 197888,
+        "operations_per_second": 931.744448031585,
+        "p99_us": 83477.165,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 155054080,
+        "wal_bytes": 108169159
+      },
+      {
+        "seconds": 126.07630959,
+        "operations": 198848,
+        "operations_per_second": 953.5126801756442,
+        "p99_us": 82523.421,
+        "gc_cycles": 35,
+        "live_heap_bytes": 75710616,
+        "rss_bytes": 155185152,
+        "wal_bytes": 108698682
+      },
+      {
+        "seconds": 127.097972472,
+        "operations": 199808,
+        "operations_per_second": 939.6445901222435,
+        "p99_us": 80968.038,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155316224,
+        "wal_bytes": 109228133
+      },
+      {
+        "seconds": 128.124023923,
+        "operations": 200768,
+        "operations_per_second": 935.6255956408173,
+        "p99_us": 75260.875,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155316224,
+        "wal_bytes": 109757602
+      },
+      {
+        "seconds": 129.136960129,
+        "operations": 201728,
+        "operations_per_second": 947.739842167316,
+        "p99_us": 76692.188,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155447296,
+        "wal_bytes": 110287057
+      },
+      {
+        "seconds": 130.186262532,
+        "operations": 202688,
+        "operations_per_second": 914.8935495194896,
+        "p99_us": 85100.779,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155447296,
+        "wal_bytes": 110816503
+      },
+      {
+        "seconds": 131.253784103,
+        "operations": 203712,
+        "operations_per_second": 959.2312022704787,
+        "p99_us": 78930.999,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155578368,
+        "wal_bytes": 111381308
+      },
+      {
+        "seconds": 132.314323891,
+        "operations": 204736,
+        "operations_per_second": 965.5460470097893,
+        "p99_us": 84105.771,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155840512,
+        "wal_bytes": 111946069
+      },
+      {
+        "seconds": 133.3311045,
+        "operations": 205696,
+        "operations_per_second": 944.1564792862803,
+        "p99_us": 82313.746,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155971584,
+        "wal_bytes": 112475527
+      },
+      {
+        "seconds": 134.383710931,
+        "operations": 206720,
+        "operations_per_second": 972.823241282287,
+        "p99_us": 74737.519,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155971584,
+        "wal_bytes": 113040265
+      },
+      {
+        "seconds": 135.428816895,
+        "operations": 207680,
+        "operations_per_second": 918.5671434939778,
+        "p99_us": 87667.73,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155971584,
+        "wal_bytes": 113569760
+      },
+      {
+        "seconds": 136.431336766,
+        "operations": 208576,
+        "operations_per_second": 893.7478706594136,
+        "p99_us": 84666.409,
+        "gc_cycles": 36,
+        "live_heap_bytes": 75946232,
+        "rss_bytes": 155971584,
+        "wal_bytes": 114063945
+      },
+      {
+        "seconds": 137.486847927,
+        "operations": 209536,
+        "operations_per_second": 909.51193646355,
+        "p99_us": 81403.214,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156102656,
+        "wal_bytes": 114593404
+      },
+      {
+        "seconds": 138.553429801,
+        "operations": 210560,
+        "operations_per_second": 960.076319466873,
+        "p99_us": 74258.05,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156102656,
+        "wal_bytes": 115158141
+      },
+      {
+        "seconds": 139.615117863,
+        "operations": 211584,
+        "operations_per_second": 964.5017558839237,
+        "p99_us": 74215.114,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156233728,
+        "wal_bytes": 115722955
+      },
+      {
+        "seconds": 140.651289045,
+        "operations": 212544,
+        "operations_per_second": 926.4878397283974,
+        "p99_us": 74916.152,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156495872,
+        "wal_bytes": 116252433
+      },
+      {
+        "seconds": 141.70324548,
+        "operations": 213504,
+        "operations_per_second": 912.5853201325776,
+        "p99_us": 77938.732,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156495872,
+        "wal_bytes": 116781886
+      },
+      {
+        "seconds": 142.757226353,
+        "operations": 214528,
+        "operations_per_second": 971.5546327566042,
+        "p99_us": 72999.166,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156495872,
+        "wal_bytes": 117346645
+      },
+      {
+        "seconds": 143.768590934,
+        "operations": 215488,
+        "operations_per_second": 949.2125965601716,
+        "p99_us": 74982.538,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156495872,
+        "wal_bytes": 117876172
+      },
+      {
+        "seconds": 144.835666356,
+        "operations": 216512,
+        "operations_per_second": 959.6322611205264,
+        "p99_us": 73308.393,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156495872,
+        "wal_bytes": 118440933
+      },
+      {
+        "seconds": 145.88528072,
+        "operations": 217536,
+        "operations_per_second": 975.5964048525541,
+        "p99_us": 78497.32,
+        "gc_cycles": 37,
+        "live_heap_bytes": 76196648,
+        "rss_bytes": 156626944,
+        "wal_bytes": 119005703
+      },
+      {
+        "seconds": 146.916943355,
+        "operations": 218560,
+        "operations_per_second": 992.5725380177213,
+        "p99_us": 70102.796,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156626944,
+        "wal_bytes": 119570465
+      },
+      {
+        "seconds": 147.936536356,
+        "operations": 219584,
+        "operations_per_second": 1004.3223119378788,
+        "p99_us": 72305.459,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156626944,
+        "wal_bytes": 120135256
+      },
+      {
+        "seconds": 148.949982658,
+        "operations": 220544,
+        "operations_per_second": 947.2628180747953,
+        "p99_us": 76594.392,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156626944,
+        "wal_bytes": 120664720
+      },
+      {
+        "seconds": 149.994439415,
+        "operations": 221568,
+        "operations_per_second": 980.4139741900295,
+        "p99_us": 70490.115,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156626944,
+        "wal_bytes": 121229481
+      },
+      {
+        "seconds": 151.022624182,
+        "operations": 222528,
+        "operations_per_second": 933.6843248524806,
+        "p99_us": 77372.26,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156626944,
+        "wal_bytes": 121758965
+      },
+      {
+        "seconds": 152.036568408,
+        "operations": 223488,
+        "operations_per_second": 946.7976397352649,
+        "p99_us": 78482.272,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 156758016,
+        "wal_bytes": 122288496
+      },
+      {
+        "seconds": 153.086930846,
+        "operations": 224512,
+        "operations_per_second": 974.901579639313,
+        "p99_us": 70935.216,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 157020160,
+        "wal_bytes": 122853264
+      },
+      {
+        "seconds": 154.113803676,
+        "operations": 225536,
+        "operations_per_second": 997.2023507526243,
+        "p99_us": 70974.152,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 157020160,
+        "wal_bytes": 123418007
+      },
+      {
+        "seconds": 155.130503869,
+        "operations": 226560,
+        "operations_per_second": 1007.179901263184,
+        "p99_us": 71670.609,
+        "gc_cycles": 38,
+        "live_heap_bytes": 76336288,
+        "rss_bytes": 157020160,
+        "wal_bytes": 123982740
+      },
+      {
+        "seconds": 156.177016129,
+        "operations": 227584,
+        "operations_per_second": 978.4882978819569,
+        "p99_us": 73783.377,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157282304,
+        "wal_bytes": 124547572
+      },
+      {
+        "seconds": 157.22565344,
+        "operations": 228608,
+        "operations_per_second": 976.5054030201296,
+        "p99_us": 75867.152,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157282304,
+        "wal_bytes": 125112325
+      },
+      {
+        "seconds": 158.283580002,
+        "operations": 229632,
+        "operations_per_second": 967.9310802671764,
+        "p99_us": 78101.201,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157282304,
+        "wal_bytes": 125677091
+      },
+      {
+        "seconds": 159.351827729,
+        "operations": 230656,
+        "operations_per_second": 958.5791517438914,
+        "p99_us": 75088.849,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157544448,
+        "wal_bytes": 126241861
+      },
+      {
+        "seconds": 160.394414362,
+        "operations": 231680,
+        "operations_per_second": 982.1725769238785,
+        "p99_us": 79683.47,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157544448,
+        "wal_bytes": 126806672
+      },
+      {
+        "seconds": 161.411331846,
+        "operations": 232640,
+        "operations_per_second": 944.0293977677347,
+        "p99_us": 78997.439,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 157675520,
+        "wal_bytes": 127336140
+      },
+      {
+        "seconds": 162.439840912,
+        "operations": 233664,
+        "operations_per_second": 995.6159200253467,
+        "p99_us": 70659.429,
+        "gc_cycles": 39,
+        "live_heap_bytes": 76937032,
+        "rss_bytes": 170782720,
+        "wal_bytes": 127900890
+      },
+      {
+        "seconds": 163.478281172,
+        "operations": 234688,
+        "operations_per_second": 986.0942795110814,
+        "p99_us": 73209.459,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 170913792,
+        "wal_bytes": 128465649
+      },
+      {
+        "seconds": 164.545807192,
+        "operations": 235712,
+        "operations_per_second": 959.2272045977858,
+        "p99_us": 73069.634,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 170913792,
+        "wal_bytes": 129030456
+      },
+      {
+        "seconds": 165.612794768,
+        "operations": 236736,
+        "operations_per_second": 959.7112684656039,
+        "p99_us": 80221.986,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 170913792,
+        "wal_bytes": 129595246
+      },
+      {
+        "seconds": 166.653881233,
+        "operations": 237696,
+        "operations_per_second": 922.1136113800115,
+        "p99_us": 76613.903,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 170913792,
+        "wal_bytes": 130124714
+      },
+      {
+        "seconds": 167.686252664,
+        "operations": 238656,
+        "operations_per_second": 929.8978750991802,
+        "p99_us": 77470.651,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171044864,
+        "wal_bytes": 130654196
+      },
+      {
+        "seconds": 168.71249299,
+        "operations": 239616,
+        "operations_per_second": 935.4533978817745,
+        "p99_us": 78961.831,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171044864,
+        "wal_bytes": 131183667
+      },
+      {
+        "seconds": 169.720912308,
+        "operations": 240576,
+        "operations_per_second": 951.9849360918331,
+        "p99_us": 75343.237,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171175936,
+        "wal_bytes": 131713179
+      },
+      {
+        "seconds": 170.738549582,
+        "operations": 241536,
+        "operations_per_second": 943.3616717148669,
+        "p99_us": 77796.519,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171307008,
+        "wal_bytes": 132242642
+      },
+      {
+        "seconds": 171.742725715,
+        "operations": 242432,
+        "operations_per_second": 892.2737461636125,
+        "p99_us": 88131.135,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171438080,
+        "wal_bytes": 132736802
+      },
+      {
+        "seconds": 172.748280449,
+        "operations": 243328,
+        "operations_per_second": 891.050451759894,
+        "p99_us": 80269.643,
+        "gc_cycles": 40,
+        "live_heap_bytes": 80332752,
+        "rss_bytes": 171569152,
+        "wal_bytes": 133230951
+      },
+      {
+        "seconds": 173.774404125,
+        "operations": 244224,
+        "operations_per_second": 873.1890910974361,
+        "p99_us": 81064.058,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 133725161
+      },
+      {
+        "seconds": 174.784921093,
+        "operations": 245120,
+        "operations_per_second": 886.6748687786508,
+        "p99_us": 80659.522,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 134219339
+      },
+      {
+        "seconds": 175.795208229,
+        "operations": 246016,
+        "operations_per_second": 886.8765800062606,
+        "p99_us": 83504.818,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 134713522
+      },
+      {
+        "seconds": 176.804283289,
+        "operations": 246912,
+        "operations_per_second": 887.9418742149866,
+        "p99_us": 87066.38,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 135207707
+      },
+      {
+        "seconds": 177.82262488,
+        "operations": 247808,
+        "operations_per_second": 879.8619323012606,
+        "p99_us": 85877.58,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 135701872
+      },
+      {
+        "seconds": 178.864058043,
+        "operations": 248768,
+        "operations_per_second": 921.8066354201551,
+        "p99_us": 82439.945,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172093440,
+        "wal_bytes": 136231363
+      },
+      {
+        "seconds": 179.87137861,
+        "operations": 249664,
+        "operations_per_second": 889.488440277225,
+        "p99_us": 86723.881,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172224512,
+        "wal_bytes": 136725518
+      },
+      {
+        "seconds": 180.897593077,
+        "operations": 250560,
+        "operations_per_second": 873.111838521762,
+        "p99_us": 84346.195,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172224512,
+        "wal_bytes": 137219697
+      },
+      {
+        "seconds": 181.940652486,
+        "operations": 251520,
+        "operations_per_second": 920.3694360231785,
+        "p99_us": 78318.218,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172224512,
+        "wal_bytes": 137749163
+      },
+      {
+        "seconds": 182.948214697,
+        "operations": 252480,
+        "operations_per_second": 952.7947649477695,
+        "p99_us": 86680.724,
+        "gc_cycles": 41,
+        "live_heap_bytes": 80499472,
+        "rss_bytes": 172224512,
+        "wal_bytes": 138278692
+      },
+      {
+        "seconds": 183.954783794,
+        "operations": 253440,
+        "operations_per_second": 953.7348234325933,
+        "p99_us": 70529.563,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172355584,
+        "wal_bytes": 138808156
+      },
+      {
+        "seconds": 184.964593669,
+        "operations": 254400,
+        "operations_per_second": 950.6740068272753,
+        "p99_us": 74225.978,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172486656,
+        "wal_bytes": 139337618
+      },
+      {
+        "seconds": 186.008187979,
+        "operations": 255424,
+        "operations_per_second": 981.2242077096031,
+        "p99_us": 73751.438,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172486656,
+        "wal_bytes": 139902391
+      },
+      {
+        "seconds": 187.045595991,
+        "operations": 256384,
+        "operations_per_second": 925.3832521972079,
+        "p99_us": 77427.53,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172486656,
+        "wal_bytes": 140431899
+      },
+      {
+        "seconds": 188.114271211,
+        "operations": 257408,
+        "operations_per_second": 958.1956995316126,
+        "p99_us": 70731.669,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172617728,
+        "wal_bytes": 140996637
+      },
+      {
+        "seconds": 189.117742801,
+        "operations": 258368,
+        "operations_per_second": 956.6788034327908,
+        "p99_us": 73366.192,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172748800,
+        "wal_bytes": 141526105
+      },
+      {
+        "seconds": 190.177203923,
+        "operations": 259392,
+        "operations_per_second": 966.5290955339085,
+        "p99_us": 71743.898,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172879872,
+        "wal_bytes": 142090880
+      },
+      {
+        "seconds": 191.21744437,
+        "operations": 260416,
+        "operations_per_second": 984.3877951036834,
+        "p99_us": 73925.082,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172879872,
+        "wal_bytes": 142655690
+      },
+      {
+        "seconds": 192.224406867,
+        "operations": 261376,
+        "operations_per_second": 953.3622184143766,
+        "p99_us": 73438.471,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 172879872,
+        "wal_bytes": 143185184
+      },
+      {
+        "seconds": 193.256082332,
+        "operations": 262400,
+        "operations_per_second": 992.5601943049019,
+        "p99_us": 76932.101,
+        "gc_cycles": 42,
+        "live_heap_bytes": 80636576,
+        "rss_bytes": 173010944,
+        "wal_bytes": 143749941
+      },
+      {
+        "seconds": 194.28924875,
+        "operations": 263360,
+        "operations_per_second": 929.1823497886862,
+        "p99_us": 76531.506,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173010944,
+        "wal_bytes": 144279403
+      },
+      {
+        "seconds": 195.35146816,
+        "operations": 264384,
+        "operations_per_second": 964.0192886326564,
+        "p99_us": 72194.333,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173142016,
+        "wal_bytes": 144844215
+      },
+      {
+        "seconds": 196.375582391,
+        "operations": 265344,
+        "operations_per_second": 937.3954300611608,
+        "p99_us": 78609.53,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173142016,
+        "wal_bytes": 145373678
+      },
+      {
+        "seconds": 197.382261949,
+        "operations": 266304,
+        "operations_per_second": 953.6301719558707,
+        "p99_us": 73064.519,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173142016,
+        "wal_bytes": 145903148
+      },
+      {
+        "seconds": 198.384963331,
+        "operations": 267264,
+        "operations_per_second": 957.4136599723965,
+        "p99_us": 72329.395,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173142016,
+        "wal_bytes": 146432599
+      },
+      {
+        "seconds": 199.390086063,
+        "operations": 268224,
+        "operations_per_second": 955.1072415701767,
+        "p99_us": 73257.601,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173273088,
+        "wal_bytes": 146962072
+      },
+      {
+        "seconds": 200.418095021,
+        "operations": 269184,
+        "operations_per_second": 933.8440025539155,
+        "p99_us": 73366.189,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173273088,
+        "wal_bytes": 147491609
+      },
+      {
+        "seconds": 201.45458881,
+        "operations": 270144,
+        "operations_per_second": 926.1994719005498,
+        "p99_us": 84494.673,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173273088,
+        "wal_bytes": 148021065
+      },
+      {
+        "seconds": 202.502315427,
+        "operations": 271168,
+        "operations_per_second": 977.3541908595037,
+        "p99_us": 70971.944,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173273088,
+        "wal_bytes": 148585835
+      },
+      {
+        "seconds": 203.541273469,
+        "operations": 272192,
+        "operations_per_second": 985.602843045321,
+        "p99_us": 71667.376,
+        "gc_cycles": 43,
+        "live_heap_bytes": 80834848,
+        "rss_bytes": 173273088,
+        "wal_bytes": 149150591
+      },
+      {
+        "seconds": 204.568160408,
+        "operations": 273152,
+        "operations_per_second": 934.8643590061282,
+        "p99_us": 74192.089,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 149680095
+      },
+      {
+        "seconds": 205.585064544,
+        "operations": 274048,
+        "operations_per_second": 881.1056699252131,
+        "p99_us": 81191.625,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 150174260
+      },
+      {
+        "seconds": 206.644021078,
+        "operations": 275072,
+        "operations_per_second": 966.9896422774233,
+        "p99_us": 78546.646,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 150739006
+      },
+      {
+        "seconds": 207.707133838,
+        "operations": 276096,
+        "operations_per_second": 963.2092084004333,
+        "p99_us": 71194.415,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 151303772
+      },
+      {
+        "seconds": 208.761418293,
+        "operations": 277120,
+        "operations_per_second": 971.2748728710034,
+        "p99_us": 72592.276,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 151868612
+      },
+      {
+        "seconds": 209.806637586,
+        "operations": 278144,
+        "operations_per_second": 979.6987166787784,
+        "p99_us": 79346.484,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173666304,
+        "wal_bytes": 152433375
+      },
+      {
+        "seconds": 210.825029981,
+        "operations": 279168,
+        "operations_per_second": 1005.5063303963498,
+        "p99_us": 68307.924,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173797376,
+        "wal_bytes": 152998117
+      },
+      {
+        "seconds": 211.854301561,
+        "operations": 280192,
+        "operations_per_second": 994.8783391065747,
+        "p99_us": 70457.198,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173928448,
+        "wal_bytes": 153562875
+      },
+      {
+        "seconds": 212.916158663,
+        "operations": 281216,
+        "operations_per_second": 964.3482141535839,
+        "p99_us": 71799.509,
+        "gc_cycles": 44,
+        "live_heap_bytes": 80946880,
+        "rss_bytes": 173928448,
+        "wal_bytes": 154127698
+      },
+      {
+        "seconds": 213.928096551,
+        "operations": 282176,
+        "operations_per_second": 948.6748261766833,
+        "p99_us": 74656.375,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174059520,
+        "wal_bytes": 154657156
+      },
+      {
+        "seconds": 214.986621268,
+        "operations": 283200,
+        "operations_per_second": 967.3841182491726,
+        "p99_us": 73688.633,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174059520,
+        "wal_bytes": 155221923
+      },
+      {
+        "seconds": 216.045996683,
+        "operations": 284224,
+        "operations_per_second": 966.6072909573797,
+        "p99_us": 74215.664,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174321664,
+        "wal_bytes": 155786690
+      },
+      {
+        "seconds": 217.083494591,
+        "operations": 285248,
+        "operations_per_second": 986.9899419594782,
+        "p99_us": 70528.61,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174321664,
+        "wal_bytes": 156351501
+      },
+      {
+        "seconds": 218.130790498,
+        "operations": 286272,
+        "operations_per_second": 977.7561366904109,
+        "p99_us": 74837.34,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174321664,
+        "wal_bytes": 156916240
+      },
+      {
+        "seconds": 219.138447404,
+        "operations": 287232,
+        "operations_per_second": 952.7052256415539,
+        "p99_us": 69506.238,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174321664,
+        "wal_bytes": 157445705
+      },
+      {
+        "seconds": 220.186554487,
+        "operations": 288256,
+        "operations_per_second": 976.9994083705661,
+        "p99_us": 70292.965,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174452736,
+        "wal_bytes": 158010470
+      },
+      {
+        "seconds": 221.207663385,
+        "operations": 289216,
+        "operations_per_second": 940.1543771485184,
+        "p99_us": 75592.505,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174452736,
+        "wal_bytes": 158539980
+      },
+      {
+        "seconds": 222.242162445,
+        "operations": 290240,
+        "operations_per_second": 989.8510685935279,
+        "p99_us": 70863.217,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174452736,
+        "wal_bytes": 159104751
+      },
+      {
+        "seconds": 223.308299529,
+        "operations": 291264,
+        "operations_per_second": 960.476861153814,
+        "p99_us": 73575.666,
+        "gc_cycles": 45,
+        "live_heap_bytes": 81686600,
+        "rss_bytes": 174452736,
+        "wal_bytes": 159669514
+      },
+      {
+        "seconds": 224.311591611,
+        "operations": 292224,
+        "operations_per_second": 956.849971432347,
+        "p99_us": 76813.44,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191098880,
+        "wal_bytes": 160198998
+      },
+      {
+        "seconds": 225.349926164,
+        "operations": 293248,
+        "operations_per_second": 986.1946682226994,
+        "p99_us": 71817.432,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191098880,
+        "wal_bytes": 160763823
+      },
+      {
+        "seconds": 226.411646437,
+        "operations": 294272,
+        "operations_per_second": 964.4724943478592,
+        "p99_us": 73313.84,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191229952,
+        "wal_bytes": 161328573
+      },
+      {
+        "seconds": 227.436052487,
+        "operations": 295232,
+        "operations_per_second": 937.1283974748098,
+        "p99_us": 75284.969,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191229952,
+        "wal_bytes": 161858055
+      },
+      {
+        "seconds": 228.479875122,
+        "operations": 296256,
+        "operations_per_second": 981.0095754438205,
+        "p99_us": 70905.811,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191229952,
+        "wal_bytes": 162422808
+      },
+      {
+        "seconds": 229.517342736,
+        "operations": 297280,
+        "operations_per_second": 987.0187620140978,
+        "p99_us": 77427.885,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191229952,
+        "wal_bytes": 162987629
+      },
+      {
+        "seconds": 230.551793798,
+        "operations": 298240,
+        "operations_per_second": 928.0284348531125,
+        "p99_us": 77633.336,
+        "gc_cycles": 46,
+        "live_heap_bytes": 81828040,
+        "rss_bytes": 191229952,
+        "wal_bytes": 163517096
+      },
+      {
+        "seconds": 231.551895854,
+        "operations": 299200,
+        "operations_per_second": 959.9020362377897,
+        "p99_us": 73341.478,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182452224,
+        "wal_bytes": 164046556
+      },
+      {
+        "seconds": 232.610255079,
+        "operations": 300224,
+        "operations_per_second": 967.5353847839328,
+        "p99_us": 77209.192,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182452224,
+        "wal_bytes": 164611327
+      },
+      {
+        "seconds": 233.667046164,
+        "operations": 301248,
+        "operations_per_second": 968.9710809776561,
+        "p99_us": 72772.66,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182452224,
+        "wal_bytes": 165176136
+      },
+      {
+        "seconds": 234.695013116,
+        "operations": 302208,
+        "operations_per_second": 933.8821623907613,
+        "p99_us": 73363.694,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182583296,
+        "wal_bytes": 165705614
+      },
+      {
+        "seconds": 235.727575047,
+        "operations": 303168,
+        "operations_per_second": 929.726315854269,
+        "p99_us": 74658.16,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182714368,
+        "wal_bytes": 166235085
+      },
+      {
+        "seconds": 236.742207088,
+        "operations": 304128,
+        "operations_per_second": 946.1558094044065,
+        "p99_us": 74789.94,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182845440,
+        "wal_bytes": 166764519
+      },
+      {
+        "seconds": 237.800916478,
+        "operations": 305152,
+        "operations_per_second": 967.2153753165446,
+        "p99_us": 72161.704,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182845440,
+        "wal_bytes": 167329292
+      },
+      {
+        "seconds": 238.856872191,
+        "operations": 306176,
+        "operations_per_second": 969.737638987517,
+        "p99_us": 72741.199,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182976512,
+        "wal_bytes": 167894097
+      },
+      {
+        "seconds": 239.909039835,
+        "operations": 307200,
+        "operations_per_second": 973.228939170838,
+        "p99_us": 74489.413,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182976512,
+        "wal_bytes": 168458846
+      },
+      {
+        "seconds": 240.962732955,
+        "operations": 308224,
+        "operations_per_second": 971.8199545613434,
+        "p99_us": 73309.829,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 182976512,
+        "wal_bytes": 169023590
+      },
+      {
+        "seconds": 242.011801154,
+        "operations": 309248,
+        "operations_per_second": 976.1043190291198,
+        "p99_us": 71282.454,
+        "gc_cycles": 47,
+        "live_heap_bytes": 86082032,
+        "rss_bytes": 183762944,
+        "wal_bytes": 169588352
+      },
+      {
+        "seconds": 243.059381846,
+        "operations": 310272,
+        "operations_per_second": 977.4903335083615,
+        "p99_us": 74548.392,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186122240,
+        "wal_bytes": 170153181
+      },
+      {
+        "seconds": 244.070540843,
+        "operations": 311232,
+        "operations_per_second": 949.4055859149914,
+        "p99_us": 73688.836,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186122240,
+        "wal_bytes": 170682660
+      },
+      {
+        "seconds": 245.128584719,
+        "operations": 312256,
+        "operations_per_second": 967.8237578117224,
+        "p99_us": 70613.2,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 171247425
+      },
+      {
+        "seconds": 246.182123348,
+        "operations": 313280,
+        "operations_per_second": 971.9624623275205,
+        "p99_us": 72143.84,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 171812177
+      },
+      {
+        "seconds": 247.188743164,
+        "operations": 314240,
+        "operations_per_second": 953.6867690671411,
+        "p99_us": 73040.517,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 172341684
+      },
+      {
+        "seconds": 248.222852263,
+        "operations": 315264,
+        "operations_per_second": 990.2243399562236,
+        "p99_us": 70247.975,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 172906431
+      },
+      {
+        "seconds": 249.223458671,
+        "operations": 316224,
+        "operations_per_second": 959.4182011274908,
+        "p99_us": 70279.285,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 173435906
+      },
+      {
+        "seconds": 250.265288375,
+        "operations": 317248,
+        "operations_per_second": 982.8861627466134,
+        "p99_us": 70100.706,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 174000635
+      },
+      {
+        "seconds": 251.269096795,
+        "operations": 318208,
+        "operations_per_second": 956.3577878735068,
+        "p99_us": 71408.171,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 174530146
+      },
+      {
+        "seconds": 252.284212773,
+        "operations": 319168,
+        "operations_per_second": 945.7047478371973,
+        "p99_us": 93811.654,
+        "gc_cycles": 48,
+        "live_heap_bytes": 86244192,
+        "rss_bytes": 186253312,
+        "wal_bytes": 175059590
+      },
+      {
+        "seconds": 253.362139732,
+        "operations": 320128,
+        "operations_per_second": 890.5983768052321,
+        "p99_us": 81984.068,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 186777600,
+        "wal_bytes": 175589044
+      },
+      {
+        "seconds": 254.408539753,
+        "operations": 321088,
+        "operations_per_second": 917.431174248801,
+        "p99_us": 80689.167,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 186908672,
+        "wal_bytes": 176118514
+      },
+      {
+        "seconds": 255.446384249,
+        "operations": 322048,
+        "operations_per_second": 924.9940657776539,
+        "p99_us": 78396.803,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 186908672,
+        "wal_bytes": 176648030
+      },
+      {
+        "seconds": 256.459048047,
+        "operations": 322944,
+        "operations_per_second": 884.7951331622502,
+        "p99_us": 92207.463,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 186908672,
+        "wal_bytes": 177142187
+      },
+      {
+        "seconds": 257.474392033,
+        "operations": 323840,
+        "operations_per_second": 882.4595529736067,
+        "p99_us": 83207.46,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187170816,
+        "wal_bytes": 177636334
+      },
+      {
+        "seconds": 258.540567658,
+        "operations": 324800,
+        "operations_per_second": 900.4145072252987,
+        "p99_us": 81242.089,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187170816,
+        "wal_bytes": 178165792
+      },
+      {
+        "seconds": 259.611527878,
+        "operations": 325760,
+        "operations_per_second": 896.3918379713488,
+        "p99_us": 81645.339,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187301888,
+        "wal_bytes": 178695308
+      },
+      {
+        "seconds": 260.683060655,
+        "operations": 326720,
+        "operations_per_second": 895.9128648287723,
+        "p99_us": 89619.582,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187432960,
+        "wal_bytes": 179224763
+      },
+      {
+        "seconds": 261.699764479,
+        "operations": 327616,
+        "operations_per_second": 881.2792662418472,
+        "p99_us": 81874.954,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187564032,
+        "wal_bytes": 179718917
+      },
+      {
+        "seconds": 262.756541239,
+        "operations": 328512,
+        "operations_per_second": 847.8611887717894,
+        "p99_us": 93552.82,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187564032,
+        "wal_bytes": 180213076
+      },
+      {
+        "seconds": 263.77432124,
+        "operations": 329408,
+        "operations_per_second": 880.3474219572527,
+        "p99_us": 86484.914,
+        "gc_cycles": 49,
+        "live_heap_bytes": 86428152,
+        "rss_bytes": 187695104,
+        "wal_bytes": 180707234
+      },
+      {
+        "seconds": 264.832756087,
+        "operations": 330368,
+        "operations_per_second": 906.9996161983885,
+        "p99_us": 78952.663,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187826176,
+        "wal_bytes": 181236733
+      },
+      {
+        "seconds": 265.86783898,
+        "operations": 331264,
+        "operations_per_second": 865.6311548180519,
+        "p99_us": 80754.872,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187826176,
+        "wal_bytes": 181730876
+      },
+      {
+        "seconds": 266.886001496,
+        "operations": 332160,
+        "operations_per_second": 880.0166829162663,
+        "p99_us": 81765.767,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187826176,
+        "wal_bytes": 182225042
+      },
+      {
+        "seconds": 267.950270893,
+        "operations": 333120,
+        "operations_per_second": 902.02725241004,
+        "p99_us": 83329.341,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187826176,
+        "wal_bytes": 182754488
+      },
+      {
+        "seconds": 269.00682598,
+        "operations": 334016,
+        "operations_per_second": 848.0390762625707,
+        "p99_us": 86032.748,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187826176,
+        "wal_bytes": 183248691
+      },
+      {
+        "seconds": 270.011144865,
+        "operations": 334912,
+        "operations_per_second": 892.1469200492033,
+        "p99_us": 80536.487,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 183742861
+      },
+      {
+        "seconds": 271.061490945,
+        "operations": 335872,
+        "operations_per_second": 913.9844650060484,
+        "p99_us": 88283.931,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 184272301
+      },
+      {
+        "seconds": 272.119872833,
+        "operations": 336768,
+        "operations_per_second": 846.5753336852265,
+        "p99_us": 94510.01,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 184766482
+      },
+      {
+        "seconds": 273.168262191,
+        "operations": 337792,
+        "operations_per_second": 976.7363548533845,
+        "p99_us": 87885.678,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 185331215
+      },
+      {
+        "seconds": 274.205107103,
+        "operations": 338816,
+        "operations_per_second": 987.6115397285182,
+        "p99_us": 70431.584,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 185896019
+      },
+      {
+        "seconds": 275.216016922,
+        "operations": 339840,
+        "operations_per_second": 1012.9489107277134,
+        "p99_us": 70448.452,
+        "gc_cycles": 50,
+        "live_heap_bytes": 86596904,
+        "rss_bytes": 187957248,
+        "wal_bytes": 186460772
+      },
+      {
+        "seconds": 276.241204916,
+        "operations": 340800,
+        "operations_per_second": 936.4136193736971,
+        "p99_us": 70467.983,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 188350464,
+        "wal_bytes": 186990233
+      },
+      {
+        "seconds": 277.291504179,
+        "operations": 341824,
+        "operations_per_second": 974.9602195046003,
+        "p99_us": 72306.346,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 188350464,
+        "wal_bytes": 187554992
+      },
+      {
+        "seconds": 278.328281421,
+        "operations": 342848,
+        "operations_per_second": 987.6760007044984,
+        "p99_us": 72543.67,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 188481536,
+        "wal_bytes": 188119792
+      },
+      {
+        "seconds": 279.346502294,
+        "operations": 343872,
+        "operations_per_second": 1005.675710598009,
+        "p99_us": 74078.341,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 188481536,
+        "wal_bytes": 188684530
+      },
+      {
+        "seconds": 280.391843355,
+        "operations": 344896,
+        "operations_per_second": 979.5845951180903,
+        "p99_us": 70747.342,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191496192,
+        "wal_bytes": 189249283
+      },
+      {
+        "seconds": 281.433977802,
+        "operations": 345920,
+        "operations_per_second": 982.5987452461592,
+        "p99_us": 70981.632,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191496192,
+        "wal_bytes": 189814025
+      },
+      {
+        "seconds": 282.444503067,
+        "operations": 346880,
+        "operations_per_second": 950.0009878525897,
+        "p99_us": 74319.936,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191627264,
+        "wal_bytes": 190343537
+      },
+      {
+        "seconds": 283.513940799,
+        "operations": 347904,
+        "operations_per_second": 957.5125034021149,
+        "p99_us": 71967.206,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191627264,
+        "wal_bytes": 190908292
+      },
+      {
+        "seconds": 284.520143407,
+        "operations": 348864,
+        "operations_per_second": 954.0822021005933,
+        "p99_us": 70337.917,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191627264,
+        "wal_bytes": 191437754
+      },
+      {
+        "seconds": 285.557245207,
+        "operations": 349824,
+        "operations_per_second": 925.6564784672054,
+        "p99_us": 72199.704,
+        "gc_cycles": 51,
+        "live_heap_bytes": 86768408,
+        "rss_bytes": 191627264,
+        "wal_bytes": 191967225
+      },
+      {
+        "seconds": 286.592648326,
+        "operations": 350784,
+        "operations_per_second": 927.1751092725848,
+        "p99_us": 78925.804,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190558208,
+        "wal_bytes": 192496719
+      },
+      {
+        "seconds": 287.60437162,
+        "operations": 351744,
+        "operations_per_second": 948.8760471299379,
+        "p99_us": 75110.657,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190689280,
+        "wal_bytes": 193026206
+      },
+      {
+        "seconds": 288.643811819,
+        "operations": 352768,
+        "operations_per_second": 985.1456591587912,
+        "p99_us": 77416.959,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190820352,
+        "wal_bytes": 193590985
+      },
+      {
+        "seconds": 289.672456518,
+        "operations": 353792,
+        "operations_per_second": 995.484642068816,
+        "p99_us": 70027.287,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190820352,
+        "wal_bytes": 194155732
+      },
+      {
+        "seconds": 290.704975578,
+        "operations": 354816,
+        "operations_per_second": 991.7492467402974,
+        "p99_us": 71398.063,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190820352,
+        "wal_bytes": 194720534
+      },
+      {
+        "seconds": 291.718883165,
+        "operations": 355840,
+        "operations_per_second": 1009.9539771961485,
+        "p99_us": 69496.641,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190951424,
+        "wal_bytes": 195285269
+      },
+      {
+        "seconds": 292.787922909,
+        "operations": 356864,
+        "operations_per_second": 957.8689714271279,
+        "p99_us": 71817.844,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 190951424,
+        "wal_bytes": 195850010
+      },
+      {
+        "seconds": 293.813178693,
+        "operations": 357824,
+        "operations_per_second": 936.3517036252097,
+        "p99_us": 72088.808,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 191082496,
+        "wal_bytes": 196379470
+      },
+      {
+        "seconds": 294.857173489,
+        "operations": 358784,
+        "operations_per_second": 919.5448135164843,
+        "p99_us": 83469.652,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 191213568,
+        "wal_bytes": 196908991
+      },
+      {
+        "seconds": 295.883323655,
+        "operations": 359680,
+        "operations_per_second": 873.1665497776667,
+        "p99_us": 88985.16,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 191213568,
+        "wal_bytes": 197403169
+      },
+      {
+        "seconds": 296.934789768,
+        "operations": 360640,
+        "operations_per_second": 913.0108789345263,
+        "p99_us": 83587.705,
+        "gc_cycles": 52,
+        "live_heap_bytes": 87628792,
+        "rss_bytes": 191344640,
+        "wal_bytes": 197932636
+      },
+      {
+        "seconds": 297.981821858,
+        "operations": 361536,
+        "operations_per_second": 855.7521861626991,
+        "p99_us": 85736.623,
+        "gc_cycles": 53,
+        "live_heap_bytes": 87781712,
+        "rss_bytes": 191606784,
+        "wal_bytes": 198426790
+      },
+      {
+        "seconds": 299.069046642,
+        "operations": 362496,
+        "operations_per_second": 882.9820788927123,
+        "p99_us": 87820.823,
+        "gc_cycles": 53,
+        "live_heap_bytes": 87781712,
+        "rss_bytes": 191606784,
+        "wal_bytes": 198956240
+      },
+      {
+        "seconds": 300.070995189,
+        "operations": 363392,
+        "operations_per_second": 894.2574972365322,
+        "p99_us": 77531.547,
+        "gc_cycles": 53,
+        "live_heap_bytes": 87781712,
+        "rss_bytes": 191737856,
+        "wal_bytes": 199450446
+      }
+    ]
+  }
+}

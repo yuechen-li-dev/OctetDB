@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T14:08:14.458826368Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "go",
+    "durability": "group",
+    "workload": "hot_source",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 5000,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 12001,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 79,
+    "elapsed_seconds": 10.483036453,
+    "operations_per_second": 476.96104295899084,
+    "batches_per_second": 7.535984478752055,
+    "p50_us": 131757.93,
+    "p95_us": 148520.476,
+    "p99_us": 169932.756,
+    "p99_9_us": 169932.756,
+    "max_us": 169932.756,
+    "go_runtime_cpu_seconds": 134.10162665599998,
+    "process_cpu_seconds": 0.64,
+    "process_cpu_cores": 0.06105101349875083,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 25118240,
+      "allocations": 150814,
+      "bytes_per_op": 5023.648,
+      "allocs_per_op": 30.1628,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.006100640000000004,
+      "gc_cpu_percent_of_go_capacity": 0.004549266218559362,
+      "pause_total_us": 88.241,
+      "max_pause_us": 88.241,
+      "live_heap_bytes": 30639448,
+      "heap_goal_bytes": 62319330,
+      "rss_bytes": 48234496
+    },
+    "storage": {
+      "wal_bytes": 2494521,
+      "wal_bytes_per_op": 498.9042,
+      "syncs": 5001,
+      "commands_per_sync": 0.9998000399920016
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "bf6ddac2c72a4358dff48e71b9b3df14e0fb8141118763d7dc744b02dd7f816b",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

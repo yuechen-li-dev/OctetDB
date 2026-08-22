@@ -1,0 +1,46 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: inuse_space
+Time: 2026-08-22 07:12:13 PDT
+Showing nodes accounting for 63.07MB, 100% of 63.07MB total
+      flat  flat%   sum%        cum   cum%
+   29.25MB 46.37% 46.37%    29.25MB 46.37%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   19.26MB 30.54% 76.91%    19.26MB 30.54%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+    6.40MB 10.14% 87.05%     6.40MB 10.14%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+    5.01MB  7.94% 95.00%     5.01MB  7.94%  runtime.mallocgc
+    1.16MB  1.83% 96.83%     1.16MB  1.83%  runtime/pprof.StartCPUProfile
+       1MB  1.59% 98.41%        2MB  3.17%  fmt.Sprintf
+    0.50MB  0.79% 99.21%     0.50MB  0.79%  internal/sync.runtime_SemacquireMutex
+    0.50MB  0.79%   100%     0.50MB  0.79%  fmt.(*buffer).writeString (inline)
+         0     0%   100%     0.50MB  0.79%  fmt.(*pp).doPrintf
+         0     0%   100%     0.50MB  0.79%  fmt.newPrinter
+         0     0%   100%    29.25MB 46.37%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%    25.66MB 40.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+         0     0%   100%    25.66MB 40.68%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%     0.50MB  0.79%  internal/sync.(*Mutex).Lock (inline)
+         0     0%   100%     0.50MB  0.79%  internal/sync.(*Mutex).lockSlow
+         0     0%   100%        1MB  1.59%  main.(*octExecutor).executeBatch.func1
+         0     0%   100%    30.25MB 47.96%  main.(*octExecutor).setup.func1
+         0     0%   100%     1.16MB  1.83%  main.main
+         0     0%   100%     1.16MB  1.83%  main.run
+         0     0%   100%     4.51MB  7.15%  runtime.allocm
+         0     0%   100%     1.16MB  1.83%  runtime.main
+         0     0%   100%     0.50MB  0.79%  runtime.malg
+         0     0%   100%     0.50MB  0.79%  runtime.mcall
+         0     0%   100%     4.01MB  6.35%  runtime.mstart
+         0     0%   100%     4.01MB  6.35%  runtime.mstart0
+         0     0%   100%     4.01MB  6.35%  runtime.mstart1
+         0     0%   100%     4.51MB  7.15%  runtime.newm
+         0     0%   100%     5.01MB  7.94%  runtime.newobject
+         0     0%   100%     0.50MB  0.79%  runtime.newproc.func1
+         0     0%   100%     0.50MB  0.79%  runtime.newproc1
+         0     0%   100%     0.50MB  0.79%  runtime.park_m
+         0     0%   100%     4.01MB  6.35%  runtime.resetspinning
+         0     0%   100%     4.51MB  7.15%  runtime.schedule
+         0     0%   100%     4.51MB  7.15%  runtime.startm
+         0     0%   100%     0.50MB  0.79%  runtime.systemstack
+         0     0%   100%     4.51MB  7.15%  runtime.wakep
+         0     0%   100%     0.50MB  0.79%  sync.(*Mutex).Lock (inline)
+         0     0%   100%     0.50MB  0.79%  sync.(*Pool).Get
+         0     0%   100%     0.50MB  0.79%  sync.(*Pool).pin
+         0     0%   100%     0.50MB  0.79%  sync.(*Pool).pinSlow

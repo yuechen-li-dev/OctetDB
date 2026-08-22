@@ -1,0 +1,49 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: inuse_space
+Time: 2026-08-22 07:12:13 PDT
+Showing nodes accounting for 59.07MB, 100% of 59.07MB total
+      flat  flat%   sum%        cum   cum%
+   25.66MB 43.43% 43.43%    25.66MB 43.43%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).entry
+   13.28MB 22.47% 65.91%    13.28MB 22.47%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).rememberResult (inline)
+    7.52MB 12.73% 78.63%     7.52MB 12.73%  runtime.mallocgc
+    6.40MB 10.83% 89.47%     6.40MB 10.83%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+    2.50MB  4.23% 93.70%     2.50MB  4.23%  fmt.Sprintf
+    1.72MB  2.91% 96.61%     1.72MB  2.91%  runtime/pprof.StartCPUProfile
+    0.50MB  0.85% 97.46%    20.17MB 34.15%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+    0.50MB  0.85% 98.31%     0.50MB  0.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.fn_Main_AccountAgent (inline)
+    0.50MB  0.85% 99.15%     0.50MB  0.85%  runtime/pprof.newProfileBuilder
+    0.50MB  0.85%   100%     0.50MB  0.85%  sync.OnceFunc (inline)
+         0     0%   100%     0.50MB  0.85%  crypto/internal/fips140/ecdsa.init
+         0     0%   100%     0.50MB  0.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.NewAccountAgent (inline)
+         0     0%   100%     0.50MB  0.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7generated.NewDurableAccountAgent (inline)
+         0     0%   100%    25.66MB 43.43%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%     0.50MB  0.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+         0     0%   100%     0.50MB  0.85%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0%   100%    20.17MB 34.15%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%     2.50MB  4.23%  main.(*octExecutor).executeBatch.func1
+         0     0%   100%    25.66MB 43.43%  main.(*octExecutor).setup.func1
+         0     0%   100%     1.72MB  2.91%  main.main
+         0     0%   100%     1.72MB  2.91%  main.run
+         0     0%   100%     0.51MB  0.86%  runtime.allgadd
+         0     0%   100%     5.01MB  8.48%  runtime.allocm
+         0     0%   100%     0.50MB  0.85%  runtime.doInit (inline)
+         0     0%   100%     0.50MB  0.85%  runtime.doInit1
+         0     0%   100%     0.51MB  0.86%  runtime.growslice
+         0     0%   100%     2.22MB  3.76%  runtime.main
+         0     0%   100%        2MB  3.39%  runtime.malg
+         0     0%   100%     0.50MB  0.85%  runtime.mcall
+         0     0%   100%     4.51MB  7.63%  runtime.mstart
+         0     0%   100%     4.51MB  7.63%  runtime.mstart0
+         0     0%   100%     4.51MB  7.63%  runtime.mstart1
+         0     0%   100%     5.01MB  8.48%  runtime.newm
+         0     0%   100%     7.01MB 11.87%  runtime.newobject
+         0     0%   100%     2.51MB  4.25%  runtime.newproc.func1
+         0     0%   100%     2.51MB  4.25%  runtime.newproc1
+         0     0%   100%     0.50MB  0.85%  runtime.park_m
+         0     0%   100%     4.51MB  7.63%  runtime.resetspinning
+         0     0%   100%     5.01MB  8.48%  runtime.schedule
+         0     0%   100%     5.01MB  8.48%  runtime.startm
+         0     0%   100%     2.51MB  4.25%  runtime.systemstack
+         0     0%   100%     5.01MB  8.48%  runtime.wakep
+         0     0%   100%     0.50MB  0.85%  runtime/pprof.profileWriter

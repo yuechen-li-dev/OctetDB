@@ -1,0 +1,52 @@
+2026-08-22 14:12:41.593Z warning: a cluster id of 0 is reserved for testing and benchmarking, do not use in production
+2026-08-22 14:12:41.593Z warning: omit --cluster=0 to randomly generate a suitable id
+
+2026-08-22 14:12:41.594Z info(io): creating "0_0.tigerbeetle"...
+2026-08-22 14:12:41.594Z info(io): allocating 1.06298828125GiB...
+2026-08-22 14:12:41.941Z info(main): 0: formatted: cluster=0 replica_count=1
+2026-08-22 14:12:41.943Z info(io): opening "0_0.tigerbeetle"...
+2026-08-22 14:12:41.961Z warning(main): Grid cache size of 640MiB is small. See --cache-grid
+2026-08-22 14:12:41.971Z info(multiversioning): releases_bundled old: {  }
+2026-08-22 14:12:41.981Z info(multiversioning): releases_bundled new: { 0.17.5, 0.17.6, 0.17.7, 0.17.8, 0.17.9 }
+2026-08-22 14:12:41.981Z info(main): release=0.17.9
+2026-08-22 14:12:41.981Z info(main): release_client_min=0.16.4
+2026-08-22 14:12:41.981Z info(main): releases_bundled={ 0.17.5, 0.17.6, 0.17.7, 0.17.8, 0.17.9 }
+2026-08-22 14:12:41.981Z info(main): git_commit=cc1c06a924e49b11089c521b2209d34c92caaf18
+2026-08-22 14:12:41.982Z info(journal): 0: slot_count=1024 size=1.000244140625GiB headers_size=256KiB prepares_size=1GiB
+2026-08-22 14:12:42.363Z info(replica): 0R: init: replica_count=1 quorum_view_change=1 quorum_replication=1 release=0.17.9
+2026-08-22 14:12:42.363Z info(replica): superblock release=0.17.9
+2026-08-22 14:12:42.479Z info(replica): 0N: transition_to_normal_from_recovering_status: view=1 primary
+2026-08-22 14:12:42.479Z warning(main): multiversioning: upgrade polling and --experimental enabled - make sure to check CLI argument compatibility before upgrading.
+2026-08-22 14:12:42.479Z warning(main): If the cluster upgrades automatically, and incompatible experimental CLI arguments are set, it will crash.
+2026-08-22 14:12:42.479Z info(main): 0: Allocated 2932MiB during replica init
+2026-08-22 14:12:42.479Z info(main): 0: Grid cache: 640MiB, LSM-tree manifests: 128MiB
+2026-08-22 14:12:42.479Z info(main): 0: cluster=0: listening on net.SocketAddress{ .ip = 127.0.0.1, .port = 3000 }
+2026-08-22 14:12:42.479Z warning(mlock): Unable to lock pages in memory (memory would exceed RLIMIT_MEMLOCK) - kernel swap would otherwise bypass TigerBeetle's storage fault tolerance.
+2026-08-22 14:12:42.479Z warning(main): If this is a production replica, consider either running the replica with CAP_IPC_LOCK privilege, increasing the MEMLOCK process limit, or disabling swap system-wide.
+2026-08-22 14:12:42.479Z warning(main): A cluster id of 0 is reserved for testing and benchmarking, do not use in production.
+2026-08-22 14:12:42.479Z info(replica): 0N: state_machine_open_callback: sync_ops=0..0
+2026-08-22 14:12:44.552Z info(message_bus): 0: recv_update_peer: connection from client_likely=4587811336041777079201974148293588902
+2026-08-22 14:12:45.104Z info(message_bus): 0: on_recv: from=vsr.Peer{ .client_likely = 4587811336041777079201974148293588902 } orderly shutdown
+2026-08-22 14:12:45.168Z info(io): opening "0_0.tigerbeetle"...
+2026-08-22 14:12:45.190Z warning(main): Grid cache size of 640MiB is small. See --cache-grid
+2026-08-22 14:12:45.200Z info(multiversioning): releases_bundled old: {  }
+2026-08-22 14:12:45.211Z info(multiversioning): releases_bundled new: { 0.17.5, 0.17.6, 0.17.7, 0.17.8, 0.17.9 }
+2026-08-22 14:12:45.211Z info(main): release=0.17.9
+2026-08-22 14:12:45.211Z info(main): release_client_min=0.16.4
+2026-08-22 14:12:45.211Z info(main): releases_bundled={ 0.17.5, 0.17.6, 0.17.7, 0.17.8, 0.17.9 }
+2026-08-22 14:12:45.211Z info(main): git_commit=cc1c06a924e49b11089c521b2209d34c92caaf18
+2026-08-22 14:12:45.212Z info(journal): 0: slot_count=1024 size=1.000244140625GiB headers_size=256KiB prepares_size=1GiB
+2026-08-22 14:12:45.474Z info(replica): 0R: init: replica_count=1 quorum_view_change=1 quorum_replication=1 release=0.17.9
+2026-08-22 14:12:45.474Z info(replica): superblock release=0.17.9
+2026-08-22 14:12:45.599Z warning(main): multiversioning: upgrade polling and --experimental enabled - make sure to check CLI argument compatibility before upgrading.
+2026-08-22 14:12:45.599Z warning(main): If the cluster upgrades automatically, and incompatible experimental CLI arguments are set, it will crash.
+2026-08-22 14:12:45.599Z info(main): 0: Allocated 2932MiB during replica init
+2026-08-22 14:12:45.599Z info(main): 0: Grid cache: 640MiB, LSM-tree manifests: 128MiB
+2026-08-22 14:12:45.599Z info(main): 0: cluster=0: listening on net.SocketAddress{ .ip = 127.0.0.1, .port = 3000 }
+2026-08-22 14:12:45.599Z warning(mlock): Unable to lock pages in memory (memory would exceed RLIMIT_MEMLOCK) - kernel swap would otherwise bypass TigerBeetle's storage fault tolerance.
+2026-08-22 14:12:45.599Z warning(main): If this is a production replica, consider either running the replica with CAP_IPC_LOCK privilege, increasing the MEMLOCK process limit, or disabling swap system-wide.
+2026-08-22 14:12:45.599Z warning(main): A cluster id of 0 is reserved for testing and benchmarking, do not use in production.
+2026-08-22 14:12:45.599Z info(replica): 0R: state_machine_open_callback: sync_ops=0..0
+2026-08-22 14:12:45.755Z info(replica): 0N: transition_to_normal_from_recovering_status: view=2 primary
+2026-08-22 14:12:45.776Z info(message_bus): 0: recv_update_peer: connection from client_likely=247329565703783409851572853897608720937
+2026-08-22 14:12:45.786Z info(message_bus): 0: on_recv: from=vsr.Peer{ .client_likely = 247329565703783409851572853897608720937 } orderly shutdown

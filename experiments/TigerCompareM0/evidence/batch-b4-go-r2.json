@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T14:05:33.009262965Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "go",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go call; one Engine; harness concurrent burst",
+    "operations": 5000,
+    "accounts": 1000,
+    "offered_batch": 4,
+    "seed": 8170,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 1250,
+    "elapsed_seconds": 4.431255048,
+    "operations_per_second": 1128.3485030401707,
+    "batches_per_second": 282.0871257600427,
+    "p50_us": 3770.835,
+    "p95_us": 3960.374,
+    "p99_us": 4193.815,
+    "p99_9_us": 7890.436,
+    "max_us": 9113.343,
+    "go_runtime_cpu_seconds": 63.037560256000006,
+    "process_cpu_seconds": 0.3,
+    "process_cpu_cores": 0.06770091018241024,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 24250944,
+      "allocations": 143969,
+      "bytes_per_op": 4850.1888,
+      "allocs_per_op": 28.7938,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.006033806000000003,
+      "gc_cpu_percent_of_go_capacity": 0.009571763208309917,
+      "pause_total_us": 58.664,
+      "max_pause_us": 58.664,
+      "live_heap_bytes": 30611120,
+      "heap_goal_bytes": 62225770,
+      "rss_bytes": 52297728
+    },
+    "storage": {
+      "wal_bytes": 2471436,
+      "wal_bytes_per_op": 494.2872,
+      "syncs": 1251,
+      "commands_per_sync": 3.9968025579536373
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "c311a47724fbf26b4eb7139c99c40dbdcdbef0108b1c71b3e996c3885ba27efd",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

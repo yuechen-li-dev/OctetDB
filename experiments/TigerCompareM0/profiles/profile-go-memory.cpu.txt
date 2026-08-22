@@ -1,0 +1,145 @@
+File: tigercompare
+Build ID: 7a5ee42b2e241305f65786d45e3a9f0197b5336c
+Type: cpu
+Time: 2026-08-22 07:12:13 PDT
+Duration: 198.58ms, Total samples = 580ms (292.07%)
+Showing nodes accounting for 580ms, 100% of 580ms total
+      flat  flat%   sum%        cum   cum%
+      60ms 10.34% 10.34%       60ms 10.34%  runtime.futex
+      60ms 10.34% 20.69%       60ms 10.34%  runtime.memmove
+      30ms  5.17% 25.86%      120ms 20.69%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).commitGroup
+      30ms  5.17% 31.03%       90ms 15.52%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).processGoM1
+      30ms  5.17% 36.21%       30ms  5.17%  internal/runtime/maps.ctrlGroup.matchH2 (inline)
+      30ms  5.17% 41.38%       40ms  6.90%  runtime.casgstatus
+      30ms  5.17% 46.55%       30ms  5.17%  runtime.usleep
+      20ms  3.45% 50.00%       20ms  3.45%  runtime.procyieldAsm
+      20ms  3.45% 53.45%       20ms  3.45%  runtime.typePointers.next
+      10ms  1.72% 55.17%       10ms  1.72%  encoding/json/internal/jsonflags.Flags.Get
+      10ms  1.72% 56.90%       10ms  1.72%  encoding/json/jsontext.(*encoderState).reset
+      10ms  1.72% 58.62%       30ms  5.17%  encoding/json/v2.marshalEncode
+      10ms  1.72% 60.34%       10ms  1.72%  fmt.(*buffer).writeString (inline)
+      10ms  1.72% 62.07%       20ms  3.45%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).view
+      10ms  1.72% 63.79%       10ms  1.72%  internal/runtime/maps.memHashAES
+      10ms  1.72% 65.52%       80ms 13.79%  main.(*octExecutor).executeBatch.func1
+      10ms  1.72% 67.24%       10ms  1.72%  main.run.func3
+      10ms  1.72% 68.97%       10ms  1.72%  runtime.(*guintptr).cas (inline)
+      10ms  1.72% 70.69%       10ms  1.72%  runtime.(*mSpanStateBox).get (inline)
+      10ms  1.72% 72.41%       10ms  1.72%  runtime.(*spanInlineMarkBits).init
+      10ms  1.72% 74.14%       10ms  1.72%  runtime.(*sweepLocked).sweep
+      10ms  1.72% 75.86%       10ms  1.72%  runtime.(*timeHistogram).record
+      10ms  1.72% 77.59%       10ms  1.72%  runtime.(*timers).check
+      10ms  1.72% 79.31%       10ms  1.72%  runtime.(*waitq).dequeue (inline)
+      10ms  1.72% 81.03%       50ms  8.62%  runtime.chansend
+      10ms  1.72% 82.76%       10ms  1.72%  runtime.gogo
+      10ms  1.72% 84.48%       20ms  3.45%  runtime.lock2
+      10ms  1.72% 86.21%       20ms  3.45%  runtime.makeslice
+      10ms  1.72% 87.93%       10ms  1.72%  runtime.mallocgcSmallScanNoHeader
+      10ms  1.72% 89.66%       10ms  1.72%  runtime.memclrNoHeapPointers
+      10ms  1.72% 91.38%       10ms  1.72%  runtime.pcvalue
+      10ms  1.72% 93.10%       10ms  1.72%  runtime.releasem (inline)
+      10ms  1.72% 94.83%       30ms  5.17%  runtime.stackfree
+      10ms  1.72% 96.55%       20ms  3.45%  sync.(*Mutex).Lock (inline)
+      10ms  1.72% 98.28%       10ms  1.72%  sync.(*Pool).pin
+      10ms  1.72%   100%       10ms  1.72%  sync/atomic.(*Int32).Add (inline)
+         0     0%   100%       20ms  3.45%  _.goready.func1
+         0     0%   100%       50ms  8.62%  encoding/json.Marshal (inline)
+         0     0%   100%       20ms  3.45%  encoding/json/jsontext.export.GetBufferedEncoder (inline)
+         0     0%   100%       20ms  3.45%  encoding/json/jsontext.getBufferedEncoder
+         0     0%   100%       50ms  8.62%  encoding/json/v2.Marshal
+         0     0%   100%       20ms  3.45%  encoding/json/v2.makeStructArshaler.func2
+         0     0%   100%       10ms  1.72%  encoding/json/v2.makeUintArshaler.func1
+         0     0%   100%       30ms  5.17%  fmt.(*fmt).fmtInteger
+         0     0%   100%       30ms  5.17%  fmt.(*fmt).pad
+         0     0%   100%       40ms  6.90%  fmt.(*pp).doPrintf
+         0     0%   100%       30ms  5.17%  fmt.(*pp).fmtInteger
+         0     0%   100%       30ms  5.17%  fmt.(*pp).printArg
+         0     0%   100%       40ms  6.90%  fmt.Sprintf
+         0     0%   100%       30ms  5.17%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).Submit
+         0     0%   100%      160ms 27.59%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).process
+         0     0%   100%      190ms 32.76%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runAgent
+         0     0%   100%      120ms 20.69%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Engine).runCommitAuthority
+         0     0%   100%       30ms  5.17%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*Store).apply
+         0     0%   100%       30ms  5.17%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*lockTable).acquire
+         0     0%   100%       10ms  1.72%  internal/runtime/maps.MemHash
+         0     0%   100%       10ms  1.72%  internal/strconv.AppendUint
+         0     0%   100%       10ms  1.72%  internal/sync.(*Mutex).Lock (inline)
+         0     0%   100%       10ms  1.72%  internal/sync.(*Mutex).lockSlow
+         0     0%   100%       10ms  1.72%  internal/sync.runtime_doSpin
+         0     0%   100%       10ms  1.72%  main.main
+         0     0%   100%       10ms  1.72%  main.run
+         0     0%   100%       10ms  1.72%  runtime.(*mcache).nextFree
+         0     0%   100%       10ms  1.72%  runtime.(*mcache).refill
+         0     0%   100%       10ms  1.72%  runtime.(*mcentral).cacheSpan
+         0     0%   100%       10ms  1.72%  runtime.(*mcentral).grow
+         0     0%   100%       10ms  1.72%  runtime.(*mspan).initHeapBits
+         0     0%   100%       10ms  1.72%  runtime.(*mspan).initInlineMarkBits (inline)
+         0     0%   100%       10ms  1.72%  runtime.(*unwinder).next
+         0     0%   100%       10ms  1.72%  runtime.(*unwinder).resolveInternal
+         0     0%   100%       10ms  1.72%  runtime.bgsweep
+         0     0%   100%       10ms  1.72%  runtime.chanrecv
+         0     0%   100%       10ms  1.72%  runtime.chanrecv2
+         0     0%   100%       30ms  5.17%  runtime.chansend1
+         0     0%   100%       10ms  1.72%  runtime.convTnoptr
+         0     0%   100%       40ms  6.90%  runtime.copystack
+         0     0%   100%       20ms  3.45%  runtime.execute
+         0     0%   100%       60ms 10.34%  runtime.findRunnable
+         0     0%   100%       10ms  1.72%  runtime.funcspdelta (inline)
+         0     0%   100%       10ms  1.72%  runtime.futexsleep
+         0     0%   100%       50ms  8.62%  runtime.futexwakeup
+         0     0%   100%       20ms  3.45%  runtime.gcBgMarkWorker
+         0     0%   100%       20ms  3.45%  runtime.gcBgMarkWorker.func2
+         0     0%   100%       20ms  3.45%  runtime.gcDrain
+         0     0%   100%       20ms  3.45%  runtime.gcDrainMarkWorkerDedicated (inline)
+         0     0%   100%       20ms  3.45%  runtime.gdestroy
+         0     0%   100%       20ms  3.45%  runtime.gfput
+         0     0%   100%       80ms 13.79%  runtime.goexit0
+         0     0%   100%       20ms  3.45%  runtime.goready (inline)
+         0     0%   100%       20ms  3.45%  runtime.growslice
+         0     0%   100%       20ms  3.45%  runtime.lock (inline)
+         0     0%   100%       20ms  3.45%  runtime.lockWithRank (inline)
+         0     0%   100%       10ms  1.72%  runtime.mPark (inline)
+         0     0%   100%       10ms  1.72%  runtime.main
+         0     0%   100%       30ms  5.17%  runtime.mallocgc
+         0     0%   100%       10ms  1.72%  runtime.mallocgcLarge
+         0     0%   100%       10ms  1.72%  runtime.mallocgcSmallNoScanSC4
+         0     0%   100%       10ms  1.72%  runtime.mapaccess1
+         0     0%   100%       10ms  1.72%  runtime.mapaccess2
+         0     0%   100%       30ms  5.17%  runtime.mapaccess2_faststr
+         0     0%   100%      150ms 25.86%  runtime.mcall
+         0     0%   100%       10ms  1.72%  runtime.memclrNoHeapPointersChunked
+         0     0%   100%       10ms  1.72%  runtime.memhash
+         0     0%   100%       50ms  8.62%  runtime.newstack
+         0     0%   100%       10ms  1.72%  runtime.notesleep
+         0     0%   100%       50ms  8.62%  runtime.notewakeup
+         0     0%   100%       70ms 12.07%  runtime.park_m
+         0     0%   100%       20ms  3.45%  runtime.procyield (inline)
+         0     0%   100%       20ms  3.45%  runtime.ready
+         0     0%   100%       10ms  1.72%  runtime.readyWithTime
+         0     0%   100%       10ms  1.72%  runtime.releaseSudog
+         0     0%   100%       50ms  8.62%  runtime.resetspinning
+         0     0%   100%       40ms  6.90%  runtime.runqgrab
+         0     0%   100%       40ms  6.90%  runtime.runqsteal
+         0     0%   100%       20ms  3.45%  runtime.scanObject
+         0     0%   100%      130ms 22.41%  runtime.schedule
+         0     0%   100%       10ms  1.72%  runtime.selectgo
+         0     0%   100%       20ms  3.45%  runtime.selectnbsend
+         0     0%   100%       10ms  1.72%  runtime.semrelease1
+         0     0%   100%       30ms  5.17%  runtime.send
+         0     0%   100%       20ms  3.45%  runtime.sendDirect
+         0     0%   100%       20ms  3.45%  runtime.stackcacherelease
+         0     0%   100%       10ms  1.72%  runtime.stackpoolfree
+         0     0%   100%       50ms  8.62%  runtime.startm
+         0     0%   100%       40ms  6.90%  runtime.stealWork
+         0     0%   100%       10ms  1.72%  runtime.stopm
+         0     0%   100%       10ms  1.72%  runtime.sweepone
+         0     0%   100%       40ms  6.90%  runtime.systemstack
+         0     0%   100%       50ms  8.62%  runtime.wakep
+         0     0%   100%       10ms  1.72%  sort.Slice
+         0     0%   100%       10ms  1.72%  sort.partition_func
+         0     0%   100%       10ms  1.72%  sort.pdqsort_func
+         0     0%   100%       10ms  1.72%  strconv.AppendUint (inline)
+         0     0%   100%       10ms  1.72%  sync.(*Pool).Get
+         0     0%   100%       10ms  1.72%  sync.(*RWMutex).RLock (inline)
+         0     0%   100%       10ms  1.72%  sync.(*RWMutex).Unlock
+         0     0%   100%       10ms  1.72%  sync.runtime_Semrelease
+         0     0%   100%       10ms  1.72%  type:.hash.M1K7M8
