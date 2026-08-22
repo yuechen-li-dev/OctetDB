@@ -1,0 +1,16 @@
+expect error: "function 'Step' expects 1 argument, got 2"
+
+package DBSchedulerM7Invalid
+
+enum AccountMessage { Deposit(Int) Freeze }
+
+flow AccountAgent() -> Int {
+    state Waiting {
+        suspend
+    }
+}
+
+fn Main() -> Void {
+    let agent = AccountAgent()
+    Step(agent, AccountMessage.Deposit(10))
+}

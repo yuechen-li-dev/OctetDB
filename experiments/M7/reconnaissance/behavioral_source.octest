@@ -1,0 +1,144 @@
+package DBSchedulerM7
+
+enum AccountStatus { Open Frozen }
+enum CommandKind { Create Deposit Withdraw Transfer Freeze Unfreeze }
+enum EffectKind { Reject SetBalance SetStatus AwaitConfirmation CompleteTransfer }
+
+record CommandShape {
+    Kind: CommandKind
+    AccountWrites: Int
+    LedgerAppends: Int
+    MaxEffects: Int
+}
+
+record TransitionDecision {
+    Accepted: Bool
+    Effect: EffectKind
+    PriorBalance: Int
+    NextBalance: Int
+    PriorStatus: AccountStatus
+    NextStatus: AccountStatus
+}
+
+fn ShapeOf(kind: CommandKind) -> CommandShape {
+    return match kind {
+        case CommandKind.Create => CommandShape { Kind: kind AccountWrites: 1 LedgerAppends: 1 MaxEffects: 2 }
+        case CommandKind.Deposit => CommandShape { Kind: kind AccountWrites: 1 LedgerAppends: 1 MaxEffects: 2 }
+        case CommandKind.Withdraw => CommandShape { Kind: kind AccountWrites: 1 LedgerAppends: 1 MaxEffects: 2 }
+        case CommandKind.Transfer => CommandShape { Kind: kind AccountWrites: 2 LedgerAppends: 1 MaxEffects: 4 }
+        case CommandKind.Freeze => CommandShape { Kind: kind AccountWrites: 1 LedgerAppends: 0 MaxEffects: 1 }
+        case CommandKind.Unfreeze => CommandShape { Kind: kind AccountWrites: 1 LedgerAppends: 0 MaxEffects: 1 }
+    }
+}
+
+flow DecideWithdrawal(balance: Int, status: AccountStatus, amount: Int) -> TransitionDecision {
+    board {
+        PriorBalance: Int
+        NextBalance: Int
+        Accepted: Bool
+        EffectCodes: Int[]
+    }
+
+    state Validate {
+        board.PriorBalance = balance
+        board.NextBalance = balance
+        board.Accepted = false
+
+        if status == AccountStatus.Frozen {
+            board.EffectCodes = [0]
+            return TransitionDecision {
+                Accepted: false
+                Effect: EffectKind.Reject
+                PriorBalance: board.PriorBalance
+                NextBalance: board.NextBalance
+                PriorStatus: status
+                NextStatus: status
+            }
+        }
+
+        if amount <= 0 or amount > balance {
+            board.EffectCodes = [0]
+            return TransitionDecision {
+                Accepted: false
+                Effect: EffectKind.Reject
+                PriorBalance: board.PriorBalance
+                NextBalance: board.NextBalance
+                PriorStatus: status
+                NextStatus: status
+            }
+        }
+
+        board.NextBalance = balance - amount
+        board.Accepted = true
+        board.EffectCodes = [1]
+        return TransitionDecision {
+            Accepted: true
+            Effect: EffectKind.SetBalance
+            PriorBalance: board.PriorBalance
+            NextBalance: board.NextBalance
+            PriorStatus: status
+            NextStatus: status
+        }
+    }
+}
+
+// This is deliberately a seam probe, not a mailbox implementation. The
+// confirmation value is frozen at construction and cannot be injected later.
+flow TransferWorkflow(amount: Int, confirmedAtConstruction: Bool) -> EffectKind {
+    board {
+        Phase: Int
+        Amount: Int
+        EffectCodes: Int[]
+    }
+
+    state Begin {
+        board.Phase = 1
+        board.Amount = amount
+        board.EffectCodes = [3]
+        goto Waiting
+    }
+
+    state Waiting {
+        suspend
+        if confirmedAtConstruction {
+            board.Phase = 2
+            board.EffectCodes = [3, 4]
+            return EffectKind.CompleteTransfer
+        }
+        return EffectKind.Reject
+    }
+}
+
+[Fact]
+fn TypedTopologyAndWithdrawalDecisionCompileAndRun() -> Void {
+    let transfer = ShapeOf(CommandKind.Transfer)
+    Assert.Equal(2, transfer.AccountWrites, "transfer owns two account resources")
+    Assert.Equal(4, transfer.MaxEffects, "transfer has a statically bounded effect shape")
+
+    let accepted = DecideWithdrawal(100, AccountStatus.Open, 40)
+    Step(accepted)
+    let acceptedDecision = Result(accepted)!
+    Assert.True(acceptedDecision.Accepted, "valid withdrawal is accepted")
+    Assert.Equal(60, acceptedDecision.NextBalance, "withdrawal decision emits the next balance")
+
+    let rejected = DecideWithdrawal(100, AccountStatus.Frozen, 40)
+    Step(rejected)
+    let rejectedDecision = Result(rejected)!
+    Assert.False(rejectedDecision.Accepted, "frozen withdrawal is rejected")
+    Assert.Equal(100, rejectedDecision.NextBalance, "rejection changes no balance")
+}
+
+[Fact]
+fn DeclaredBoardPersistsAcrossSuspendButInputsAreFrozen() -> Void {
+    let workflow = TransferWorkflow(25, true)
+    Step(workflow)
+    Assert.Equal("Waiting", Active(workflow), "first step suspends in Waiting")
+    let waiting = BoardSnapshot(workflow)!
+    Assert.Equal(1, waiting.Phase, "flow-local board persists across suspend")
+    Assert.Equal(25, waiting.Amount, "board retained construction-time input")
+    Assert.Equal(1, Len(waiting.EffectCodes), "one bounded intent was recorded")
+
+    Step(workflow)
+    Assert.True(Complete(workflow), "second step consumes the frozen confirmation")
+    Assert.Equal(EffectKind.CompleteTransfer, Result(workflow)!, "workflow completes deterministically")
+}

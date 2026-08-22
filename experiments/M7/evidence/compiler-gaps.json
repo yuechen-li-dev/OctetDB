@@ -1,0 +1,31 @@
+{
+  "schema": "dbsched.m7.compiler-gaps.v1",
+  "observations": [
+    {
+      "operation": "Append(board.EffectCodes, code)",
+      "typecheck": "accepted",
+      "compiledExecution": "rejected",
+      "diagnostic": "compiled execution required: flow DBSchedulerM7.DecideWithdrawal: state Validate: compiled mode does not yet support builtin Append",
+      "workaround": "fixed bounded array literals in the probe",
+      "classification": "missing static-analysis/compiler support"
+    },
+    {
+      "operation": "board { Accounts: Accounts }",
+      "typecheck": "rejected as designed",
+      "diagnostic": "board fields must be Bool, String, Int/Int<D>, Float/Float<D>, or arrays of those types",
+      "classification": "missing board abstraction"
+    },
+    {
+      "operation": "Step(agent, message)",
+      "typecheck": "rejected as designed",
+      "diagnostic": "function 'Step' expects 1 argument, got 2",
+      "classification": "missing agent/message abstraction"
+    },
+    {
+      "operation": "Send(agent, message)",
+      "typecheck": "rejected because no surface exists",
+      "diagnostic": "function Main: undefined variable: Send",
+      "classification": "missing agent/message abstraction"
+    }
+  ]
+}

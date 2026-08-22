@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "oct.cli.result.v1",
+  "command": "oct test",
+  "octVersion": "dev",
+  "executionIdentity": "gooct-cli",
+  "target": "experiments/M7/reconnaissance",
+  "ok": true,
+  "exitStatus": 0,
+  "timingMilliseconds": 1294,
+  "diagnostics": [],
+  "stdoutSummary": [
+    "PASS DBSchedulerM7.DeclaredBoardPersistsAcrossSuspendButInputsAreFrozen",
+    "PASS DBSchedulerM7.TypedTopologyAndWithdrawalDecisionCompileAndRun",
+    "PASS invalid/authoritative_record_board.octfail",
+    "PASS invalid/no_mailbox_send_surface.octfail",
+    "PASS invalid/step_cannot_accept_message.octfail",
+    "PASS invalid/typed_status_board.octfail"
+  ],
+  "execution": {
+    "requested": "compiled",
+    "compiledCases": 2,
+    "interpretedFallbacks": 0
+  },
+  "summary": {
+    "discovered": 6,
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0
+  }
+}

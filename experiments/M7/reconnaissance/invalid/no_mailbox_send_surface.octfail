@@ -1,0 +1,16 @@
+expect error: "function Main: undefined variable: Send"
+
+package DBSchedulerM7Invalid
+
+enum AccountMessage { Deposit(Int) Freeze }
+
+flow AccountAgent() -> Int {
+    state Waiting {
+        suspend
+    }
+}
+
+fn Main() -> Void {
+    let agent = AccountAgent()
+    Send(agent, AccountMessage.Deposit(10))
+}

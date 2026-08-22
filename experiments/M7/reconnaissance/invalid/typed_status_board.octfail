@@ -1,0 +1,15 @@
+expect error: "board field Status: board fields must be Bool, String, Int/Int<D>, Float/Float<D>, or arrays of those types"
+
+package DBSchedulerM7Invalid
+
+enum AccountStatus { Open Frozen }
+
+flow AccountAgent() -> Int {
+    board {
+        Status: AccountStatus
+    }
+
+    state Start {
+        return 0
+    }
+}

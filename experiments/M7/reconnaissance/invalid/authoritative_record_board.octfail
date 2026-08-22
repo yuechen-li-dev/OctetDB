@@ -1,0 +1,18 @@
+expect error: "board field Accounts: board fields must be Bool, String, Int/Int<D>, Float/Float<D>, or arrays of those types"
+
+package DBSchedulerM7Invalid
+
+record Accounts {
+    IDs: Int[]
+    Balances: Int[]
+}
+
+flow AccountAgent() -> Int {
+    board {
+        Accounts: Accounts
+    }
+
+    state Start {
+        return 0
+    }
+}

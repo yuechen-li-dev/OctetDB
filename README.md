@@ -1,4 +1,12 @@
-# Database Scheduler — DBSCHED-M0 through M5
+# Database Scheduler — DBSCHED-M0 through M7
+
+DBSCHED-M7 begins OctetDB Write M0 and reaches **Meaningful progression**. Real
+compiled Oct probes show that typed command/effect topology and persistent
+flow-local boards work, but current boards are not shared authoritative state,
+flows cannot receive post-construction messages, and compiled flows cannot be
+restored. The experiment stops before hiding those gaps in a Go-owned write
+engine. See [`docs/experiments/DBSCHED_M7.md`](docs/experiments/DBSCHED_M7.md)
+and `experiments/M7/summary.json`.
 
 DBSCHED-M5 begins Phase 2 with a compiled immutable read cache. A deterministic
 typed Octagon catalog is validated as an Oct record table and emitted as fixed
