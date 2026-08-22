@@ -1,0 +1,238 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"os"
+	"runtime"
+	"sync"
+	"testing"
+	"time"
+)
+
+type queryResult struct {
+	Lane, Query          string
+	NSPerOp, AllocsPerOp float64
+	BytesPerOp           uint64
+	Iterations           int
+}
+type parallelResult struct {
+	Workers      int
+	OpsPerSecond float64
+}
+type result struct {
+	Rows           int              `json:"rows"`
+	GoVersion      string           `json:"go_version"`
+	LogicalHash    string           `json:"logical_hash"`
+	SchemaHash     string           `json:"schema_hash"`
+	RowCount       int              `json:"compiler_row_count"`
+	StartupAllocs  uint64           `json:"startup_allocations"`
+	StartupBytes   uint64           `json:"startup_allocated_bytes"`
+	HeapAfterReady uint64           `json:"heap_after_ready_bytes"`
+	Queries        []queryResult    `json:"queries"`
+	Parallel       []parallelResult `json:"parallel"`
+	Correctness    string           `json:"correctness"`
+}
+
+var sink uint64
+var pointIndex int
+
+func main() {
+	output := flag.String("output", "native.json", "result path")
+	hold := flag.Duration("hold", 0, "hold after measurement for external process-memory sampling")
+	startupProbe := flag.Bool("startup-probe", false, "run only identity and first-query startup path")
+	flag.Parse()
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	sink = point(1000418)
+	runtime.ReadMemStats(&after)
+	out := result{Rows: len(ProductsData), GoVersion: runtime.Version(), LogicalHash: ProductsDataLogicalHash, SchemaHash: ProductsDataSchemaHash, RowCount: ProductsDataRowCount, StartupAllocs: after.Mallocs - before.Mallocs, StartupBytes: after.TotalAlloc - before.TotalAlloc, HeapAfterReady: after.HeapAlloc}
+	if *startupProbe {
+		out.Correctness = "identity and first static query ready"
+		data, err := json.MarshalIndent(out, "", "  ")
+		if err != nil {
+			panic(err)
+		}
+		if err := os.WriteFile(*output, append(data, '\n'), 0o644); err != nil {
+			panic(err)
+		}
+		if *hold > 0 {
+			time.Sleep(*hold)
+		}
+		return
+	}
+	verify()
+	scanIters, indexedIters := 100, 500
+	if len(ProductsData) <= 10_000 {
+		scanIters, indexedIters = 1000, 3000
+	}
+	out.Queries = []queryResult{
+		measure("D_compiled_scan", "Q1_point", 100_000, pointSweep),
+		measure("D_compiled_scan", "Q2_category", scanIters, func() uint64 { return categoryScan(3) }),
+		measure("D_compiled_scan", "Q3_price", scanIters, func() uint64 { return priceScan(50_000, 80_000) }),
+		measure("D_compiled_scan", "Q4_projection", scanIters, func() uint64 { return activeScan(2) }),
+		measure("E_compiled_indexed", "Q1_point", 100_000, pointSweep),
+		measure("E_compiled_indexed", "Q2_category", indexedIters, func() uint64 { return categoryIndexed(3) }),
+		measure("E_compiled_indexed", "Q3_price", indexedIters, func() uint64 { return priceIndexed(50_000, 80_000) }),
+		measure("E_compiled_indexed", "Q4_projection", indexedIters, func() uint64 { return activeIndexed(2) }),
+	}
+	for _, workers := range []int{1, 2, 4, 8} {
+		out.Parallel = append(out.Parallel, parallel(workers))
+	}
+	out.Correctness = "D and E Q1-Q4 normalized traversals match"
+	data, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	if err := os.WriteFile(*output, append(data, '\n'), 0o644); err != nil {
+		panic(err)
+	}
+	if *hold > 0 {
+		time.Sleep(*hold)
+	}
+}
+
+func digest(id, price int) uint64 { return uint64(id)*0x9e3779b185ebca87 + uint64(price) }
+func point(id int) uint64 {
+	i := id - 1000001
+	if i < 0 || i >= len(ProductsData) || ProductsData[i].ID != id {
+		return 0
+	}
+	return digest(ProductsData[i].ID, ProductsData[i].PriceCents)
+}
+func pointSweep() uint64 { pointIndex++; return point(1000001 + pointIndex%len(ProductsData)) }
+func categoryScan(c int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		if int(ProductsData[i].Category) == c {
+			d += digest(ProductsData[i].ID, ProductsData[i].PriceCents)
+		}
+	}
+	return d
+}
+func priceScan(low, high int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		p := ProductsData[i].PriceCents
+		if p >= low && p <= high {
+			d += digest(ProductsData[i].ID, p)
+		}
+	}
+	return d
+}
+func activeScan(region int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		r := ProductsData[i]
+		if int(r.Status) == 1 && int(r.Region) == region {
+			d += digest(r.ID, r.PriceCents)
+		}
+	}
+	return d
+}
+func categoryIndexed(c int) uint64 {
+	var d uint64
+	for _, id := range CategoryRows[CategoryOffsets[c]:CategoryOffsets[c+1]] {
+		r := ProductsData[id]
+		d += digest(r.ID, r.PriceCents)
+	}
+	return d
+}
+func priceIndexed(low, high int) uint64 {
+	a := lowerPrice(low)
+	b := lowerPrice(high + 1)
+	var d uint64
+	for _, id := range PriceRows[a:b] {
+		r := ProductsData[id]
+		d += digest(r.ID, r.PriceCents)
+	}
+	return d
+}
+func lowerPrice(target int) int {
+	lo, hi := 0, len(PriceRows)
+	for lo < hi {
+		mid := (lo + hi) / 2
+		if ProductsData[PriceRows[mid]].PriceCents < target {
+			lo = mid + 1
+		} else {
+			hi = mid
+		}
+	}
+	return lo
+}
+func activeIndexed(region int) uint64 {
+	var d uint64
+	for i := ActiveOffsets[region]; i < ActiveOffsets[region+1]; i++ {
+		d += digest(ActiveIDs[i], ActivePrices[i])
+	}
+	return d
+}
+func verify() {
+	if ProductsDataRowCount != len(ProductsData) {
+		panic("row-count metadata mismatch")
+	}
+	for c := 0; c < 8; c++ {
+		if categoryScan(c) != categoryIndexed(c) {
+			panic("category mismatch")
+		}
+	}
+	if priceScan(50000, 80000) != priceIndexed(50000, 80000) {
+		panic("price mismatch")
+	}
+	for r := 0; r < 6; r++ {
+		if activeScan(r) != activeIndexed(r) {
+			panic("active projection mismatch")
+		}
+	}
+}
+func measure(lane, query string, n int, fn func() uint64) queryResult {
+	allocs := testing.AllocsPerRun(50, func() { sink = fn() })
+	var a, b runtime.MemStats
+	runtime.ReadMemStats(&a)
+	start := time.Now()
+	for i := 0; i < n; i++ {
+		sink = fn()
+	}
+	elapsed := time.Since(start)
+	if elapsed <= 0 {
+		n = 10_000_000
+		start = time.Now()
+		for i := 0; i < n; i++ {
+			sink = fn()
+		}
+		elapsed = time.Since(start)
+	}
+	runtime.ReadMemStats(&b)
+	return queryResult{Lane: lane, Query: query, NSPerOp: float64(elapsed.Nanoseconds()) / float64(n), AllocsPerOp: allocs, BytesPerOp: (b.TotalAlloc - a.TotalAlloc) / uint64(n), Iterations: n}
+}
+func parallel(workers int) parallelResult {
+	const ops = 20000
+	start := time.Now()
+	var wg sync.WaitGroup
+	for w := 0; w < workers; w++ {
+		wg.Add(1)
+		go func(worker int) {
+			defer wg.Done()
+			var d uint64
+			for i := worker; i < ops; i += workers {
+				switch i & 3 {
+				case 0:
+					d = point(1000001 + i%len(ProductsData))
+				case 1:
+					d = categoryIndexed(i % 8)
+				case 2:
+					d = priceIndexed(50000, 50500)
+				case 3:
+					d = activeIndexed(i % 6)
+				}
+			}
+			sink = d
+		}(w)
+	}
+	wg.Wait()
+	elapsed := time.Since(start)
+	if elapsed <= 0 {
+		elapsed = time.Nanosecond
+	}
+	return parallelResult{Workers: workers, OpsPerSecond: float64(ops) / elapsed.Seconds()}
+}

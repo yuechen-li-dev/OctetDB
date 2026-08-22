@@ -1,0 +1,5 @@
+package DBSchedulerM6InvalidRefinement
+concept PositivePrice = Int { Require(Self > 0, "price must be positive") }
+record table Products { Price: PositivePrice }
+[Artifact]
+fn Reject() -> Void ! Error { let table = LoadOctagon<Products>("experiments/M6/invalid/refinement_violation.octagon")? Artifact.WriteCompiledData("invalid.go", "Rows", table) }

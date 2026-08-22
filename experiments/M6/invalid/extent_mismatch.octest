@@ -1,0 +1,4 @@
+package DBSchedulerM6ExtentMismatch
+record table Products { ID: Int Price: Int }
+[Artifact]
+fn Reject() -> Void ! Error { let table = LoadOctagon<Products>("experiments/M6/invalid/extent_mismatch.octagon")? Artifact.WriteCompiledData("invalid.go", "Rows", table) }

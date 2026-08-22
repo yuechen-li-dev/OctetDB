@@ -1,0 +1,3 @@
+package DBSchedulerM6CorruptSort
+[Artifact]
+fn Reject() -> Void { let prices = [100, 300, 200] var sorted = true for i in 1..Len(prices) { if prices[i-1] > prices[i] { sorted = false } } StaticAssert.True(sorted, "price index sorted") Artifact.WriteCompiledData("invalid.go", "Prices", prices) }

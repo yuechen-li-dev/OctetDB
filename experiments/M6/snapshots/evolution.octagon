@@ -1,0 +1,6 @@
+Products {
+    ID: [1, 2, 3]
+    Category: [Category.Tools, Category.Books, Category.Tools]
+    Status: [Status.Active, Status.Draft, Status.Active]
+    PriceCents: [100, 200, 300]
+}

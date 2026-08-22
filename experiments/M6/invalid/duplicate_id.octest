@@ -1,0 +1,5 @@
+package DBSchedulerM6DuplicateID
+record table Products { ID: Int Price: Int }
+fn Unique(table: Products) -> Bool { for i in 1..Len(table) { if table[i-1].ID >= table[i].ID { return false } } return true }
+[Artifact]
+fn Reject() -> Void { let table = Products { ID: [1, 1] Price: [10, 20] } StaticAssert.True(Unique(table), "IDs must be unique") Artifact.WriteCompiledData("invalid.go", "Rows", table) }

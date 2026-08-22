@@ -1,0 +1,94 @@
+package main
+
+import (
+	"encoding/json"
+	"flag"
+	"os"
+	"runtime"
+	"testing"
+	"time"
+)
+
+type scanResult struct {
+	Rows           int     `json:"rows"`
+	LogicalHash    string  `json:"logical_hash"`
+	SchemaHash     string  `json:"schema_hash"`
+	StartupAllocs  uint64  `json:"startup_allocations"`
+	StartupBytes   uint64  `json:"startup_allocated_bytes"`
+	HeapAfterReady uint64  `json:"heap_after_ready_bytes"`
+	Q1NS           float64 `json:"q1_ns_per_op"`
+	Q2NS           float64 `json:"q2_ns_per_op"`
+	Q3NS           float64 `json:"q3_ns_per_op"`
+	Q4NS           float64 `json:"q4_ns_per_op"`
+	QueryAllocs    float64 `json:"query_allocations_per_op"`
+}
+
+var scanSink uint64
+var scanPoint int
+
+func main() {
+	output := flag.String("output", "scan.json", "result path")
+	flag.Parse()
+	var before, after runtime.MemStats
+	runtime.ReadMemStats(&before)
+	scanSink = scanPointQuery()
+	runtime.ReadMemStats(&after)
+	result := scanResult{Rows: len(ProductsData), LogicalHash: ProductsDataLogicalHash, SchemaHash: ProductsDataSchemaHash, StartupAllocs: after.Mallocs - before.Mallocs, StartupBytes: after.TotalAlloc - before.TotalAlloc, HeapAfterReady: after.HeapAlloc}
+	result.QueryAllocs = testing.AllocsPerRun(50, func() { scanSink = scanCategory(3) })
+	result.Q1NS = timed(100000, scanPointQuery)
+	result.Q2NS = timed(100, func() uint64 { return scanCategory(3) })
+	result.Q3NS = timed(100, func() uint64 { return scanPrice(50000, 80000) })
+	result.Q4NS = timed(100, func() uint64 { return scanActive(2) })
+	data, err := json.MarshalIndent(result, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	if err = os.WriteFile(*output, append(data, '\n'), 0o644); err != nil {
+		panic(err)
+	}
+}
+
+func scanDigest(id, price int) uint64 { return uint64(id)*0x9e3779b185ebca87 + uint64(price) }
+func scanPointQuery() uint64 {
+	scanPoint++
+	i := scanPoint % len(ProductsData)
+	r := ProductsData[i]
+	return scanDigest(r.ID, r.PriceCents)
+}
+func scanCategory(c int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		r := ProductsData[i]
+		if int(r.Category) == c {
+			d += scanDigest(r.ID, r.PriceCents)
+		}
+	}
+	return d
+}
+func scanPrice(low, high int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		r := ProductsData[i]
+		if r.PriceCents >= low && r.PriceCents <= high {
+			d += scanDigest(r.ID, r.PriceCents)
+		}
+	}
+	return d
+}
+func scanActive(region int) uint64 {
+	var d uint64
+	for i := range ProductsData {
+		r := ProductsData[i]
+		if int(r.Status) == 1 && int(r.Region) == region {
+			d += scanDigest(r.ID, r.PriceCents)
+		}
+	}
+	return d
+}
+func timed(n int, fn func() uint64) float64 {
+	start := time.Now()
+	for i := 0; i < n; i++ {
+		scanSink = fn()
+	}
+	return float64(time.Since(start).Nanoseconds()) / float64(n)
+}

@@ -53,3 +53,7 @@ experiments/M4/prediction/
 experiments/M5/data/catalog.json
 experiments/M5/data/catalog.bin
 experiments/M5/publication/*.exe
+
+# M6 scale inputs and compiled Go are intentionally ephemeral. The retained
+# report/evidence records hashes, timings, sizes, and reproducible parameters.
+experiments/M6/work/

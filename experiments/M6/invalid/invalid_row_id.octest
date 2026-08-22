@@ -1,0 +1,3 @@
+package DBSchedulerM6InvalidRow
+[Artifact]
+fn Reject() -> Void { let rows = [0, 1, 3] let rowCount = 3 var valid = true for i in 0..Len(rows) { if rows[i] < 0 or rows[i] >= rowCount { valid = false } } StaticAssert.True(valid, "row IDs valid") Artifact.WriteCompiledData("invalid.go", "Rows", rows) }

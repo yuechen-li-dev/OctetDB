@@ -1,0 +1,5 @@
+package DBSchedulerM6InvalidEnum
+enum Status { Draft Active }
+record table Products { Status: Status }
+[Artifact]
+fn Reject() -> Void ! Error { let table = LoadOctagon<Products>("experiments/M6/invalid/invalid_enum.octagon")? Artifact.WriteCompiledData("invalid.go", "Rows", table) }

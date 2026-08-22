@@ -1,0 +1,24 @@
+package DBSchedulerM6Evolution
+
+enum Category { Tools Books }
+enum Status { Draft Active }
+concept PositivePrice = Int { Require(Self > 0, "price must be positive") }
+record table Products { ID: Int Category: Category Status: Status PriceCents: PositivePrice }
+record table ProductsV2 { ID: Int Category: Category Status: Status PriceCents: PositivePrice Label: String }
+
+[Artifact]
+fn PublishEvolution() -> Void ! Error {
+    let source = LoadOctagon<Products>("experiments/M6/snapshots/evolution.octagon")?
+    let updated = source with { PriceCents: [100, 250, 300] }
+    StaticAssert.Equal(3, Len(source), "source row count")
+    StaticAssert.Equal(3, Len(updated), "updated row count")
+    StaticAssert.True(source[1].PriceCents == 200, "source remains unchanged")
+    StaticAssert.True(updated[1].PriceCents == 250, "updated column is reflected")
+    StaticAssert.Equal(source[0].ID, updated[0].ID, "unchanged ID semantics")
+    StaticAssert.True(source[2].Status == updated[2].Status, "unchanged enum semantics")
+    Artifact.WriteCompiledData("source.generated.go", "Source", source)
+    Artifact.WriteCompiledData("source_copy.generated.go", "SourceCopy", source)
+    Artifact.WriteCompiledData("updated.generated.go", "Updated", updated)
+    let schemaChanged = ProductsV2 { ID: [1, 2, 3] Category: [Category.Tools, Category.Books, Category.Tools] Status: [Status.Active, Status.Draft, Status.Active] PriceCents: [100, 250, 300] Label: ["A", "B", "C"] }
+    Artifact.WriteCompiledData("schema_changed.generated.go", "SchemaChanged", schemaChanged)
+}
