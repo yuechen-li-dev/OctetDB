@@ -12,6 +12,8 @@ At 100k, representative FLOW state fell from 780–784 checkpoint bytes to 54–
 
 M1's ordered central commit authority, canonical conflict ownership, segmented checksummed WAL, deterministic global sequence, bounded group sync, authoritative effects, semantic snapshots, snapshot-plus-tail recovery, process-crash retirement protocol, strict program identity, bounded 100,000-command dedupe horizon, and canonical Octagon publication frontier remain unchanged.
 
+The generated FLOW/checkpoint representation remains the retained M7 artifact produced with exact Oct commit `309da01b60ec0f7917d4fd5efd1707bd71d2d40f`; M2 does not regenerate it. This pin records experiment provenance and does not promise compatibility with checkpoint bytes from other Oct compiler revisions.
+
 Oct still owns command admission, nominal semantics, private workflow state, transition control, and yielded decisions. Go still owns mailboxes, registry, conflict scheduling, authoritative accounts/ledger, commit order, WAL, snapshots, dedupe runtime structures, recovery, and publication. No page manager, MVCC, B-tree, LSM, mmap, unsafe, cgo, allocator, replication, or Oct storage syntax was added.
 
 ## 3. Measured M1 amplification

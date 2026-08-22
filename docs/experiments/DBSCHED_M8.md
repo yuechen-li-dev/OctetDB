@@ -12,6 +12,8 @@ The resulting storage architecture remains small: an ordered commit authority, a
 
 The resumed M7 result remains intact. Oct owns typed admission, scalar utility arbitration, transition meaning, private workflow state, and yielded effects. Go owns keyed queues, conflict identity, authoritative mutable state, WAL/fsync, recovery, snapshots, and Octagon publication. M1 does not restart that architecture experiment or reinterpret the M7 PostgreSQL figures as universal equivalent-guarantee benchmarks.
 
+The generated FLOW/checkpoint representation used here is the retained M7 artifact produced with exact Oct commit `309da01b60ec0f7917d4fd5efd1707bd71d2d40f`; M1 did not regenerate it against a different compiler revision. This pin is experiment provenance, not a checkpoint ABI guarantee.
+
 The utility lesson is preserved unchanged: feature predicates feed scalar deterministic arbitration, followed by one typed switch and one rich decision. M1 adds no Oct compiler work and does not use record-valued `when utility` candidates as an inference system.
 
 ## 3. Durability invariants
