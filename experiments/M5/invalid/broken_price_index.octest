@@ -1,0 +1,15 @@
+package DBSchedulerM5BrokenIndex
+
+record table Products {
+    ID: Int
+    PriceCents: Int
+}
+
+[Fact]
+fn PriceIndexMustBeSorted() -> Void {
+    let rows = Products { ID: [1, 2] PriceCents: [100, 50] }
+    let index = [0, 1]
+    for i in 1..Len(index) {
+        Assert.True(rows[index[i - 1]].PriceCents <= rows[index[i]].PriceCents, "price index is sorted")
+    }
+}

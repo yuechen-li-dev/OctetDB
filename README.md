@@ -1,4 +1,11 @@
-# Database Scheduler — DBSCHED-M0 through M4
+# Database Scheduler — DBSCHED-M0 through M5
+
+DBSCHED-M5 begins Phase 2 with a compiled immutable read cache. A deterministic
+typed Octagon catalog is validated as an Oct record table and emitted as fixed
+Go arrays plus declared indexes. The report, reproducible evidence, Oct gaps,
+and publication/runtime tradeoffs are in
+[`docs/experiments/DBSCHED_M5.md`](docs/experiments/DBSCHED_M5.md) and
+`experiments/M5`.
 
 DBSCHED-M4 measures PostgreSQL feedback delay and evaluates a bounded Oct
 observer, persistence, linear extrapolation, and one filtered reactive

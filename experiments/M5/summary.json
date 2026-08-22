@@ -1,0 +1,251 @@
+{
+  "generated_at": "2026-08-22T02:35:43Z",
+  "go_version": "go1.26.2",
+  "rows": 10000,
+  "identity": {
+    "SnapshotVersion": "m5-seed-20260821-n10000",
+    "SnapshotHash": "8314fe505eed49b57b8faf1cd72069cd6f5d35a4f17da24adda6f05755385d0e",
+    "SchemaVersion": "product-v1",
+    "RowCount": 10000
+  },
+  "startup": [
+    {
+      "lane": "A_postgresql_publication",
+      "index_ns": 85778000,
+      "first_query_ns": 0,
+      "total_ns": 85778000,
+      "allocations": 40118,
+      "allocated_bytes": 2050744,
+      "live_heap_delta_bytes": -2988688
+    },
+    {
+      "lane": "A_postgresql_ready_pool",
+      "first_query_ns": 1186400,
+      "total_ns": 1186400,
+      "allocations": 21,
+      "allocated_bytes": 936,
+      "live_heap_delta_bytes": 936
+    },
+    {
+      "lane": "B_json",
+      "read_ns": 128840,
+      "decode_ns": 9309300,
+      "index_ns": 1546400,
+      "first_query_ns": 1,
+      "total_ns": 11371000,
+      "allocations": 40251,
+      "allocated_bytes": 3271464,
+      "live_heap_delta_bytes": 2161360
+    },
+    {
+      "lane": "C_binary",
+      "read_ns": 515600,
+      "decode_ns": 514600,
+      "index_ns": 2052000,
+      "first_query_ns": 2,
+      "total_ns": 3082200,
+      "allocations": 80059,
+      "allocated_bytes": 1518376,
+      "live_heap_delta_bytes": 1518376
+    },
+    {
+      "lane": "D_compiled",
+      "first_query_ns": 6,
+      "total_ns": 6,
+      "allocations": 0,
+      "allocated_bytes": 0,
+      "live_heap_delta_bytes": 0
+    },
+    {
+      "lane": "E_compiled",
+      "first_query_ns": 6,
+      "total_ns": 6,
+      "allocations": 0,
+      "allocated_bytes": 0,
+      "live_heap_delta_bytes": 0
+    }
+  ],
+  "queries": [
+    {
+      "lane": "A_postgresql",
+      "query": "Q1_point",
+      "ns_per_op": 269474.2,
+      "allocations_per_op": 12,
+      "bytes_per_op": 533,
+      "iterations": 1000
+    },
+    {
+      "lane": "A_postgresql",
+      "query": "Q2_category",
+      "ns_per_op": 583367,
+      "allocations_per_op": 2602,
+      "bytes_per_op": 62800,
+      "iterations": 100
+    },
+    {
+      "lane": "A_postgresql",
+      "query": "Q3_price",
+      "ns_per_op": 631441,
+      "allocations_per_op": 2406,
+      "bytes_per_op": 58110,
+      "iterations": 100
+    },
+    {
+      "lane": "A_postgresql",
+      "query": "Q4_projection",
+      "ns_per_op": 409094,
+      "allocations_per_op": 1140,
+      "bytes_per_op": 27645,
+      "iterations": 200
+    },
+    {
+      "lane": "B_json",
+      "query": "Q1_point",
+      "ns_per_op": 5.223,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 100000
+    },
+    {
+      "lane": "B_json",
+      "query": "Q2_category",
+      "ns_per_op": 10083.75,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "B_json",
+      "query": "Q3_price",
+      "ns_per_op": 9188.4,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "B_json",
+      "query": "Q4_projection",
+      "ns_per_op": 530.78,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 5000
+    },
+    {
+      "lane": "C_binary",
+      "query": "Q1_point",
+      "ns_per_op": 15.094,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 100000
+    },
+    {
+      "lane": "C_binary",
+      "query": "Q2_category",
+      "ns_per_op": 10455.15,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "C_binary",
+      "query": "Q3_price",
+      "ns_per_op": 9294.55,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "C_binary",
+      "query": "Q4_projection",
+      "ns_per_op": 436.46,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 5000
+    },
+    {
+      "lane": "D_compiled_scan",
+      "query": "Q1_point",
+      "ns_per_op": 20.54,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 100000
+    },
+    {
+      "lane": "D_compiled_scan",
+      "query": "Q2_category",
+      "ns_per_op": 14425.3,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "D_compiled_scan",
+      "query": "Q3_price",
+      "ns_per_op": 16956.6,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "D_compiled_scan",
+      "query": "Q4_projection",
+      "ns_per_op": 10074.56,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 5000
+    },
+    {
+      "lane": "E_compiled_indexed",
+      "query": "Q1_point",
+      "ns_per_op": 15.033,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 100000
+    },
+    {
+      "lane": "E_compiled_indexed",
+      "query": "Q2_category",
+      "ns_per_op": 10271.5,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "E_compiled_indexed",
+      "query": "Q3_price",
+      "ns_per_op": 9883.85,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 2000
+    },
+    {
+      "lane": "E_compiled_indexed",
+      "query": "Q4_projection",
+      "ns_per_op": 500.84,
+      "allocations_per_op": 0,
+      "bytes_per_op": 0,
+      "iterations": 5000
+    }
+  ],
+  "parallel_e": [
+    {
+      "workers": 1,
+      "ops_per_second": 384944.6603556273
+    },
+    {
+      "workers": 2,
+      "ops_per_second": 394113.365133027
+    },
+    {
+      "workers": 4,
+      "ops_per_second": 409509.29729433113
+    },
+    {
+      "workers": 8,
+      "ops_per_second": 802152.9785945478
+    }
+  ],
+  "postgresql_available": true,
+  "postgresql_version": "PostgreSQL 17.11 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit",
+  "correctness": "all available lanes match canonical logical results and identity"
+}

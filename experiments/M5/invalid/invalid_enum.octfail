@@ -1,0 +1,17 @@
+expect error: "enum 'Status' has no variant 'Unknown'"
+
+package DBSchedulerM5InvalidEnum
+
+enum Status { Draft Active Retired }
+
+record table Products {
+    ID: Int
+    Status: Status
+}
+
+fn Invalid() -> Products {
+    return Products {
+        ID: [1]
+        Status: [Status.Unknown]
+    }
+}

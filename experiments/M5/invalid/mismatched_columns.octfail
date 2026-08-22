@@ -1,0 +1,15 @@
+expect error: "columns have inconsistent literal lengths: ID: 2, Name: 1"
+
+package DBSchedulerM5InvalidColumns
+
+record table Products {
+    ID: Int
+    Name: String
+}
+
+fn Invalid() -> Products {
+    return Products {
+        ID: [1, 2]
+        Name: ["only-one"]
+    }
+}

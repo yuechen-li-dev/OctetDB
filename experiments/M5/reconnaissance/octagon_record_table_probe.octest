@@ -1,0 +1,18 @@
+package DBSchedulerM5OctagonProbe
+
+record table Products {
+    ID: Int
+    Name: String
+}
+
+[Fact]
+fn OctagonMaterializesTypedRecordTableStorage() -> Void {
+    match LoadOctagon<Products>("../Database-Scheduler/experiments/M5/reconnaissance/record_table.octagon") {
+        ok(value) -> {
+            Assert.Equal(1, Len(value), "record-table row count is preserved")
+            Assert.Equal(1, value[0].ID, "record-table cell type is preserved")
+            Assert.Equal("probe", value[0].Name, "record-table nominal fields are preserved")
+        }
+        err(problem) -> { Assert.True(false, "record-table Octagon load unexpectedly failed") }
+    }
+}

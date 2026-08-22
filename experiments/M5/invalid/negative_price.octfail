@@ -1,0 +1,19 @@
+expect error: "price must be positive"
+
+package DBSchedulerM5InvalidPrice
+
+concept PositivePrice = Int {
+    Require(Self > 0, "price must be positive")
+}
+
+record table Products {
+    ID: Int
+    PriceCents: PositivePrice
+}
+
+fn Invalid() -> Products {
+    return Products {
+        ID: [1]
+        PriceCents: [-1]
+    }
+}

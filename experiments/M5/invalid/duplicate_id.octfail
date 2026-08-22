@@ -1,0 +1,9 @@
+expect error: "product IDs must be unique"
+
+package DBSchedulerM5DuplicateID
+
+fn Invalid() -> Int[] {
+    let ids = [1, 1]
+    Require(1 != 1, "product IDs must be unique")
+    return ids
+}

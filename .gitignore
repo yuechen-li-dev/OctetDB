@@ -47,3 +47,9 @@ experiments/M4/**/trace.json
 experiments/M4/characterization/
 experiments/M4/shadow/
 experiments/M4/prediction/
+
+# M5 cache controls and native executables are deterministic publication
+# products. Retain their hashes/sizes in summary evidence, not duplicate bytes.
+experiments/M5/data/catalog.json
+experiments/M5/data/catalog.bin
+experiments/M5/publication/*.exe

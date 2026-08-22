@@ -1,0 +1,52 @@
+{
+  "oct_revision": "a997285fc006b29143c31f6391ca6f21a950adb2",
+  "go_version": "go1.26.2 windows/amd64",
+  "row_count": 10000,
+  "canonical_generation_seconds_warm": 0.162,
+  "oct_validation_seconds_median": 1.279,
+  "oct_artifact_seconds": [93.343, 94.891, 90.070, 93.311],
+  "oct_source_bytes": 153873,
+  "oct_source_sha256": "5F585B0EC641AA1EB402443A8A8C57DC5A01BC06AFC9CCADBD38DFA817CBAF15",
+  "octagon_bytes": 405759,
+  "octagon_sha256": "7D7E35F438C7AD1F3F61F1AAB368AD0001468C7FABA293CDFCBA8E7B140242D4",
+  "raw_generated_go_bytes": 1212657,
+  "raw_generated_go_sha256_run_1": "3BFDC431325373CE6048F05672D64EC1492762BD6023CDF2A804056BD619BA42",
+  "raw_generated_go_sha256_run_2": "3BFDC431325373CE6048F05672D64EC1492762BD6023CDF2A804056BD619BA42",
+  "raw_generated_go_sha256_final_octagon_path": "3BFDC431325373CE6048F05672D64EC1492762BD6023CDF2A804056BD619BA42",
+  "formatted_generated_go_bytes": 1386361,
+  "formatted_generated_go_sha256": "A1203527EDA020CD06EE57A21F93932020139CB25B0C5D029A05DAFFE61327FF",
+  "json_bytes": 1115612,
+  "binary_bytes": 280012,
+  "go_build_seconds_forced": {
+    "empty": 3.800,
+    "compiled_d": 3.906,
+    "compiled_e": 4.031,
+    "runtime_controls": 4.147
+  },
+  "executable_bytes": {
+    "empty": 2691072,
+    "compiled_d": 3212288,
+    "compiled_e": 3321344,
+    "runtime_controls": 3602944
+  },
+  "whole_process_ms_rotated_30": {
+    "empty_p50": 9.625,
+    "compiled_d_p50": 10.127,
+    "compiled_e_p50": 9.764,
+    "json_p50": 21.199,
+    "binary_p50": 12.923
+  },
+  "private_bytes_p50": {
+    "compiled_d": 46469120,
+    "compiled_e": 46571520,
+    "json": 51310592,
+    "binary": 48050176
+  },
+  "static_symbols_bytes_e": {
+    "products": 320000,
+    "category_rows": 40000,
+    "price_rows": 40000,
+    "active_projections": 27232,
+    "offsets": 144
+  }
+}
