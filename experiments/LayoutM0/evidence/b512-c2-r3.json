@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T15:52:24.044595526Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "c2",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one contiguous safe-Go command batch; one fixed-layout binary WAL frame and Sync",
+    "topology": "in-process Go; lane=c2",
+    "operations": 102400,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 22003,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 102400,
+    "batches": 200,
+    "elapsed_seconds": 0.290796578,
+    "operations_per_second": 352136.19329454424,
+    "batches_per_second": 687.7660025284067,
+    "p50_us": 1392.761,
+    "p95_us": 1810.056,
+    "p99_us": 2086.16,
+    "p99_9_us": 2912.57,
+    "max_us": 2912.57,
+    "go_runtime_cpu_seconds": 3.244413408,
+    "process_cpu_seconds": 0.1,
+    "process_cpu_cores": 0.34388300126420335,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 26209160,
+      "allocations": 205517,
+      "bytes_per_op": 255.948828125,
+      "allocs_per_op": 2.007001953125,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.0035799459999999988,
+      "gc_cpu_percent_of_go_capacity": 0.11034185690308917,
+      "pause_total_us": 68.092,
+      "max_pause_us": 68.092,
+      "live_heap_bytes": 22530296,
+      "heap_goal_bytes": 45298274,
+      "rss_bytes": 51511296
+    },
+    "storage": {
+      "wal_bytes": 14440800,
+      "wal_bytes_per_op": 141.0234375,
+      "syncs": 200,
+      "commands_per_sync": 512
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 102400,
+      "rejected": 0,
+      "state_digest": "f2f1d221425d05e71e7cbf6ff01e2ca7eab9083f05ecaad994226273e8e1067d",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

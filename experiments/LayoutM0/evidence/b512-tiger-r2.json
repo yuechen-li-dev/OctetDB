@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T15:51:38.522807405Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "loopback client; one production TigerBeetle 0.17.9 replica",
+    "operations": 102400,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 22002,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 102400,
+    "batches": 200,
+    "elapsed_seconds": 0.444321604,
+    "operations_per_second": 230463.69809197934,
+    "batches_per_second": 450.12441033589715,
+    "p50_us": 1885.278,
+    "p95_us": 2284.943,
+    "p99_us": 12558.734,
+    "p99_9_us": 20782.439,
+    "max_us": 20782.439,
+    "go_runtime_cpu_seconds": 6.7326289280000005,
+    "process_cpu_seconds": 0.05,
+    "process_cpu_cores": 0.1125311025839743,
+    "external_process": {
+      "pid": 49446,
+      "cpu_seconds": 0.16000000000000003,
+      "utilized_cores": 0.36009952826871783,
+      "rss_bytes": 3085266944
+    },
+    "gc": {
+      "allocated_bytes": 23374192,
+      "allocations": 1564,
+      "bytes_per_op": 228.26359375,
+      "allocs_per_op": 0.0152734375,
+      "gc_cycles": 9,
+      "gc_cpu_seconds": 0.00594716,
+      "gc_cpu_percent_of_go_capacity": 0.08833339938380753,
+      "pause_total_us": 523.487,
+      "max_pause_us": 79.188,
+      "live_heap_bytes": 2322384,
+      "heap_goal_bytes": 4881778,
+      "rss_bytes": 38486016
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 102400,
+      "rejected": 0,
+      "state_digest": "f2f1d221425d05e71e7cbf6ff01e2ca7eab9083f05ecaad994226273e8e1067d",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

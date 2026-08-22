@@ -1,0 +1,34 @@
+File: tigercompare-layout
+Build ID: 699316af481c6c12811f8e2bc56fa896122d943a
+Type: alloc_space
+Time: 2026-08-22 08:47:48 PDT
+Showing nodes accounting for 92.46MB, 100% of 92.46MB total
+      flat  flat%   sum%        cum   cum%
+   36.68MB 39.67% 39.67%    36.68MB 39.67%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.OpenSpecialized
+   14.96MB 16.18% 55.85%    18.80MB 20.34%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).SubmitBatch
+   13.93MB 15.06% 70.91%    35.23MB 38.10%  main.(*c2Executor).executeBatch
+   10.32MB 11.16% 82.08%    88.45MB 95.67%  main.run
+    4.06MB  4.39% 86.47%     4.06MB  4.39%  main.makeTransfers
+    3.85MB  4.16% 90.63%     3.85MB  4.16%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).remember (inline)
+    3.51MB  3.79% 94.42%     3.51MB  3.79%  runtime.mallocgc
+    2.50MB  2.70% 97.13%     2.50MB  2.70%  fmt.Sprintf
+    1.16MB  1.25% 98.38%     1.16MB  1.25%  runtime/pprof.StartCPUProfile
+       1MB  1.08% 99.46%        1MB  1.08%  main.(*c2Executor).setup
+    0.50MB  0.54%   100%     0.50MB  0.54%  runtime/pprof.newProfileBuilder
+         0     0%   100%     3.85MB  4.16%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).applyDurable
+         0     0%   100%    88.45MB 95.67%  main.main
+         0     0%   100%    36.68MB 39.67%  main.openExecutor
+         0     0%   100%     3.51MB  3.79%  runtime.allocm
+         0     0%   100%    88.45MB 95.67%  runtime.main
+         0     0%   100%        2MB  2.17%  runtime.mcall
+         0     0%   100%     1.50MB  1.63%  runtime.mstart
+         0     0%   100%     1.50MB  1.63%  runtime.mstart0
+         0     0%   100%     1.50MB  1.63%  runtime.mstart1
+         0     0%   100%     3.51MB  3.79%  runtime.newm
+         0     0%   100%     3.51MB  3.79%  runtime.newobject
+         0     0%   100%        2MB  2.17%  runtime.park_m
+         0     0%   100%     3.01MB  3.25%  runtime.resetspinning
+         0     0%   100%     3.51MB  3.79%  runtime.schedule
+         0     0%   100%     3.51MB  3.79%  runtime.startm
+         0     0%   100%     3.51MB  3.79%  runtime.wakep
+         0     0%   100%     0.50MB  0.54%  runtime/pprof.profileWriter

@@ -1,0 +1,32 @@
+File: tigercompare-layout
+Build ID: 699316af481c6c12811f8e2bc56fa896122d943a
+Type: alloc_space
+Time: 2026-08-22 08:47:47 PDT
+Showing nodes accounting for 102.64MB, 99.52% of 103.14MB total
+Dropped 9 nodes (cum <= 0.52MB)
+      flat  flat%   sum%        cum   cum%
+   42.66MB 41.36% 41.36%    42.66MB 41.36%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.OpenSpecialized
+   20.59MB 19.96% 61.33%    41.50MB 40.23%  main.(*c2Executor).executeBatch
+   14.07MB 13.64% 74.96%    17.91MB 17.36%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).SubmitBatch
+    8.31MB  8.05% 83.02%    98.14MB 95.14%  main.run
+    4.51MB  4.37% 87.39%     4.51MB  4.37%  main.makeTransfers
+    4.51MB  4.37% 91.76%     4.51MB  4.37%  runtime.mallocgc
+    3.85MB  3.73% 95.49%     3.85MB  3.73%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).remember (inline)
+       3MB  2.91% 98.39%        3MB  2.91%  fmt.Sprintf
+    1.16MB  1.12% 99.52%     1.16MB  1.12%  runtime/pprof.StartCPUProfile
+         0     0% 99.52%     3.85MB  3.73%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).applyDurable
+         0     0% 99.52%    98.14MB 95.14%  main.main
+         0     0% 99.52%    42.66MB 41.36%  main.openExecutor
+         0     0% 99.52%     4.01MB  3.89%  runtime.allocm
+         0     0% 99.52%    98.64MB 95.63%  runtime.main
+         0     0% 99.52%     1.50MB  1.46%  runtime.mcall
+         0     0% 99.52%     2.50MB  2.43%  runtime.mstart
+         0     0% 99.52%     2.50MB  2.43%  runtime.mstart0
+         0     0% 99.52%     2.50MB  2.43%  runtime.mstart1
+         0     0% 99.52%     4.01MB  3.89%  runtime.newm
+         0     0% 99.52%     4.51MB  4.37%  runtime.newobject
+         0     0% 99.52%     1.50MB  1.46%  runtime.park_m
+         0     0% 99.52%     3.51MB  3.40%  runtime.resetspinning
+         0     0% 99.52%     4.01MB  3.89%  runtime.schedule
+         0     0% 99.52%     4.01MB  3.89%  runtime.startm
+         0     0% 99.52%     4.01MB  3.89%  runtime.wakep

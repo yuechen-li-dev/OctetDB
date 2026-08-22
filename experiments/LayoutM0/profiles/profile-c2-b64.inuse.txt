@@ -1,0 +1,39 @@
+File: tigercompare-layout
+Build ID: 699316af481c6c12811f8e2bc56fa896122d943a
+Type: inuse_space
+Time: 2026-08-22 08:47:47 PDT
+Showing nodes accounting for 52.60MB, 100% of 52.60MB total
+      flat  flat%   sum%        cum   cum%
+   39.59MB 75.27% 75.27%    39.59MB 75.27%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.OpenSpecialized
+    4.51MB  8.57% 83.84%     4.51MB  8.57%  runtime.mallocgc
+    3.85MB  7.31% 91.15%     3.85MB  7.31%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).remember (inline)
+       3MB  5.70% 96.85%        3MB  5.70%  fmt.Sprintf
+    1.16MB  2.20% 99.05%     1.16MB  2.20%  runtime/pprof.StartCPUProfile
+    0.50MB  0.95%   100%     0.50MB  0.95%  sync.OnceFunc (inline)
+         0     0%   100%     0.50MB  0.95%  crypto/internal/fips140/ecdsa.init
+         0     0%   100%     3.85MB  7.31%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).SubmitBatch
+         0     0%   100%     3.85MB  7.31%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).applyDurable
+         0     0%   100%     6.85MB 13.02%  main.(*c2Executor).executeBatch
+         0     0%   100%    47.59MB 90.48%  main.main
+         0     0%   100%    39.59MB 75.27%  main.openExecutor
+         0     0%   100%    47.59MB 90.48%  main.run
+         0     0%   100%     0.50MB  0.95%  runtime.acquireSudog
+         0     0%   100%     4.01MB  7.62%  runtime.allocm
+         0     0%   100%     0.50MB  0.95%  runtime.doInit (inline)
+         0     0%   100%     0.50MB  0.95%  runtime.doInit1
+         0     0%   100%     0.50MB  0.95%  runtime.gcBgMarkWorker
+         0     0%   100%     0.50MB  0.95%  runtime.gcMarkDone
+         0     0%   100%    48.09MB 91.43%  runtime.main
+         0     0%   100%     1.50MB  2.86%  runtime.mcall
+         0     0%   100%     2.50MB  4.76%  runtime.mstart
+         0     0%   100%     2.50MB  4.76%  runtime.mstart0
+         0     0%   100%     2.50MB  4.76%  runtime.mstart1
+         0     0%   100%     4.01MB  7.62%  runtime.newm
+         0     0%   100%     4.51MB  8.57%  runtime.newobject
+         0     0%   100%     1.50MB  2.86%  runtime.park_m
+         0     0%   100%     3.51MB  6.67%  runtime.resetspinning
+         0     0%   100%     4.01MB  7.62%  runtime.schedule
+         0     0%   100%     0.50MB  0.95%  runtime.semacquire (inline)
+         0     0%   100%     0.50MB  0.95%  runtime.semacquire1
+         0     0%   100%     4.01MB  7.62%  runtime.startm
+         0     0%   100%     4.01MB  7.62%  runtime.wakep

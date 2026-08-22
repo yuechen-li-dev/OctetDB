@@ -1,0 +1,26 @@
+{
+  "accounts": 1000,
+  "before_snapshot_ops": 100000,
+  "tail_ops": 10000,
+  "snapshot_path": "/home/yuech/tigercompare/runs-layout-m0/recovery-c2/c2.snapshot",
+  "snapshot_bytes": 9633656,
+  "snapshot_duration": 46554308,
+  "wal_tail_bytes": 1330264,
+  "recovery": {
+    "snapshot_sequence": 101000,
+    "snapshot_bytes": 9633656,
+    "snapshot_decode": 23657495,
+    "wal_scan": 1517174,
+    "wal_bytes_scanned": 1330264,
+    "records_replayed": 10000,
+    "agents_restored": 0,
+    "dedupe_decode": 0,
+    "agent_restore": 0,
+    "flow_delta_apply": 0,
+    "total_ready": 32196700
+  },
+  "ready_wall": 32197040,
+  "duplicate_suppressed": true,
+  "conserved": true,
+  "digest": "7b4a2a51bd096bc9c9b7afa756b89a995cc073bb8fc10718ad8b9077e0a4a7ff"
+}

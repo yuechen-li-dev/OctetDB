@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T15:51:31.278471769Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "loopback client; one production TigerBeetle 0.17.9 replica",
+    "operations": 5000,
+    "accounts": 100000,
+    "offered_batch": 64,
+    "seed": 24001,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 79,
+    "elapsed_seconds": 0.168916322,
+    "operations_per_second": 29600.45507029214,
+    "batches_per_second": 467.6871901106158,
+    "p50_us": 1563.445,
+    "p95_us": 1724.849,
+    "p99_us": 30139.549,
+    "p99_9_us": 30139.549,
+    "max_us": 30139.549,
+    "go_runtime_cpu_seconds": 0,
+    "process_cpu_seconds": 0.019999999999999997,
+    "process_cpu_cores": 0.11840182028116854,
+    "external_process": {
+      "pid": 49244,
+      "cpu_seconds": 0.050000000000000044,
+      "utilized_cores": 0.29600455070292164,
+      "rss_bytes": 3085447168
+    },
+    "gc": {
+      "allocated_bytes": 1070400,
+      "allocations": 673,
+      "bytes_per_op": 214.08,
+      "allocs_per_op": 0.1346,
+      "gc_cycles": 0,
+      "gc_cpu_seconds": 0,
+      "gc_cpu_percent_of_go_capacity": 0,
+      "pause_total_us": 0,
+      "max_pause_us": 0,
+      "live_heap_bytes": 444544,
+      "heap_goal_bytes": 4194304,
+      "rss_bytes": 57511936
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "64a97ced6015708f8f10f53d225484ff59a0d08ac8f0b7fcdfbe2f30e4134836",
+      "detail": "user account net sum=100000000000000000 expected=100000000000000000"
+    }
+  }
+}

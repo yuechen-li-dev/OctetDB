@@ -1,0 +1,32 @@
+File: tigercompare-layout
+Build ID: 699316af481c6c12811f8e2bc56fa896122d943a
+Type: inuse_space
+Time: 2026-08-22 08:47:48 PDT
+Showing nodes accounting for 46192.79kB, 100% of 46192.79kB total
+      flat  flat%   sum%        cum   cum%
+34407.67kB 74.49% 74.49% 34407.67kB 74.49%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.OpenSpecialized
+ 3937.80kB  8.52% 83.01%  3937.80kB  8.52%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).remember (inline)
+    3591kB  7.77% 90.79%     3591kB  7.77%  runtime.mallocgc
+ 2560.04kB  5.54% 96.33%  2560.04kB  5.54%  fmt.Sprintf
+ 1184.27kB  2.56% 98.89%  1184.27kB  2.56%  runtime/pprof.StartCPUProfile
+  512.01kB  1.11%   100%   512.01kB  1.11%  runtime/pprof.newProfileBuilder
+         0     0%   100%  3937.80kB  8.52%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).SubmitBatch
+         0     0%   100%  3937.80kB  8.52%  github.com/yuechen-li-dev/database-scheduler/internal/m7write.(*SpecializedEngine).applyDurable
+         0     0%   100%  6497.84kB 14.07%  main.(*c2Executor).executeBatch
+         0     0%   100% 42089.78kB 91.12%  main.main
+         0     0%   100% 34407.67kB 74.49%  main.openExecutor
+         0     0%   100% 42089.78kB 91.12%  main.run
+         0     0%   100%     3591kB  7.77%  runtime.allocm
+         0     0%   100% 42089.78kB 91.12%  runtime.main
+         0     0%   100%     2052kB  4.44%  runtime.mcall
+         0     0%   100%     1539kB  3.33%  runtime.mstart
+         0     0%   100%     1539kB  3.33%  runtime.mstart0
+         0     0%   100%     1539kB  3.33%  runtime.mstart1
+         0     0%   100%     3591kB  7.77%  runtime.newm
+         0     0%   100%     3591kB  7.77%  runtime.newobject
+         0     0%   100%     2052kB  4.44%  runtime.park_m
+         0     0%   100%     3078kB  6.66%  runtime.resetspinning
+         0     0%   100%     3591kB  7.77%  runtime.schedule
+         0     0%   100%     3591kB  7.77%  runtime.startm
+         0     0%   100%     3591kB  7.77%  runtime.wakep
+         0     0%   100%   512.01kB  1.11%  runtime/pprof.profileWriter

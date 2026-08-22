@@ -158,7 +158,7 @@ type executor interface {
 
 func main() {
 	var c config
-	flag.StringVar(&c.Lane, "lane", "oct", "oct, go, tiger, or postgres")
+	flag.StringVar(&c.Lane, "lane", "oct", "oct, go, c2, tiger, or postgres")
 	flag.StringVar(&c.Durability, "durability", "group", "memory, sync_each, or group")
 	flag.StringVar(&c.Workload, "workload", "independent", "independent, hot_source, hot_destination, or hotset")
 	flag.StringVar(&c.Topology, "topology", "in_process", "reported process/network topology")
@@ -483,7 +483,7 @@ func makeTransfers(c config, offset, n int) []logicalTransfer {
 
 func openExecutor(ctx context.Context, c config) (executor, func(), string, error) {
 	switch c.Lane {
-	case "oct", "go":
+	case "oct", "go", "c2":
 		dir := c.StorageDir
 		cleanup := func() {}
 		if dir == "" {
@@ -504,6 +504,14 @@ func openExecutor(ctx context.Context, c config) (executor, func(), string, erro
 			return nil, nil, "", fmt.Errorf("unknown durability %q", c.Durability)
 		}
 		cfg := m7write.Config{StorageDir: dir, Durability: mode, SegmentRecords: 4096, GroupMax: c.Batch, GroupWait: c.GroupWait, DedupeWindow: max(c.Operations+c.Accounts+100, 100000), MailboxCapacity: max(c.Batch*2, 256)}
+		if c.Lane == "c2" {
+			e, err := m7write.OpenSpecialized(m7write.SpecializedConfig{StorageDir: dir, Durability: mode, DedupeWindow: max(c.Operations+c.Accounts+100, 100000), AccountHint: c.Accounts, RecordHint: c.Accounts + c.Warmup + c.Operations + 1})
+			if err != nil {
+				cleanup()
+				return nil, nil, "", err
+			}
+			return &c2Executor{e: e, accounts: c.Accounts}, cleanup, "one contiguous safe-Go command batch; one fixed-layout binary WAL frame and Sync", nil
+		}
 		var e *m7write.Engine
 		var err error
 		if c.Lane == "go" {
@@ -623,6 +631,81 @@ func (o *octExecutor) storage() storageResult {
 	return storageResult{WALBytes: s.WALBytesWritten, Syncs: s.Syncs}
 }
 func (o *octExecutor) close() error { return o.e.Close() }
+
+type c2Executor struct {
+	e        *m7write.SpecializedEngine
+	accounts int
+}
+
+func (c *c2Executor) setup(ctx context.Context) error {
+	_ = ctx
+	const setupBatch = 256
+	commands := make([]m7write.Command, 0, setupBatch)
+	for start := 1; start <= c.accounts; start += setupBatch {
+		commands = commands[:0]
+		end := min(start+setupBatch, c.accounts+1)
+		for i := start; i < end; i++ {
+			commands = append(commands, m7write.Command{ID: fmt.Sprintf("setup-%d", i), Kind: m7write.Create, Account: m7write.AccountID(i), Amount: int(initialBalance)})
+		}
+		results, err := c.e.SubmitBatch(commands)
+		if err != nil {
+			return err
+		}
+		for i, result := range results {
+			if !result.Accepted {
+				return fmt.Errorf("create %d rejected: %+v", start+i, result)
+			}
+		}
+	}
+	return nil
+}
+
+func (c *c2Executor) executeBatch(ctx context.Context, transfers []logicalTransfer) (int, int, error) {
+	_ = ctx
+	commands := make([]m7write.Command, len(transfers))
+	for i, t := range transfers {
+		commands[i] = m7write.Command{ID: fmt.Sprintf("x-%d", t.id), Kind: m7write.Transfer, Account: m7write.AccountID(t.source), Other: m7write.AccountID(t.destination), Amount: int(t.amount)}
+	}
+	results, err := c.e.SubmitBatch(commands)
+	if err != nil {
+		return 0, 0, err
+	}
+	accepted := 0
+	for _, result := range results {
+		if result.Accepted {
+			accepted++
+		}
+	}
+	return accepted, len(results) - accepted, nil
+}
+
+func (c *c2Executor) verify(ctx context.Context, transfer logicalTransfer) (correctnessResult, error) {
+	_ = ctx
+	id := fmt.Sprintf("x-%d", transfer.id)
+	result, err := c.e.Submit(m7write.Command{ID: id, Kind: m7write.Transfer, Account: m7write.AccountID(transfer.source), Other: m7write.AccountID(transfer.destination), Amount: int(transfer.amount)})
+	if err != nil {
+		return correctnessResult{}, err
+	}
+	h := sha256.New()
+	var total uint64
+	for i := 1; i <= c.accounts; i++ {
+		a, ok := c.e.Account(m7write.AccountID(i))
+		if !ok {
+			return correctnessResult{}, fmt.Errorf("account %d missing", i)
+		}
+		total += uint64(a.Balance)
+		fmt.Fprintf(h, "%d:%d;", i, a.Balance)
+	}
+	expected := uint64(c.accounts) * initialBalance
+	return correctnessResult{Conserved: total == expected, DuplicateSuppressed: result.Duplicate, StateDigest: hex.EncodeToString(h.Sum(nil)), Detail: fmt.Sprintf("sum=%d expected=%d", total, expected)}, nil
+}
+
+func (c *c2Executor) storage() storageResult {
+	s := c.e.StorageMetrics()
+	return storageResult{WALBytes: s.WALBytesWritten, Syncs: s.Syncs}
+}
+
+func (c *c2Executor) close() error { return c.e.Close() }
 
 type tigerExecutor struct {
 	client   tb.Client

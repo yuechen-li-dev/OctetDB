@@ -1,0 +1,16 @@
+goos: linux
+goarch: amd64
+pkg: github.com/yuechen-li-dev/database-scheduler/internal/m7write
+cpu: AMD Ryzen 7 7700X 8-Core Processor             
+BenchmarkAccountLookupMap-16      	100000000	        10.70 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16      	100000000	        10.50 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16      	100000000	        10.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16      	100000000	        12.47 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16      	100000000	        11.39 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16    	127488553	         9.209 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16    	136310612	         8.645 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16    	136857654	         8.745 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16    	140503399	         8.682 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16    	139919648	         8.552 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/yuechen-li-dev/database-scheduler/internal/m7write	16.173s

@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T15:43:07.659213889Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "loopback; Tiger server counters only",
+    "operations": 500000,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 27064,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 500000,
+    "batches": 7813,
+    "elapsed_seconds": 32.531388619,
+    "operations_per_second": 15369.77120331022,
+    "batches_per_second": 240.1680448229255,
+    "p50_us": 4137.68,
+    "p95_us": 7113.714,
+    "p99_us": 14494.443,
+    "p99_9_us": 96188.507,
+    "max_us": 149369.466,
+    "go_runtime_cpu_seconds": 475.728422224,
+    "process_cpu_seconds": 1.49,
+    "process_cpu_cores": 0.04580191818586445,
+    "external_process": {
+      "pid": 45788,
+      "cpu_seconds": 4.17,
+      "utilized_cores": 0.12818389183560724,
+      "rss_bytes": 3085479936
+    },
+    "gc": {
+      "allocated_bytes": 116658256,
+      "allocations": 54857,
+      "bytes_per_op": 233.316512,
+      "allocs_per_op": 0.109714,
+      "gc_cycles": 18,
+      "gc_cpu_seconds": 0.021401488,
+      "gc_cpu_percent_of_go_capacity": 0.004498677606847497,
+      "pause_total_us": 1478.78,
+      "max_pause_us": 278.669,
+      "live_heap_bytes": 9123520,
+      "heap_goal_bytes": 18484034,
+      "rss_bytes": 52797440
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 500000,
+      "rejected": 0,
+      "state_digest": "bb5750bea2ef01139256dc0acc5ab79d21a47ac750bdea6096751a436c639197",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

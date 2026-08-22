@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T15:52:12.237990096Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "go",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "harness concurrent burst of per-command Submit calls; internal group commit bounded by offered batch",
+    "topology": "in-process Go; lane=go",
+    "operations": 5000,
+    "accounts": 100000,
+    "offered_batch": 64,
+    "seed": 24002,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 5000,
+    "batches": 79,
+    "elapsed_seconds": 0.132779678,
+    "operations_per_second": 37656.36485426632,
+    "batches_per_second": 594.9705646974079,
+    "p50_us": 1548.109,
+    "p95_us": 2494.953,
+    "p99_us": 3720.207,
+    "p99_9_us": 3720.207,
+    "max_us": 3720.207,
+    "go_runtime_cpu_seconds": 0,
+    "process_cpu_seconds": 0.09999999999999964,
+    "process_cpu_cores": 0.7531272970853238,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 21927088,
+      "allocations": 132497,
+      "bytes_per_op": 4385.4176,
+      "allocs_per_op": 26.4994,
+      "gc_cycles": 0,
+      "gc_cpu_seconds": 0,
+      "gc_cpu_percent_of_go_capacity": 0,
+      "pause_total_us": 0,
+      "max_pause_us": 0,
+      "live_heap_bytes": 2849462816,
+      "heap_goal_bytes": 5773562618,
+      "rss_bytes": 1557065728
+    },
+    "storage": {
+      "wal_bytes": 2488395,
+      "wal_bytes_per_op": 497.679,
+      "syncs": 82,
+      "commands_per_sync": 60.97560975609756
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 5000,
+      "rejected": 0,
+      "state_digest": "64a97ced6015708f8f10f53d225484ff59a0d08ac8f0b7fcdfbe2f30e4134836",
+      "detail": "sum=100000000000000000 expected=100000000000000000"
+    }
+  }
+}

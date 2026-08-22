@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T15:43:40.624822552Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "loopback; Tiger server counters only",
+    "operations": 500000,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 27512,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 500000,
+    "batches": 977,
+    "elapsed_seconds": 11.352085358,
+    "operations_per_second": 44044.77100303354,
+    "batches_per_second": 86.06348253992753,
+    "p50_us": 7563.156,
+    "p95_us": 51989.999,
+    "p99_us": 85701.322,
+    "p99_9_us": 115355.642,
+    "max_us": 115355.642,
+    "go_runtime_cpu_seconds": 167.165948352,
+    "process_cpu_seconds": 0.38,
+    "process_cpu_cores": 0.03347402596230549,
+    "external_process": {
+      "pid": 46067,
+      "cpu_seconds": 1.51,
+      "utilized_cores": 0.13301520842916129,
+      "rss_bytes": 3085664256
+    },
+    "gc": {
+      "allocated_bytes": 115023456,
+      "allocations": 7025,
+      "bytes_per_op": 230.046912,
+      "allocs_per_op": 0.01405,
+      "gc_cycles": 18,
+      "gc_cpu_seconds": 0.017753203000000002,
+      "gc_cpu_percent_of_go_capacity": 0.010620107249723626,
+      "pause_total_us": 1394.938,
+      "max_pause_us": 130.828,
+      "live_heap_bytes": 9195584,
+      "heap_goal_bytes": 18628178,
+      "rss_bytes": 50950144
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 500000,
+      "rejected": 0,
+      "state_digest": "bb5750bea2ef01139256dc0acc5ab79d21a47ac750bdea6096751a436c639197",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

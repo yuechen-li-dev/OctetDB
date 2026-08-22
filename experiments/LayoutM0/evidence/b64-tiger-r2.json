@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-08-22T15:51:34.013351202Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "tiger",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one homogeneous CreateTransfers client request",
+    "topology": "loopback client; one production TigerBeetle 0.17.9 replica",
+    "operations": 12800,
+    "accounts": 1000,
+    "offered_batch": 64,
+    "seed": 21002,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 12800,
+    "batches": 200,
+    "elapsed_seconds": 0.329950342,
+    "operations_per_second": 38793.71641930288,
+    "batches_per_second": 606.1518190516075,
+    "p50_us": 1594.826,
+    "p95_us": 1731.892,
+    "p99_us": 3330.645,
+    "p99_9_us": 3855.76,
+    "max_us": 3855.76,
+    "go_runtime_cpu_seconds": 0,
+    "process_cpu_seconds": 0.03,
+    "process_cpu_cores": 0.09092277285774111,
+    "external_process": {
+      "pid": 49342,
+      "cpu_seconds": 0.050000000000000044,
+      "utilized_cores": 0.151537954762902,
+      "rss_bytes": 3085443072
+    },
+    "gc": {
+      "allocated_bytes": 2808096,
+      "allocations": 1522,
+      "bytes_per_op": 219.3825,
+      "allocs_per_op": 0.11890625,
+      "gc_cycles": 0,
+      "gc_cpu_seconds": 0,
+      "gc_cpu_percent_of_go_capacity": 0,
+      "pause_total_us": 0,
+      "max_pause_us": 0,
+      "live_heap_bytes": 438952,
+      "heap_goal_bytes": 4194304,
+      "rss_bytes": 34865152
+    },
+    "storage": {
+      "wal_bytes": 0,
+      "wal_bytes_per_op": 0,
+      "syncs": 0,
+      "commands_per_sync": 0
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 12800,
+      "rejected": 0,
+      "state_digest": "a72a28304fda849361892cc922365aa613150887c94063f6ed71710dce049400",
+      "detail": "user account net sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}

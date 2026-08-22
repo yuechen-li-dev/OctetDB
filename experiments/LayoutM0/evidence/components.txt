@@ -1,0 +1,26 @@
+goos: linux
+goarch: amd64
+pkg: github.com/yuechen-li-dev/database-scheduler/internal/m7write
+cpu: AMD Ryzen 7 7700X 8-Core Processor             
+BenchmarkAccountLookupMap-16       	100000000	        10.28 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16       	100000000	        10.40 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16       	100000000	        10.81 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16       	100000000	        10.35 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupMap-16       	100000000	        10.25 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16     	129126433	         8.962 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16     	137445898	         8.868 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16     	137127391	         8.727 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16     	135589819	         8.795 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAccountLookupDense-16     	137460548	         8.813 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWALRecordJSON-16          	  610270	      1744 ns/op	    2114 B/op	       6 allocs/op
+BenchmarkWALRecordJSON-16          	  619586	      1830 ns/op	    2114 B/op	       6 allocs/op
+BenchmarkWALRecordJSON-16          	  620557	      1811 ns/op	    2114 B/op	       6 allocs/op
+BenchmarkWALRecordJSON-16          	  627002	      1731 ns/op	    2114 B/op	       6 allocs/op
+BenchmarkWALRecordJSON-16          	  651612	      1754 ns/op	    2114 B/op	       6 allocs/op
+BenchmarkWALRecordC2Reusable-16    	84861529	        14.20 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWALRecordC2Reusable-16    	85350139	        14.11 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWALRecordC2Reusable-16    	85576940	        14.21 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWALRecordC2Reusable-16    	86168404	        14.19 ns/op	       0 B/op	       0 allocs/op
+BenchmarkWALRecordC2Reusable-16    	86184433	        14.38 ns/op	       0 B/op	       0 allocs/op
+PASS
+ok  	github.com/yuechen-li-dev/database-scheduler/internal/m7write	27.609s

@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-08-22T15:50:43.150933451Z",
+  "go_version": "go1.27.0-X:nodwarf5",
+  "goos": "linux",
+  "goarch": "amd64",
+  "gomaxprocs": 16,
+  "config": {
+    "lane": "c2",
+    "durability": "group",
+    "workload": "independent",
+    "batch_semantics": "one contiguous safe-Go command batch; one fixed-layout binary WAL frame and Sync",
+    "topology": "in-process Go; lane=c2",
+    "operations": 102400,
+    "accounts": 1000,
+    "offered_batch": 512,
+    "seed": 22001,
+    "duration": "0s",
+    "warmup_operations": 1000
+  },
+  "result": {
+    "operations": 102400,
+    "batches": 200,
+    "elapsed_seconds": 0.279589938,
+    "operations_per_second": 366250.66242548404,
+    "batches_per_second": 715.3333250497735,
+    "p50_us": 1361.05,
+    "p95_us": 1524.139,
+    "p99_us": 1763.88,
+    "p99_9_us": 2279.17,
+    "max_us": 2279.17,
+    "go_runtime_cpu_seconds": 3.1044216799999997,
+    "process_cpu_seconds": 0.09000000000000001,
+    "process_cpu_cores": 0.3218999962723981,
+    "external_process": {
+      "cpu_seconds": 0,
+      "utilized_cores": 0,
+      "rss_bytes": 0
+    },
+    "gc": {
+      "allocated_bytes": 26209608,
+      "allocations": 205524,
+      "bytes_per_op": 255.953203125,
+      "allocs_per_op": 2.0070703125,
+      "gc_cycles": 1,
+      "gc_cpu_seconds": 0.0038925320000000006,
+      "gc_cpu_percent_of_go_capacity": 0.1253867032651312,
+      "pause_total_us": 59.006,
+      "max_pause_us": 59.006,
+      "live_heap_bytes": 22530328,
+      "heap_goal_bytes": 45298322,
+      "rss_bytes": 51380224
+    },
+    "storage": {
+      "wal_bytes": 14440800,
+      "wal_bytes_per_op": 141.0234375,
+      "syncs": 200,
+      "commands_per_sync": 512
+    },
+    "correctness": {
+      "conserved": true,
+      "duplicate_suppressed": true,
+      "accepted": 102400,
+      "rejected": 0,
+      "state_digest": "f2f1d221425d05e71e7cbf6ff01e2ca7eab9083f05ecaad994226273e8e1067d",
+      "detail": "sum=1000000000000000 expected=1000000000000000"
+    }
+  }
+}
