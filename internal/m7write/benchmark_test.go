@@ -106,10 +106,13 @@ func TestAgentPopulationEvidence(t *testing.T) {
 		for i := 1; i <= population; i++ {
 			id := AccountID(i)
 			entry := e.entry(id)
-			machine := generated.NewAccountAgent(i)
+			machine := generated.NewDurableAccountAgent(i)
 			machine.Step(generated.Main_CommandContext{Kind: generated.NewCommandKindDeposit(), AccountA: i, Amount: 1, StatusA: generated.NewAccountStatusMissing()})
 			checkpoint, err := machine.Checkpoint()
 			if err != nil {
+				t.Fatal(err)
+			}
+			if err := machine.AcceptCommitted(checkpoint); err != nil {
 				t.Fatal(err)
 			}
 			entry.machine = machine

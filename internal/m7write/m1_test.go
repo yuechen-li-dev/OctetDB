@@ -343,6 +343,10 @@ func TestM1CrashWindowRecoveryMatrix(t *testing.T) {
 		{DuringWALAppend, false, 0},
 		{AfterWALAppendBeforeSync, true, 0},
 		{AfterWALSyncBeforeApply, true, 0},
+		{AfterStepBeforeDeltaExport, false, 0},
+		{AfterDeltaExportBeforeWALAppend, false, 0},
+		{AfterSyncBeforeDirtyClear, true, 0},
+		{AfterStateApplyBeforeDirtyClear, true, 0},
 		{AfterStateApplyBeforeAck, true, 0},
 		{DuringSegmentRotation, false, 3},
 	}
@@ -382,7 +386,7 @@ func TestM1CrashWindowRecoveryMatrix(t *testing.T) {
 }
 
 func TestM1SnapshotInstallationCrashMatrix(t *testing.T) {
-	for _, point := range []FailurePoint{DuringSnapshotWrite, AfterSnapshotSyncBeforeInstall, AfterSnapshotInstallBeforeCleanup} {
+	for _, point := range []FailurePoint{DuringSnapshotFlowCheckpoint, DuringCompactDedupeEncoding, DuringSnapshotWrite, AfterSnapshotSyncBeforeInstall, AfterSnapshotInstallBeforeCleanup} {
 		t.Run(string(point), func(t *testing.T) {
 			dir := t.TempDir()
 			cfg := m1Config(dir, SyncEach)

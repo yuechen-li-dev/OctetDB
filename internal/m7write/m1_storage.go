@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	m1WALVersion      = 2
-	m1SnapshotVersion = 1
+	m1WALVersion      = 3
+	m1SnapshotVersion = 2
 	m1WALMagic        = "OCTWAL01"
 	m1EndMagic        = "OCTEND01"
 	m1SnapshotMagic   = "OCTSNAP1"
@@ -42,16 +42,19 @@ type snapshotResult struct {
 }
 
 type durableSnapshot struct {
-	Version   int              `json:"version"`
-	Sequence  uint64           `json:"sequence"`
-	SchemaID  string           `json:"schema_id"`
-	ProgramID string           `json:"program_id"`
-	Accounts  []Account        `json:"accounts"`
-	Ledger    []LedgerEntry    `json:"ledger"`
-	Dedupe    []snapshotResult `json:"dedupe"`
-	Agents    []snapshotAgent  `json:"agents"`
-	Octagon   []byte           `json:"octagon"`
-	OctHash   string           `json:"octagon_sha256"`
+	Version       int              `json:"version"`
+	Sequence      uint64           `json:"sequence"`
+	SchemaID      string           `json:"schema_id"`
+	ProgramID     string           `json:"program_id"`
+	Accounts      []Account        `json:"accounts"`
+	Ledger        []LedgerEntry    `json:"ledger"`
+	Dedupe        []snapshotResult `json:"dedupe,omitempty"`
+	DedupeFormat  string           `json:"dedupe_format,omitempty"`
+	DedupeCompact []byte           `json:"dedupe_compact,omitempty"`
+	DedupeHorizon int              `json:"dedupe_horizon"`
+	Agents        []snapshotAgent  `json:"agents"`
+	Octagon       []byte           `json:"octagon"`
+	OctHash       string           `json:"octagon_sha256"`
 }
 
 type segmentMeta struct {
@@ -299,18 +302,19 @@ func (s *m1Storage) appendGroup(records []logRecord) error {
 		return err
 	}
 	for _, record := range records {
+		s.stats.FlowDeltaBytes += uint64(len(record.FlowDelta))
 		if err := s.ensureSegment(record.Sequence); err != nil {
-			return err
+			return fmt.Errorf("ensure WAL segment: %w", err)
 		}
 		if s.segment.records >= s.segmentRecords {
 			if err := s.inject(DuringSegmentRotation); err != nil {
 				return err
 			}
 			if err := s.closeSegment(true); err != nil {
-				return err
+				return fmt.Errorf("rotate WAL segment: %w", err)
 			}
 			if err := s.ensureSegment(record.Sequence); err != nil {
-				return err
+				return fmt.Errorf("ensure rotated WAL segment: %w", err)
 			}
 		}
 		framed, err := frame(record)
@@ -322,7 +326,7 @@ func (s *m1Storage) appendGroup(records []logRecord) error {
 			return err
 		}
 		if _, err := s.file.Write(framed); err != nil {
-			return err
+			return fmt.Errorf("append WAL frame: %w", err)
 		}
 		s.segment.records++
 		s.segment.last = record.Sequence
@@ -333,7 +337,7 @@ func (s *m1Storage) appendGroup(records []logRecord) error {
 		return err
 	}
 	if err := s.file.Sync(); err != nil {
-		return err
+		return fmt.Errorf("sync WAL group: %w", err)
 	}
 	s.stats.Syncs++
 	s.stats.Committed += uint64(len(records))

@@ -84,6 +84,10 @@ type Config struct {
 	DedupeWindow        int
 	FailureInjector     func(FailurePoint) error
 	GoBehavioralControl bool
+	// FullCheckpointWAL and JSONDedupeSnapshot retain the independent M1
+	// ablations. Normal M2 operation leaves both false.
+	FullCheckpointWAL  bool
+	JSONDedupeSnapshot bool
 }
 
 type FailurePoint string
@@ -93,9 +97,15 @@ const (
 	DuringWALAppend                   FailurePoint = "during_wal_append"
 	AfterWALAppendBeforeSync          FailurePoint = "after_wal_append_before_sync"
 	AfterWALSyncBeforeApply           FailurePoint = "after_wal_sync_before_apply"
+	AfterStepBeforeDeltaExport        FailurePoint = "after_step_before_delta_export"
+	AfterDeltaExportBeforeWALAppend   FailurePoint = "after_delta_export_before_wal_append"
+	AfterSyncBeforeDirtyClear         FailurePoint = "after_sync_before_dirty_clear"
+	AfterStateApplyBeforeDirtyClear   FailurePoint = "after_state_apply_before_dirty_clear"
 	AfterStateApplyBeforeAck          FailurePoint = "after_state_apply_before_ack"
 	DuringSegmentRotation             FailurePoint = "during_segment_rotation"
 	DuringSnapshotWrite               FailurePoint = "during_snapshot_temp_write"
+	DuringSnapshotFlowCheckpoint      FailurePoint = "during_snapshot_flow_checkpoint"
+	DuringCompactDedupeEncoding       FailurePoint = "during_compact_dedupe_encoding"
 	AfterSnapshotSyncBeforeInstall    FailurePoint = "after_snapshot_sync_before_install"
 	AfterSnapshotInstallBeforeCleanup FailurePoint = "after_snapshot_install_before_wal_cleanup"
 )
@@ -108,6 +118,9 @@ type RecoveryStats struct {
 	WALBytesScanned  int64         `json:"wal_bytes_scanned"`
 	RecordsReplayed  int           `json:"records_replayed"`
 	AgentsRestored   int           `json:"agents_restored"`
+	DedupeDecode     time.Duration `json:"dedupe_decode"`
+	AgentRestore     time.Duration `json:"agent_restore"`
+	FlowDeltaApply   time.Duration `json:"flow_delta_apply"`
 	TotalReady       time.Duration `json:"total_ready"`
 }
 
@@ -119,6 +132,8 @@ type StorageStats struct {
 	LogicalStateBytes    uint64 `json:"logical_state_bytes"`
 	FlowCheckpointBytes  uint64 `json:"flow_checkpoint_bytes"`
 	DedupeBytes          uint64 `json:"dedupe_bytes"`
+	FlowDeltaBytes       uint64 `json:"flow_delta_bytes"`
+	DedupeDecodeNanos    uint64 `json:"dedupe_decode_nanos"`
 	PublicationBytes     uint64 `json:"publication_bytes"`
 }
 

@@ -22,22 +22,25 @@ type report struct {
 	Results     []result `json:"results"`
 }
 type result struct {
-	Control             string  `json:"control"`
-	Commits             int     `json:"commits"`
-	Tail                string  `json:"tail"`
-	TimeToReadyMillis   float64 `json:"time_to_ready_ms"`
-	RecordsReplayed     int     `json:"records_replayed"`
-	AgentsRestored      int     `json:"agents_restored"`
-	SnapshotBytes       int64   `json:"snapshot_bytes"`
-	WALBytesScanned     int64   `json:"wal_bytes_scanned"`
-	RecoveryAllocs      uint64  `json:"recovery_allocs"`
-	RecoveryBytes       uint64  `json:"recovery_bytes"`
-	CanonicalHash       string  `json:"canonical_hash"`
-	LogicalStateBytes   uint64  `json:"logical_state_bytes"`
-	FlowCheckpointBytes uint64  `json:"flow_checkpoint_bytes"`
-	DedupeBytes         uint64  `json:"dedupe_bytes"`
-	PublicationBytes    uint64  `json:"publication_bytes"`
-	SnapshotPauseMillis float64 `json:"snapshot_pause_ms"`
+	Control              string  `json:"control"`
+	Commits              int     `json:"commits"`
+	Tail                 string  `json:"tail"`
+	TimeToReadyMillis    float64 `json:"time_to_ready_ms"`
+	RecordsReplayed      int     `json:"records_replayed"`
+	AgentsRestored       int     `json:"agents_restored"`
+	SnapshotBytes        int64   `json:"snapshot_bytes"`
+	WALBytesScanned      int64   `json:"wal_bytes_scanned"`
+	RecoveryAllocs       uint64  `json:"recovery_allocs"`
+	RecoveryBytes        uint64  `json:"recovery_bytes"`
+	CanonicalHash        string  `json:"canonical_hash"`
+	LogicalStateBytes    uint64  `json:"logical_state_bytes"`
+	FlowCheckpointBytes  uint64  `json:"flow_checkpoint_bytes"`
+	DedupeBytes          uint64  `json:"dedupe_bytes"`
+	PublicationBytes     uint64  `json:"publication_bytes"`
+	SnapshotPauseMillis  float64 `json:"snapshot_pause_ms"`
+	DedupeDecodeMillis   float64 `json:"dedupe_decode_ms"`
+	AgentRestoreMillis   float64 `json:"agent_restore_ms"`
+	FlowDeltaApplyMillis float64 `json:"flow_delta_apply_ms"`
 }
 
 func main() {
@@ -146,7 +149,7 @@ func runSnapshot(n, tail int) result {
 	if tail > 0 {
 		label = "medium"
 	}
-	return result{Control: "m1_snapshot", Commits: n + tail, Tail: label, TimeToReadyMillis: float64(elapsed.Microseconds()) / 1000, RecordsReplayed: metrics.RecordsReplayed, AgentsRestored: metrics.AgentsRestored, SnapshotBytes: snapshotBytes, WALBytesScanned: metrics.WALBytesScanned, RecoveryAllocs: after.Mallocs - before.Mallocs, RecoveryBytes: after.TotalAlloc - before.TotalAlloc, CanonicalHash: hash, LogicalStateBytes: storageBreakdown.LogicalStateBytes, FlowCheckpointBytes: storageBreakdown.FlowCheckpointBytes, DedupeBytes: storageBreakdown.DedupeBytes, PublicationBytes: storageBreakdown.PublicationBytes, SnapshotPauseMillis: float64(snapshotPause.Microseconds()) / 1000}
+	return result{Control: "m2_snapshot", Commits: n + tail, Tail: label, TimeToReadyMillis: float64(elapsed.Microseconds()) / 1000, RecordsReplayed: metrics.RecordsReplayed, AgentsRestored: metrics.AgentsRestored, SnapshotBytes: snapshotBytes, WALBytesScanned: metrics.WALBytesScanned, RecoveryAllocs: after.Mallocs - before.Mallocs, RecoveryBytes: after.TotalAlloc - before.TotalAlloc, CanonicalHash: hash, LogicalStateBytes: storageBreakdown.LogicalStateBytes, FlowCheckpointBytes: storageBreakdown.FlowCheckpointBytes, DedupeBytes: storageBreakdown.DedupeBytes, PublicationBytes: storageBreakdown.PublicationBytes, SnapshotPauseMillis: float64(snapshotPause.Microseconds()) / 1000, DedupeDecodeMillis: float64(metrics.DedupeDecode.Microseconds()) / 1000, AgentRestoreMillis: float64(metrics.AgentRestore.Microseconds()) / 1000, FlowDeltaApplyMillis: float64(metrics.FlowDeltaApply.Microseconds()) / 1000}
 }
 
 func populate(e *m7write.Engine, n, accounts int, prefix string) {

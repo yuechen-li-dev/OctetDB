@@ -1,0 +1,41 @@
+{
+  "milestone": "OctetDB Write M2",
+  "verdict": "Success",
+  "architecture": "full FLOW checkpoints in snapshots; semantic FLOW deltas plus authoritative effects and compact exact results in WAL; compact ordered dedupe snapshot section rebuilt into runtime map/order",
+  "format_identity": {
+    "wal_version": 3,
+    "snapshot_version": 2,
+    "flow_delta_version": 1,
+    "dedupe_format": "compact-v1"
+  },
+  "representative": {
+    "flow_checkpoint_bytes": "780-784",
+    "flow_delta_bytes": "54-58",
+    "full_checkpoint_wal_bytes_per_op_100k": 1461.29737,
+    "semantic_delta_wal_bytes_per_op_100k": 486.65305,
+    "wal_reduction_percent": 66.7,
+    "json_dedupe_bytes_100k": 17275072,
+    "compact_dedupe_bytes_100k": 2075439,
+    "dedupe_reduction_percent": 88.0,
+    "json_snapshot_bytes_100k": 25733844,
+    "compact_snapshot_bytes_100k": 11226037,
+    "snapshot_reduction_percent": 56.4,
+    "m2_100k_ready_ms": 116.472,
+    "m2_1m_ready_ms": 830.935,
+    "m2_1m_tail_10k_ready_ms": 1104.04,
+    "m2_1m_tail_wal_bytes_scanned": 4933270,
+    "dedupe_decode_100k_ms": 23.041,
+    "flow_delta_apply_10k_tail_ms": 285.364
+  },
+  "correctness": {
+    "race_tests": "pass",
+    "full_suite": "pass",
+    "snapshot_determinism": "pass",
+    "wal_determinism": "pass",
+    "checkpoint_equivalence_after_delta_replay": "byte-identical",
+    "crash_matrix": "pass",
+    "corruption_matrix": "fail-closed"
+  },
+  "oct_changes": "none",
+  "next_recommendation": "Measure and design bounded ledger/history compaction, now the dominant 1M snapshot section."
+}

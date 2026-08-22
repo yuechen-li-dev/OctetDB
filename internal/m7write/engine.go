@@ -28,7 +28,7 @@ type outcome struct {
 type agentEntry struct {
 	id         AccountID
 	mailbox    chan queued
-	machine    *generated.AccountAgent
+	machine    *generated.DurableAccountAgent
 	checkpoint []byte
 	started    bool
 	mu         sync.Mutex
@@ -94,7 +94,7 @@ func Open(cfg Config) (*Engine, error) {
 			log.close()
 			return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
 		}
-		machine, err := generated.RestoreAccountAgent(checkpoint)
+		machine, err := generated.RestoreDurableAccountAgent(checkpoint)
 		if err != nil {
 			log.close()
 			return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
@@ -136,10 +136,26 @@ func openM1Engine(cfg Config) (*Engine, error) {
 		if string(publication) != string(snapshot.Octagon) || hash != snapshot.OctHash {
 			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: errors.New("snapshot authoritative state/publication mismatch")}
 		}
-		for _, item := range snapshot.Dedupe {
+		dedupeStarted := time.Now()
+		dedupe := snapshot.Dedupe
+		if snapshot.DedupeFormat == "compact-v1" {
+			decoded, _, err := decodeCompactDedupe(snapshot.DedupeCompact, cfg.DedupeWindow)
+			if err != nil {
+				return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: err}
+			}
+			dedupe = decoded
+		} else if snapshot.DedupeFormat != "json-v1" {
+			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: fmt.Errorf("unknown dedupe format %q", snapshot.DedupeFormat)}
+		}
+		if err := validateDedupeEntries(dedupe, snapshot.DedupeHorizon, cfg.DedupeWindow, snapshot.Sequence); err != nil {
+			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: err}
+		}
+		for _, item := range dedupe {
 			e.results[item.CommandID] = item.Result
 			e.dedupeOrder = append(e.dedupeOrder, item.CommandID)
 		}
+		e.recoveryStats.DedupeDecode = time.Since(dedupeStarted)
+		agentStarted := time.Now()
 		for _, agent := range snapshot.Agents {
 			if cfg.GoBehavioralControl {
 				var state goAgentCheckpoint
@@ -155,7 +171,7 @@ func openM1Engine(cfg Config) (*Engine, error) {
 			if err != nil {
 				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
 			}
-			machine, err := generated.RestoreAccountAgent(checkpoint)
+			machine, err := generated.RestoreDurableAccountAgent(checkpoint)
 			if err != nil {
 				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
 			}
@@ -163,14 +179,19 @@ func openM1Engine(cfg Config) (*Engine, error) {
 			entry.machine = machine
 			entry.checkpoint = append([]byte(nil), agent.Checkpoint...)
 		}
+		e.recoveryStats.AgentRestore = time.Since(agentStarted)
 		e.sequence.Store(frontier)
-		e.recoveryStats = RecoveryStats{SnapshotSequence: frontier, SnapshotBytes: snapshotBytes, SnapshotDecode: decodeTime, AgentsRestored: len(snapshot.Agents)}
+		e.recoveryStats.SnapshotSequence = frontier
+		e.recoveryStats.SnapshotBytes = snapshotBytes
+		e.recoveryStats.SnapshotDecode = decodeTime
+		e.recoveryStats.AgentsRestored = len(snapshot.Agents)
 	}
 	storage, records, stats, err := openM1Storage(cfg, frontier)
 	if err != nil {
 		return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: err}
 	}
 	e.m1 = storage
+	e.m1.stats.DedupeDecodeNanos = uint64(e.recoveryStats.DedupeDecode)
 	e.recoveryStats.WALScan = stats.WALScan
 	e.recoveryStats.WALBytesScanned = stats.WALBytesScanned
 	e.recoveryStats.RecordsReplayed = len(records)
@@ -179,8 +200,8 @@ func openM1Engine(cfg Config) (*Engine, error) {
 			storage.close()
 			return nil, &RuntimeError{Kind: RecoveryCorrupt, Err: fmt.Errorf("non-monotonic sequence %d", record.Sequence)}
 		}
-		e.store.apply(record)
 		entry := e.entry(record.AgentID)
+		deltaStarted := time.Now()
 		if cfg.GoBehavioralControl {
 			var state goAgentCheckpoint
 			if err := json.Unmarshal(record.Checkpoint, &state); err != nil {
@@ -189,18 +210,21 @@ func openM1Engine(cfg Config) (*Engine, error) {
 			}
 			entry.goPending, entry.goTurns = state.Pending, state.Turns
 		} else {
-			checkpoint, err := generated.ParseAccountAgentCheckpoint(record.Checkpoint)
+			checkpoint, err := recoverAccountAgentCheckpoint(entry, record)
 			if err != nil {
 				storage.close()
 				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
 			}
-			machine, err := generated.RestoreAccountAgent(checkpoint)
+			machine, err := generated.RestoreDurableAccountAgent(checkpoint)
 			if err != nil {
 				storage.close()
 				return nil, &RuntimeError{Kind: RecoveryIncompatible, Err: err}
 			}
 			entry.machine = machine
+			record.Checkpoint = checkpoint.Bytes()
 		}
+		e.recoveryStats.FlowDeltaApply += time.Since(deltaStarted)
+		e.store.apply(record)
 		entry.checkpoint = append(entry.checkpoint[:0], record.Checkpoint...)
 		e.rememberResult(record.CommandID, record.Result)
 		e.sequence.Store(record.Sequence)
@@ -295,19 +319,19 @@ func (e *Engine) process(entry *agentEntry, envelope Envelope) outcome {
 		return e.processGoM1(entry, command, a, aok, b, bok)
 	}
 	if entry.machine == nil {
-		entry.machine = generated.NewAccountAgent(int(command.Account))
+		entry.machine = generated.NewDurableAccountAgent(int(command.Account))
 	}
 	machine := entry.machine
 	rollback := func() error {
 		if len(entry.checkpoint) == 0 {
-			entry.machine = generated.NewAccountAgent(int(command.Account))
+			entry.machine = generated.NewDurableAccountAgent(int(command.Account))
 			return nil
 		}
 		checkpoint, err := generated.ParseAccountAgentCheckpoint(entry.checkpoint)
 		if err != nil {
 			return err
 		}
-		restored, err := generated.RestoreAccountAgent(checkpoint)
+		restored, err := generated.RestoreDurableAccountAgent(checkpoint)
 		if err != nil {
 			return err
 		}
@@ -328,6 +352,12 @@ func (e *Engine) process(entry *agentEntry, envelope Envelope) outcome {
 		_ = rollback()
 		return outcome{err: &RuntimeError{Kind: InvalidDecision, Err: err}}
 	}
+	if e.m1 != nil {
+		if err := e.m1.inject(AfterStepBeforeDeltaExport); err != nil {
+			_ = rollback()
+			return outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+	}
 	e.trace(TraceEvent{CommandID: command.ID, Agent: command.Account, Phase: "flow_yield", VersionA: a.Version, VersionB: b.Version, Accepted: decision.Accepted, ReasonTag: decision.Reason.Tag, EffectTag: decision.Effect.Tag, FlowState: turn.Active()})
 	checkpoint, err := machine.Checkpoint()
 	if err != nil {
@@ -337,9 +367,23 @@ func (e *Engine) process(entry *agentEntry, envelope Envelope) outcome {
 	cpBytes := checkpoint.Bytes()
 	if e.m1 != nil {
 		result := Result{CommandID: command.ID, Accepted: decision.Accepted, ReasonTag: decision.Reason.Tag, EffectTag: decision.Effect.Tag, TransitionCount: decision.TransitionCount}
-		record := logRecord{Version: m1WALVersion, SchemaID: m1SchemaID, ProgramID: m1ProgramID, AgentID: command.Account, CommandID: command.ID, CommandKind: command.Kind.Tag, AccountA: command.Account, AccountB: command.Other, Amount: command.Amount, Result: result, EffectTag: decision.Effect.Tag, NewBalanceA: decision.NewBalanceA, NewBalanceB: decision.NewBalanceB, NewStatusTag: decision.NewStatus.Tag, ExpectedA: uint64(decision.ExpectedVersionA), ExpectedB: uint64(decision.ExpectedVersionB), Checkpoint: cpBytes}
+		record := logRecord{Version: m1WALVersion, SchemaID: m1SchemaID, ProgramID: m1ProgramID, AgentID: command.Account, CommandID: command.ID, CommandKind: command.Kind.Tag, AccountA: command.Account, AccountB: command.Other, Amount: command.Amount, Result: result, EffectTag: decision.Effect.Tag, NewBalanceA: decision.NewBalanceA, NewBalanceB: decision.NewBalanceB, NewStatusTag: decision.NewStatus.Tag, ExpectedA: uint64(decision.ExpectedVersionA), ExpectedB: uint64(decision.ExpectedVersionB)}
+		if e.cfg.FullCheckpointWAL {
+			record.Checkpoint = cpBytes
+		} else {
+			delta, err := machine.ExportDelta()
+			if err != nil {
+				_ = rollback()
+				return outcome{err: &RuntimeError{Kind: CheckpointExportFailed, Err: err}}
+			}
+			record.FlowDelta = delta.Bytes()
+		}
+		if err := e.m1.inject(AfterDeltaExportBeforeWALAppend); err != nil {
+			_ = rollback()
+			return outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
 		response := make(chan outcome, 1)
-		e.authority <- &m1Commit{record: record, entry: entry, checkpoint: cpBytes, response: response}
+		e.authority <- &m1Commit{record: record, entry: entry, checkpoint: cpBytes, response: response, install: func() { _ = machine.AcceptCommitted(checkpoint) }}
 		got := <-response
 		if got.err != nil || got.result.Duplicate {
 			_ = rollback()
@@ -447,6 +491,56 @@ func (e *Engine) rememberResult(id string, result Result) {
 	}
 }
 
+func recoverAccountAgentCheckpoint(entry *agentEntry, record logRecord) (generated.AccountAgentCheckpoint, error) {
+	if len(record.FlowDelta) > 0 && len(record.Checkpoint) > 0 {
+		return generated.AccountAgentCheckpoint{}, errors.New("WAL record has both FLOW delta and checkpoint")
+	}
+	if len(record.FlowDelta) == 0 {
+		if len(record.Checkpoint) == 0 {
+			return generated.AccountAgentCheckpoint{}, errors.New("WAL record has no FLOW state")
+		}
+		return generated.ParseAccountAgentCheckpoint(record.Checkpoint)
+	}
+	delta, err := generated.ParseAccountAgentDelta(record.FlowDelta)
+	if err != nil {
+		return generated.AccountAgentCheckpoint{}, err
+	}
+	var previous *generated.AccountAgentCheckpoint
+	if len(entry.checkpoint) > 0 {
+		parsed, err := generated.ParseAccountAgentCheckpoint(entry.checkpoint)
+		if err != nil {
+			return generated.AccountAgentCheckpoint{}, err
+		}
+		previous = &parsed
+	}
+	return generated.ApplyAccountAgentDelta(previous, int(record.AgentID), delta)
+}
+
+func validateDedupeEntries(entries []snapshotResult, horizon, configured int, frontier uint64) error {
+	if horizon != configured || horizon <= 0 || len(entries) > horizon {
+		return fmt.Errorf("dedupe count/horizon mismatch: %d/%d configured %d", len(entries), horizon, configured)
+	}
+	seen := make(map[string]struct{}, len(entries))
+	var prior uint64
+	for _, entry := range entries {
+		if entry.CommandID == "" || entry.Result.CommandID != entry.CommandID {
+			return errors.New("dedupe command identity mismatch")
+		}
+		if _, ok := seen[entry.CommandID]; ok {
+			return fmt.Errorf("duplicate command ID %q in snapshot", entry.CommandID)
+		}
+		seen[entry.CommandID] = struct{}{}
+		if entry.Result.Sequence <= prior {
+			return fmt.Errorf("out-of-order dedupe sequence %d", entry.Result.Sequence)
+		}
+		if entry.Result.Sequence > frontier {
+			return fmt.Errorf("dedupe sequence %d exceeds frontier", entry.Result.Sequence)
+		}
+		prior = entry.Result.Sequence
+	}
+	return nil
+}
+
 func (e *Engine) runCommitAuthority() {
 	for {
 		message := <-e.authority
@@ -539,6 +633,9 @@ func (e *Engine) commitGroup(group []*m1Commit) {
 	for i, request := range unique {
 		records[i] = request.record
 	}
+	if len(records) == 0 {
+		return
+	}
 	if err := e.m1.appendGroup(records); err != nil {
 		e.poisoned = err
 		for _, request := range unique {
@@ -559,8 +656,28 @@ func (e *Engine) commitGroup(group []*m1Commit) {
 		}
 		return
 	}
+	if err := e.m1.inject(AfterSyncBeforeDirtyClear); err != nil {
+		e.poisoned = err
+		for _, request := range unique {
+			request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		for _, repeat := range repeats {
+			repeat.request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+		}
+		return
+	}
 	for _, request := range unique {
 		e.store.apply(request.record)
+		if err := e.m1.inject(AfterStateApplyBeforeDirtyClear); err != nil {
+			e.poisoned = err
+			for _, pending := range unique {
+				pending.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+			}
+			for _, repeat := range repeats {
+				repeat.request.response <- outcome{err: &RuntimeError{Kind: DurabilityWriteFailed, Err: err}}
+			}
+			return
+		}
 		request.entry.checkpoint = append(request.entry.checkpoint[:0], request.checkpoint...)
 		if request.install != nil {
 			request.install()
@@ -612,11 +729,28 @@ func (e *Engine) snapshotAtFrontier() (string, int64, error) {
 	}
 	accounts, ledger := e.store.snapshotState()
 	octagon, hash := e.store.CanonicalOctagon()
-	snapshot := durableSnapshot{Version: m1SnapshotVersion, Sequence: e.sequence.Load(), SchemaID: m1SchemaID, ProgramID: expectedProgramID(e.cfg), Accounts: accounts, Ledger: ledger, Octagon: octagon, OctHash: hash}
+	snapshot := durableSnapshot{Version: m1SnapshotVersion, Sequence: e.sequence.Load(), SchemaID: m1SchemaID, ProgramID: expectedProgramID(e.cfg), Accounts: accounts, Ledger: ledger, Octagon: octagon, OctHash: hash, DedupeHorizon: e.cfg.DedupeWindow}
+	var dedupe []snapshotResult
 	for _, id := range e.dedupeOrder[e.dedupeHead:] {
-		snapshot.Dedupe = append(snapshot.Dedupe, snapshotResult{CommandID: id, Result: e.results[id]})
+		dedupe = append(dedupe, snapshotResult{CommandID: id, Result: e.results[id]})
+	}
+	if e.cfg.JSONDedupeSnapshot {
+		snapshot.DedupeFormat, snapshot.Dedupe = "json-v1", dedupe
+	} else {
+		if err := e.m1.inject(DuringCompactDedupeEncoding); err != nil {
+			return "", 0, err
+		}
+		compact, err := encodeCompactDedupe(dedupe, e.cfg.DedupeWindow)
+		if err != nil {
+			return "", 0, err
+		}
+		snapshot.DedupeFormat, snapshot.DedupeCompact = "compact-v1", compact
 	}
 	e.registryMu.Lock()
+	if err := e.m1.inject(DuringSnapshotFlowCheckpoint); err != nil {
+		e.registryMu.Unlock()
+		return "", 0, err
+	}
 	ids := make([]int, 0, len(e.registry))
 	for id, entry := range e.registry {
 		if len(entry.checkpoint) > 0 {
@@ -633,7 +767,10 @@ func (e *Engine) snapshotAtFrontier() (string, int64, error) {
 		Accounts []Account     `json:"accounts"`
 		Ledger   []LedgerEntry `json:"ledger"`
 	}{accounts, ledger})
-	dedupeBytes, _ := json.Marshal(snapshot.Dedupe)
+	dedupeBytes := snapshot.DedupeCompact
+	if snapshot.DedupeFormat == "json-v1" {
+		dedupeBytes, _ = json.Marshal(snapshot.Dedupe)
+	}
 	e.m1.stats.LogicalStateBytes = uint64(len(logicalBytes))
 	e.m1.stats.DedupeBytes = uint64(len(dedupeBytes))
 	e.m1.stats.PublicationBytes = uint64(len(octagon))

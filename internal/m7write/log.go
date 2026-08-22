@@ -32,7 +32,38 @@ type logRecord struct {
 	NewStatusTag int       `json:"new_status_tag"`
 	ExpectedA    uint64    `json:"expected_a"`
 	ExpectedB    uint64    `json:"expected_b"`
-	Checkpoint   []byte    `json:"checkpoint"`
+	Checkpoint   []byte    `json:"checkpoint,omitempty"`
+	FlowDelta    []byte    `json:"flow_delta,omitempty"`
+}
+
+type durableCallerResult struct {
+	Accepted        bool `json:"accepted"`
+	ReasonTag       int  `json:"reason"`
+	TransitionCount int  `json:"turns"`
+}
+
+// The runtime Result remains convenient and exact, while its WAL form omits
+// sequence, command ID, and effect tag already present in the enclosing record.
+func (r logRecord) MarshalJSON() ([]byte, error) {
+	type alias logRecord
+	return json.Marshal(struct {
+		alias
+		Result durableCallerResult `json:"result"`
+	}{alias: alias(r), Result: durableCallerResult{Accepted: r.Result.Accepted, ReasonTag: r.Result.ReasonTag, TransitionCount: r.Result.TransitionCount}})
+}
+
+func (r *logRecord) UnmarshalJSON(data []byte) error {
+	type alias logRecord
+	var wire struct {
+		alias
+		Result durableCallerResult `json:"result"`
+	}
+	if err := json.Unmarshal(data, &wire); err != nil {
+		return err
+	}
+	*r = logRecord(wire.alias)
+	r.Result = Result{Sequence: r.Sequence, CommandID: r.CommandID, Accepted: wire.Result.Accepted, ReasonTag: wire.Result.ReasonTag, EffectTag: r.EffectTag, TransitionCount: wire.Result.TransitionCount}
+	return nil
 }
 
 type commitLog struct {
