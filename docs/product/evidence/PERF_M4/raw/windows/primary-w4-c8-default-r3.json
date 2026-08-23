@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-08-23T06:41:50.4595193Z",
+  "config": {
+    "lane": "default",
+    "workload": "w4",
+    "population": 1000,
+    "operations": 1000,
+    "concurrency": 8,
+    "contention": "uniform",
+    "mix": "70r20w10q",
+    "query_op": "mixed",
+    "selectivity": "25",
+    "data_path": "C:\\Users\\yuech\\AppData\\Local\\Temp\\octetdb-perf-m4\\default-w4-1787467308924473100",
+    "warmup": 100
+  },
+  "duration_ns": 1368879900,
+  "throughput_ops_s": 730.524277549842,
+  "p50_ns": 12616600,
+  "p95_ns": 15726900,
+  "p99_ns": 18711400,
+  "max_ns": 20514900,
+  "cpu_user_ns": 62500000,
+  "cpu_kernel_ns": 125000000,
+  "rss_bytes": 15581184,
+  "heap_alloc_bytes": 1163040,
+  "heap_objects": 6837,
+  "total_alloc_delta_bytes": 2831480,
+  "malloc_delta": 37684,
+  "gc_cycles_delta": 1,
+  "gc_pause_delta_ns": 0,
+  "storage_before_bytes": 31746,
+  "storage_after_bytes": 321538,
+  "storage_delta_bytes_per_op": 289.792,
+  "wal_before_bytes": 31285,
+  "wal_after_bytes": 321077,
+  "wal_bytes_per_op": 289.792,
+  "correctness": {
+    "domain_invariant": true,
+    "idempotency": true,
+    "records_valid": true
+  },
+  "metadata": {
+    "arch": "amd64",
+    "go": "go1.26.2",
+    "octetdb": "github.com/yuechen-li-dev/octetdb@v0.2.0",
+    "os": "windows",
+    "specialization_level": "S0"
+  }
+}

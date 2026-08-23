@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-08-23T07:25:25.892557732Z",
+  "config": {
+    "lane": "default",
+    "workload": "w1",
+    "population": 1000,
+    "operations": 1000,
+    "concurrency": 1,
+    "contention": "uniform",
+    "mix": "70r20w10q",
+    "query_op": "mixed",
+    "selectivity": "25",
+    "data_path": "/home/yuech/tigercompare/perfm4-linux-data/w1-uniform-c1-default-r3",
+    "warmup": 100
+  },
+  "duration_ns": 984964456,
+  "throughput_ops_s": 1015.2650625191696,
+  "p50_ns": 964614,
+  "p95_ns": 1118980,
+  "p99_ns": 1269922,
+  "max_ns": 2859956,
+  "cpu_user_ns": 40757000,
+  "cpu_kernel_ns": 58111000,
+  "rss_bytes": 15544320,
+  "heap_alloc_bytes": 1497456,
+  "heap_objects": 8705,
+  "total_alloc_delta_bytes": 8479360,
+  "malloc_delta": 41863,
+  "gc_cycles_delta": 3,
+  "gc_pause_delta_ns": 210881,
+  "storage_before_bytes": 286822,
+  "storage_after_bytes": 663668,
+  "storage_delta_bytes_per_op": 376.846,
+  "wal_before_bytes": 286361,
+  "wal_after_bytes": 663207,
+  "wal_bytes_per_op": 376.846,
+  "correctness": {
+    "domain_invariant": true,
+    "idempotency": true,
+    "records_valid": true
+  },
+  "metadata": {
+    "arch": "amd64",
+    "go": "go1.27.0-X:nodwarf5",
+    "octetdb": "github.com/yuechen-li-dev/octetdb@v0.2.0",
+    "os": "linux",
+    "specialization_level": "S0"
+  }
+}

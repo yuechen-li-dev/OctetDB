@@ -1,0 +1,34 @@
+package Main
+
+record Job {
+    ID: Int
+    Status: Int
+}
+
+fn IsReady(job: Job) -> Bool {
+    return job.Status == 1
+}
+
+fn JobID(job: Job) -> Int {
+    return job.ID
+}
+
+query FilterOnly(jobs: Job[]) yields Job {
+    filter IsReady
+}
+
+query FilterTake10(jobs: Job[]) yields Job {
+    filter IsReady
+    take 10
+}
+
+query FilterMap(jobs: Job[]) yields Int {
+    filter IsReady
+    map JobID
+}
+
+query CountAll(jobs: Job[]) yields Job {
+    map { item }
+}
+
+fn Main() -> Void {}

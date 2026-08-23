@@ -1,0 +1,37 @@
+[
+  {
+    "workload": "w1",
+    "population": 1000,
+    "logical_json_bytes": 26890
+  },
+  {
+    "workload": "w2",
+    "population": 1000,
+    "logical_json_bytes": 42890
+  },
+  {
+    "workload": "w3",
+    "population": 1000,
+    "logical_json_bytes": 37298
+  },
+  {
+    "workload": "w5",
+    "population": 1000,
+    "logical_json_bytes": 35548
+  },
+  {
+    "workload": "w5",
+    "population": 10000,
+    "logical_json_bytes": 365548
+  },
+  {
+    "workload": "w5",
+    "population": 100000,
+    "logical_json_bytes": 3755548
+  },
+  {
+    "workload": "w6",
+    "population": 1000,
+    "logical_json_bytes": 60890
+  }
+]

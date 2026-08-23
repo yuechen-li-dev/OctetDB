@@ -1,0 +1,7 @@
+{
+  "workload": "w5",
+  "topology": "Docker Linux PostgreSQL service; sum of postgres process RSS",
+  "clock_ticks_per_second": 100,
+  "server_cpu_seconds": 0.0,
+  "server_peak_rss_bytes": 241041408
+}

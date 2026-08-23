@@ -1,0 +1,10 @@
+{
+  "Mode": "measure",
+  "Workload": "w3",
+  "Population": 10000,
+  "OpenNS": 23327317,
+  "Records": 10000,
+  "Invariant": true,
+  "SnapshotBytes": 2617864,
+  "WALBytes": 0
+}

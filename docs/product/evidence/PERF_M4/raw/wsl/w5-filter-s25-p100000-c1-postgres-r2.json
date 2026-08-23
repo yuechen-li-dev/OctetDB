@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-08-23T07:56:18.320266855Z",
+  "config": {
+    "lane": "postgres",
+    "workload": "w5",
+    "population": 100000,
+    "operations": 100,
+    "concurrency": 1,
+    "contention": "uniform",
+    "mix": "70r20w10q",
+    "query_op": "filter",
+    "selectivity": "25",
+    "data_path": "/home/yuech/tigercompare/perfm4-linux-data/w5-filter-s25-p100000-c1-postgres-r2",
+    "warmup": 10
+  },
+  "duration_ns": 310084369,
+  "throughput_ops_s": 322.4928761243041,
+  "p50_ns": 3019874,
+  "p95_ns": 3508426,
+  "p99_ns": 3821053,
+  "max_ns": 4389726,
+  "cpu_user_ns": 115752000,
+  "cpu_kernel_ns": 50961000,
+  "rss_bytes": 37355520,
+  "heap_alloc_bytes": 837864,
+  "heap_objects": 15983,
+  "total_alloc_delta_bytes": 60043152,
+  "malloc_delta": 5000516,
+  "gc_cycles_delta": 18,
+  "gc_pause_delta_ns": 1253536,
+  "storage_before_bytes": 16687104,
+  "storage_after_bytes": 16687104,
+  "storage_delta_bytes_per_op": 0,
+  "wal_before_bytes": 355634544,
+  "wal_after_bytes": 355647488,
+  "wal_bytes_per_op": 129.44,
+  "records_examined": 2500000,
+  "correctness": {
+    "domain_invariant": true,
+    "idempotency": true,
+    "records_valid": true
+  },
+  "metadata": {
+    "arch": "amd64",
+    "go": "go1.27.0-X:nodwarf5",
+    "octetdb": "github.com/yuechen-li-dev/octetdb@v0.2.0",
+    "os": "linux",
+    "postgres_topology": "out-of-process TCP pool",
+    "specialization_level": "N/A"
+  }
+}

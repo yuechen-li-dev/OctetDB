@@ -1,0 +1,10 @@
+{
+  "Mode": "cold",
+  "Workload": "w1",
+  "Population": 0,
+  "OpenNS": 2646100,
+  "Records": 0,
+  "Invariant": true,
+  "SnapshotBytes": 0,
+  "WALBytes": 0
+}

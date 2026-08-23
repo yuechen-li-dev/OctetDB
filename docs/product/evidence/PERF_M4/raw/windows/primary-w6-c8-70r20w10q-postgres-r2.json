@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-08-23T05:48:57.1674498Z",
+  "config": {
+    "lane": "postgres",
+    "workload": "w6",
+    "population": 1000,
+    "operations": 5000,
+    "concurrency": 8,
+    "contention": "uniform",
+    "mix": "70r20w10q",
+    "query_op": "mixed",
+    "selectivity": "25",
+    "data_path": "C:\\Users\\yuech\\AppData\\Local\\Temp\\octetdb-perf-m4\\postgres-w6-1787464136556303300",
+    "warmup": 100
+  },
+  "duration_ns": 461160700,
+  "throughput_ops_s": 10842.20749946819,
+  "p50_ns": 367700,
+  "p95_ns": 2381800,
+  "p99_ns": 2670400,
+  "max_ns": 11453600,
+  "cpu_user_ns": 125000000,
+  "cpu_kernel_ns": 125000000,
+  "rss_bytes": 19890176,
+  "heap_alloc_bytes": 2640176,
+  "heap_objects": 39792,
+  "total_alloc_delta_bytes": 3084960,
+  "malloc_delta": 88527,
+  "gc_cycles_delta": 1,
+  "gc_pause_delta_ns": 0,
+  "storage_before_bytes": 286720,
+  "storage_after_bytes": 573440,
+  "storage_delta_bytes_per_op": 57.344,
+  "wal_before_bytes": 1258795312,
+  "wal_after_bytes": 1259396880,
+  "wal_bytes_per_op": 120.3136,
+  "records_examined": 5000,
+  "correctness": {
+    "domain_invariant": true,
+    "idempotency": true,
+    "records_valid": true
+  },
+  "metadata": {
+    "arch": "amd64",
+    "go": "go1.26.2",
+    "octetdb": "github.com/yuechen-li-dev/octetdb@v0.2.0",
+    "os": "windows",
+    "postgres_topology": "out-of-process TCP pool",
+    "specialization_level": "N/A"
+  }
+}
