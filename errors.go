@@ -33,16 +33,15 @@ type Error struct {
 	// Kind is the stable category for programmatic handling.
 	Kind ErrorKind
 	// Op is the public operation that failed.
-	Op string
-	// Err is the wrapped diagnostic cause.
-	Err error
+	Op  string
+	err error
 }
 
 // Error returns a descriptive diagnostic.
-func (e *Error) Error() string { return fmt.Sprintf("octetdb %s: %s: %v", e.Op, e.Kind, e.Err) }
+func (e *Error) Error() string { return fmt.Sprintf("octetdb %s: %s: %v", e.Op, e.Kind, e.err) }
 
 // Unwrap returns the underlying diagnostic error.
-func (e *Error) Unwrap() error { return e.Err }
+func (e *Error) Unwrap() error { return e.err }
 
 func wrapError(op string, err error) error {
 	if err == nil {
@@ -65,7 +64,7 @@ func wrapError(op string, err error) error {
 		case core.RecoveryIncompatible:
 			kind = ErrorIncompatible
 		}
-		return &Error{Kind: kind, Op: op, Err: err}
+		return &Error{Kind: kind, Op: op, err: err}
 	}
-	return &Error{Kind: ErrorStorage, Op: op, Err: err}
+	return &Error{Kind: ErrorStorage, Op: op, err: err}
 }

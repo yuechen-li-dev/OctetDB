@@ -10,19 +10,19 @@ TigerBeetle clone, cache, or ORM.
 
 ## Status
 
-PRODUCT-M0 defines and tests the product boundary. The module is pre-1.0 and is
-not tagged `v0.1.0`; on-disk format changes remain possible, but incompatible
-data is detected and rejected. External clean-module installation proof is the
-next release milestone.
+The first public release is `v0.1.0`. It is intentionally pre-1.0: the API and
+database format may change between minor releases, incompatible data is
+detected and rejected, and automatic migration is not promised.
 
 ## Install
 
 ```sh
-go get github.com/yuechen-li-dev/octetdb
+go get github.com/yuechen-li-dev/octetdb@v0.1.0
 ```
 
-The repository currently requires the Go version declared in `go.mod`. Oct and
-PostgreSQL are not required to build or use the public package.
+OctetDB requires Go 1.23 or newer. The release is tested on Windows and Linux
+under WSL2; macOS is not yet verified. Oct and PostgreSQL are not required to
+build or use the public package.
 
 ## 30-second example
 
@@ -68,6 +68,14 @@ the complete WAL tail, and truncates an incomplete final append. Corruption and
 incompatible formats fail closed. See [the precise durability contract](docs/DURABILITY.md)
 and [recovery/storage layout](docs/RECOVERY.md).
 
+## Format compatibility
+
+`FormatVersion` identifies the database format independently of the Go module
+version. Before 1.0, the format may change between minor releases. OctetDB does
+not yet promise automatic migration, but it does promise that incompatible data
+is detected and rejected rather than silently interpreted as the current
+format.
+
 ## Limitations
 
 - Account/transfer domain only; there is no generic schema or user-defined model.
@@ -79,11 +87,17 @@ and [recovery/storage layout](docs/RECOVERY.md).
 
 ## Performance evidence
 
-In a bounded single-replica local benchmark, the specialized safe-Go engine
-exceeded the measured TigerBeetle control. This is evidence for that workload,
-not a claim that OctetDB is generally faster than TigerBeetle. See the
+In a bounded single-replica local OLTP experiment, the specialized safe-Go
+engine that became the v0.1 production engine exceeded the measured
+single-replica TigerBeetle control in the tested configurations. The systems
+were not guarantee-equivalent, and this is neither a general database benchmark
+nor a claim that OctetDB is generally faster than TigerBeetle. See the
 [TigerCompareM0 report](docs/experiments/TIGER_COMPARE_M0.md) for methodology,
 environment, and limitations.
+
+## License
+
+OctetDB is licensed under the [GNU General Public License v3.0](LICENSE).
 
 ## Development and experiments
 

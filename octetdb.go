@@ -16,8 +16,6 @@ import (
 const (
 	// FormatVersion is the on-disk database format written by this release.
 	FormatVersion = 1
-	// Version is the pre-release module version for diagnostic provenance.
-	Version = "0.1.0-dev"
 )
 
 const formatContents = "OCTETDB\nformat=1\nmodel=accounts-v1\nengine=safe-go\noct-revision=309da01b60ec0f7917d4fd5efd1707bd71d2d40f\n"
@@ -150,7 +148,7 @@ type DB struct {
 // storage/recovery error so the caller never receives a partially recovered DB.
 func Open(ctx context.Context, options Options) (*DB, error) {
 	if ctx == nil {
-		return nil, &Error{Kind: ErrorInvalidInput, Op: "open", Err: errors.New("nil context")}
+		return nil, &Error{Kind: ErrorInvalidInput, Op: "open", err: errors.New("nil context")}
 	}
 	select {
 	case <-ctx.Done():
@@ -264,10 +262,10 @@ func (db *DB) Close() error {
 
 func (db *DB) enter(ctx context.Context, op string) error {
 	if db == nil || db.closed.Load() {
-		return &Error{Kind: ErrorClosed, Op: op, Err: errors.New("database is closed")}
+		return &Error{Kind: ErrorClosed, Op: op, err: errors.New("database is closed")}
 	}
 	if ctx == nil {
-		return &Error{Kind: ErrorInvalidInput, Op: op, Err: errors.New("nil context")}
+		return &Error{Kind: ErrorInvalidInput, Op: op, err: errors.New("nil context")}
 	}
 	select {
 	case <-ctx.Done():
@@ -281,7 +279,7 @@ func (db *DB) enter(ctx context.Context, op string) error {
 	}
 	if db.closed.Load() {
 		db.leave()
-		return &Error{Kind: ErrorClosed, Op: op, Err: errors.New("database is closed")}
+		return &Error{Kind: ErrorClosed, Op: op, err: errors.New("database is closed")}
 	}
 	return nil
 }
@@ -290,10 +288,10 @@ func (db *DB) leave() { db.admission <- struct{}{} }
 
 func normalizeOptions(options Options) (Options, error) {
 	if strings.TrimSpace(options.Path) == "" {
-		return Options{}, &Error{Kind: ErrorInvalidInput, Op: "open", Err: errors.New("Path is required")}
+		return Options{}, &Error{Kind: ErrorInvalidInput, Op: "open", err: errors.New("Path is required")}
 	}
 	if options.MaxAccounts < 0 || options.DedupeHorizon < 0 || options.BatchMax < 0 {
-		return Options{}, &Error{Kind: ErrorInvalidInput, Op: "open", Err: errors.New("bounds cannot be negative")}
+		return Options{}, &Error{Kind: ErrorInvalidInput, Op: "open", err: errors.New("bounds cannot be negative")}
 	}
 	if options.MaxAccounts == 0 {
 		options.MaxAccounts = 100_000
@@ -309,36 +307,36 @@ func normalizeOptions(options Options) (Options, error) {
 
 func ensureFormat(path string) error {
 	if err := os.MkdirAll(path, 0o755); err != nil {
-		return &Error{Kind: ErrorStorage, Op: "open", Err: err}
+		return &Error{Kind: ErrorStorage, Op: "open", err: err}
 	}
 	formatPath := filepath.Join(path, "FORMAT")
 	data, err := os.ReadFile(formatPath)
 	if err == nil {
 		if string(data) != formatContents {
-			return &Error{Kind: ErrorIncompatible, Op: "open", Err: fmt.Errorf("unsupported FORMAT contents")}
+			return &Error{Kind: ErrorIncompatible, Op: "open", err: fmt.Errorf("unsupported FORMAT contents")}
 		}
 		return nil
 	}
 	if !errors.Is(err, os.ErrNotExist) {
-		return &Error{Kind: ErrorStorage, Op: "open", Err: err}
+		return &Error{Kind: ErrorStorage, Op: "open", err: err}
 	}
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return &Error{Kind: ErrorStorage, Op: "open", Err: err}
+		return &Error{Kind: ErrorStorage, Op: "open", err: err}
 	}
 	if len(entries) == 1 && entries[0].Name() == "FORMAT.tmp" {
 		if err := os.Remove(filepath.Join(path, entries[0].Name())); err != nil {
-			return &Error{Kind: ErrorStorage, Op: "open", Err: err}
+			return &Error{Kind: ErrorStorage, Op: "open", err: err}
 		}
 		entries = nil
 	}
 	if len(entries) != 0 {
-		return &Error{Kind: ErrorIncompatible, Op: "open", Err: errors.New("non-empty directory has no OctetDB FORMAT marker")}
+		return &Error{Kind: ErrorIncompatible, Op: "open", err: errors.New("non-empty directory has no OctetDB FORMAT marker")}
 	}
 	tmp := formatPath + ".tmp"
 	f, err := os.OpenFile(tmp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 	if err != nil {
-		return &Error{Kind: ErrorStorage, Op: "open", Err: err}
+		return &Error{Kind: ErrorStorage, Op: "open", err: err}
 	}
 	_, writeErr := f.WriteString(formatContents)
 	if writeErr == nil {
@@ -363,17 +361,17 @@ func ensureFormat(path string) error {
 	}
 	if writeErr != nil {
 		_ = os.Remove(tmp)
-		return &Error{Kind: ErrorStorage, Op: "open", Err: writeErr}
+		return &Error{Kind: ErrorStorage, Op: "open", err: writeErr}
 	}
 	return nil
 }
 
 func convertCommand(command Command) (core.Command, error) {
 	if command.ID == "" || command.AccountID == 0 {
-		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", Err: errors.New("command ID and AccountID are required")}
+		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", err: errors.New("command ID and AccountID are required")}
 	}
 	if command.Amount > int64(^uint(0)>>1) || command.Amount < -int64(^uint(0)>>1)-1 {
-		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", Err: errors.New("amount is outside the platform integer range")}
+		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", err: errors.New("amount is outside the platform integer range")}
 	}
 	kinds := map[CommandKind]core.CommandKind{
 		Create: core.Create, Deposit: core.Deposit, Withdraw: core.Withdraw,
@@ -382,7 +380,7 @@ func convertCommand(command Command) (core.Command, error) {
 	}
 	kind, ok := kinds[command.Kind]
 	if !ok {
-		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", Err: errors.New("unknown command kind")}
+		return core.Command{}, &Error{Kind: ErrorInvalidInput, Op: "submit", err: errors.New("unknown command kind")}
 	}
 	return core.Command{ID: command.ID, Kind: kind, Account: core.AccountID(command.AccountID), Other: core.AccountID(command.OtherAccountID), Amount: int(command.Amount)}, nil
 }
