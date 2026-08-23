@@ -1,0 +1,6 @@
+package TemplateConventionProbe
+
+fn Main() -> Int {
+    let configured = DefaultBoundedDataset() with { MaxRecords: 100000 }
+    return configured.MaxRecords
+}

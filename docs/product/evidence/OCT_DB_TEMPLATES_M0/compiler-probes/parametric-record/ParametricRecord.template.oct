@@ -1,0 +1,10 @@
+package ParametricRecordProbe
+
+// This is the minimum shape needed for a reusable typed dataset template.
+// Oct currently rejects user-defined type parameters at the parser boundary.
+record BoundedKeyedDataset<Record, Key> {
+    MaxRecords: Int
+    KeyOf: fn(Record) -> Key
+}
+
+fn Main() -> Void {}

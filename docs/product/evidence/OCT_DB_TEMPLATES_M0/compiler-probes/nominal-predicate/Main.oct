@@ -1,0 +1,18 @@
+package NominalPredicateProbe
+
+record Job { ID: Int Status: Int }
+record Item { SKU: Int Available: Int }
+
+record JobFilterTemplate {
+    Predicate: fn(Job) -> Bool
+}
+
+fn Ready(job: Job) -> Bool { return job.Status == 1 }
+fn LowStock(item: Item) -> Bool { return item.Available < 10 }
+
+fn Main() -> Void {
+    let jobs = JobFilterTemplate { Predicate: Ready }
+    // `with` correctly preserves nominal type, so it cannot retarget this
+    // known-good Job pattern to Item.
+    let inventory = jobs with { Predicate: LowStock }
+}

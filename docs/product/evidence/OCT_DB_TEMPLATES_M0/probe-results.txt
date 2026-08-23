@@ -1,0 +1,65 @@
+OCT-DB-TEMPLATES-M0 compiler probes
+Date: 2026-08-23
+Platform: windows/amd64
+Go: go1.26.2
+Oct commit: 5a77e76801cdd3e7c8dbdeb272ce04ba4930d5dd
+OctetDB commit before evidence: 2ab0d24a7b30831772d67c2d9591ab752890f88f
+
+PROBE 1: ordinary `.template.oct` discovery plus immutable `with`
+Command: go run ./cmd/oct run <evidence>/compiler-probes/convention/Main.oct
+Exit: 0
+Output:
+100000
+
+PROBE 2: minimum parametric record required by BoundedKeyedDataset
+Command: go run ./cmd/oct build <evidence>/compiler-probes/parametric-record/ParametricRecord.template.oct
+Exit: 1
+Output:
+build failed: parse <evidence>/compiler-probes/parametric-record/ParametricRecord.template.oct: expected '{' after record name at 5:27 near "<"
+exit status 1
+
+PROBE 3: retargeting an exact predicate with ordinary `with`
+Command: go run ./cmd/oct build <evidence>/compiler-probes/nominal-predicate/Main.oct
+Exit: 1
+Output:
+build failed: function Main: let inventory: field 'Predicate' on type 'JobFilterTemplate' expects fn(Job) -> Bool, got fn(Item) -> Bool
+exit status 1
+
+PROBE 4: typed field-selector authoring form
+Command: go run ./cmd/oct build <evidence>/compiler-probes/field-selector/Main.oct
+Exit: 1
+Output:
+build failed: parse <evidence>/compiler-probes/field-selector/Main.oct: expected expression at 11:38 near "."
+exit status 1
+
+Interpretation:
+- Probe 1 selects convention-only semantics for the suffix: no compiler change.
+- Probe 2 prevents reusable record/key-parametric dataset patterns.
+- Probe 3 proves current type safety while showing why a concrete filter record
+  cannot be specialized across application record types.
+- Probe 4 prevents a typed `Key = .SKU` override.
+- A stringly typed catalog could evade these errors but would not satisfy the
+  milestone's typed semantic-composition requirement.
+
+REGRESSION VERIFICATION
+
+Command: go test ./internal/project ./internal/typecheck
+Result: PASS
+
+Command: go test ./internal/build -run 'QueryM0|LayoutContract' -count=1
+Result: PASS
+
+Command: go run ./cmd/oct test Language/Data/QueryM0 --execution interpreted
+Result: 4 invalid contracts passed
+
+Command: go run ./cmd/oct test Language/Data/QueryM0 --execution compiled
+Result: 4 invalid contracts passed
+
+Command: go run ./cmd/oct test Language/Data/QueryM0/valid/query_m0.octest --execution interpreted
+Result: 6 facts passed
+
+Command: go run ./cmd/oct test Language/Data/QueryM0/valid/query_m0.octest --execution compiled
+Result: 6 facts passed; compiled: 6; interpreted fallback: 0
+
+Command: go test ./... (OctetDB)
+Result: PASS

@@ -1,0 +1,9 @@
+package TemplateConventionProbe
+
+record BoundedDataset {
+    MaxRecords: Int
+}
+
+fn DefaultBoundedDataset() -> BoundedDataset {
+    return BoundedDataset { MaxRecords: 1 }
+}

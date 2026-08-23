@@ -1,0 +1,12 @@
+package FieldSelectorProbe
+
+record DatasetTemplate {
+    MaxRecords: Int
+}
+
+fn Main() -> Void {
+    let base = DatasetTemplate { MaxRecords: 100 }
+    // The requested `.SKU` typed field-selector value has no Oct expression
+    // form, and DatasetTemplate cannot declare a field capable of holding it.
+    let inventory = base with { Key: .SKU }
+}
