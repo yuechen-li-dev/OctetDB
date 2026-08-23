@@ -243,8 +243,9 @@ direction.
 ## 23. pkg.go.dev status
 
 The public Go proxy resolves `github.com/yuechen-li-dev/octetdb@v0.2.0` and its
-module checksum. Package comments and `go doc` are ready for pkg.go.dev;
-crawler/indexing timing does not block Success.
+module checksum. The immediate pkg.go.dev page check had not indexed the new tag
+and showed its normal request-to-add state. Package comments and `go doc` are
+ready; crawler/indexing timing does not block Success.
 
 ## 24. Known v0.2 limitations
 
