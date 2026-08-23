@@ -134,6 +134,18 @@ func ensureKeyedFormat(path, expected string) error {
 }
 
 func (db *KeyedDB) appendKeyed(record keyedWALRecord) error {
+	if err := db.appendKeyedFrame(record); err != nil {
+		return err
+	}
+	return db.syncKeyed()
+}
+
+func (db *KeyedDB) appendKeyedFrame(record keyedWALRecord) error {
+	if db.beforeAppend != nil {
+		if err := db.beforeAppend(record); err != nil {
+			return &Error{Kind: ErrorStorage, Op: "submit_keyed", err: err}
+		}
+	}
 	payload, err := json.Marshal(record)
 	if err != nil {
 		return &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: err}
@@ -149,6 +161,15 @@ func (db *KeyedDB) appendKeyed(record keyedWALRecord) error {
 		return &Error{Kind: ErrorStorage, Op: "submit_keyed", err: err}
 	} else if written != len(frame) {
 		return &Error{Kind: ErrorStorage, Op: "submit_keyed", err: io.ErrShortWrite}
+	}
+	return nil
+}
+
+func (db *KeyedDB) syncKeyed() error {
+	if db.beforeSync != nil {
+		if err := db.beforeSync(); err != nil {
+			return &Error{Kind: ErrorStorage, Op: "submit_keyed", err: err}
+		}
 	}
 	if err := db.wal.file.Sync(); err != nil {
 		return &Error{Kind: ErrorStorage, Op: "submit_keyed", err: err}

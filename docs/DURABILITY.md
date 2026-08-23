@@ -1,10 +1,13 @@
 # Durability contract
 
-For the canonical v0.2 catalog database, a successful `Database.Mutate` means
-one complete checksummed WAL frame containing the command decision and every
-cross-dataset write was written and synchronized. State is applied in memory
-only after synchronization. A durable rejection is a decision too; duplicate
-retry of a retained ID appends nothing.
+For the canonical catalog database, a successful `Database.Mutate` means one
+complete checksummed WAL frame containing the command decision and every
+cross-dataset write was written and synchronized. Concurrent mutations may
+share one internal storage flush; each keeps its individual durable
+acknowledgement, database-wide order, and exact result semantics. Staged state
+is visible only to later serialized callbacks in the same group until the
+shared synchronization succeeds. A durable rejection is a decision too;
+duplicate retry of a retained ID appends nothing.
 
 Catalog structure is synchronized separately before `Bucket` or `Dataset`
 returns. OctetDB writes a checksummed complete catalog to a temporary file,
@@ -23,8 +26,9 @@ run inside mutations.
 - **Corrupt complete frame:** checksum, sequence, JSON, dataset identity, or
   bound violations fail open with `ErrorCorruption` or `ErrorCapacity` as
   applicable.
-- **Write or sync failure:** the operation returns `ErrorStorage`; the handle is
-  poisoned and later mutations return `ErrorPoisoned` until close/reopen.
+- **Write or sync failure:** no affected group member is acknowledged; the
+  handle is poisoned and all later operations return `ErrorPoisoned` until
+  close/reopen, preventing undurable staged state from being observed or used.
 - **Duplicate retry:** exact accepted or rejected decisions survive snapshot and
   restart while retained inside `DedupeHorizon`. An expired ID may apply again.
 

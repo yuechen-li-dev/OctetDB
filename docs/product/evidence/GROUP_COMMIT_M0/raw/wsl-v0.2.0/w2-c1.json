@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-08-23T16:24:00.172062367Z",
+  "config": {
+    "lane": "default",
+    "workload": "w2",
+    "population": 1000,
+    "operations": 384,
+    "concurrency": 1,
+    "contention": "uniform",
+    "mix": "70r20w10q",
+    "query_op": "mixed",
+    "selectivity": "25",
+    "data_path": "/home/yuech/octetdb-group-formal.KnRfsn/data/w2-c1",
+    "warmup": 32
+  },
+  "duration_ns": 391022287,
+  "throughput_ops_s": 982.0412103517772,
+  "p50_ns": 970538,
+  "p95_ns": 1418284,
+  "p99_ns": 1635255,
+  "max_ns": 2163667,
+  "cpu_user_ns": 9880000,
+  "cpu_kernel_ns": 35103000,
+  "rss_bytes": 14155776,
+  "heap_alloc_bytes": 1808528,
+  "heap_objects": 15174,
+  "total_alloc_delta_bytes": 763992,
+  "malloc_delta": 10412,
+  "gc_cycles_delta": 0,
+  "gc_pause_delta_ns": 0,
+  "storage_before_bytes": 305841,
+  "storage_after_bytes": 419003,
+  "storage_delta_bytes_per_op": 294.6927083333333,
+  "wal_before_bytes": 305380,
+  "wal_after_bytes": 418542,
+  "wal_bytes_per_op": 294.6927083333333,
+  "correctness": {
+    "domain_invariant": true,
+    "idempotency": true,
+    "records_valid": true
+  },
+  "metadata": {
+    "arch": "amd64",
+    "go": "go1.27.0-X:nodwarf5",
+    "octetdb": "github.com/yuechen-li-dev/octetdb@v0.2.0",
+    "os": "linux",
+    "specialization_level": "S0"
+  }
+}

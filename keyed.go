@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
 	"sync/atomic"
 )
 
@@ -91,18 +92,54 @@ func RejectWithResult(code string, result any) error {
 // Deprecated: use Database with OpenCatalog. KeyedDB retains the distinct
 // pre-v0.2 global-key format only for compatibility.
 type KeyedDB struct {
-	path       string
-	options    KeyedOptions
-	records    map[string][]byte
-	dedupe     map[string]keyedWALRecord
-	dedupeIDs  []string
-	sequence   uint64
-	wal        keyedWAL
-	admission  chan struct{}
-	closed     atomic.Bool
-	poisoned   atomic.Bool
-	format     string
-	afterApply func(keyedWALRecord)
+	path         string
+	options      KeyedOptions
+	records      map[string][]byte
+	dedupe       map[string]keyedWALRecord
+	dedupeIDs    []string
+	sequence     uint64
+	wal          keyedWAL
+	admission    chan struct{}
+	closed       atomic.Bool
+	poisoned     atomic.Bool
+	format       string
+	afterApply   func(keyedWALRecord)
+	beforeAppend func(keyedWALRecord) error
+	beforeSync   func() error
+	afterSync    func()
+	commit       keyedCommitCoordinator
+	commitStats  keyedCommitStats
+}
+
+const keyedMaxCommitGroup = 64
+
+type keyedCommitRequest struct {
+	ctx      context.Context
+	command  KeyedCommand
+	mutation KeyedMutation
+	result   chan keyedCommitResult
+}
+
+type keyedCommitResult struct {
+	decision   KeyedDecision
+	err        error
+	panicValue any
+}
+
+type keyedCommitCoordinator struct {
+	mu       sync.Mutex
+	queue    []*keyedCommitRequest
+	wake     chan struct{}
+	done     chan struct{}
+	disabled bool // internal benchmark/test control: one request per Sync
+}
+
+type keyedCommitStats struct {
+	syncCalls    atomic.Uint64
+	framesSynced atomic.Uint64
+	groups       atomic.Uint64
+	maxGroup     atomic.Uint64
+	groupSizes   [keyedMaxCommitGroup + 1]atomic.Uint64
 }
 
 // KeyedTx is the application-facing transaction passed to a KeyedMutation.
@@ -148,6 +185,9 @@ func openKeyed(ctx context.Context, path string, options KeyedOptions, format st
 		return nil, err
 	}
 	db.admission <- struct{}{}
+	db.commit.wake = make(chan struct{}, 1)
+	db.commit.done = make(chan struct{})
+	go db.runCommitCoordinator()
 	return db, nil
 }
 
@@ -155,23 +195,60 @@ func openKeyed(ctx context.Context, path string, options KeyedOptions, format st
 //
 // Deprecated: use Database.Mutate.
 func (db *KeyedDB) SubmitKeyed(ctx context.Context, command KeyedCommand, mutation KeyedMutation) (KeyedDecision, error) {
-	if err := db.enterKeyed(ctx, "submit_keyed"); err != nil {
-		return KeyedDecision{}, err
+	if db == nil || db.closed.Load() {
+		return KeyedDecision{}, &Error{Kind: ErrorClosed, Op: "submit_keyed", err: errors.New("database is closed")}
 	}
-	defer db.leaveKeyed()
+	if ctx == nil {
+		return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("nil context")}
+	}
+	if db.poisoned.Load() {
+		return KeyedDecision{}, &Error{Kind: ErrorPoisoned, Op: "submit_keyed", err: errors.New("an earlier durability failure made the database unsafe; close and reopen the database")}
+	}
+	request := &keyedCommitRequest{ctx: ctx, command: command, mutation: mutation, result: make(chan keyedCommitResult, 1)}
+	db.commit.mu.Lock()
+	if db.closed.Load() {
+		db.commit.mu.Unlock()
+		return KeyedDecision{}, &Error{Kind: ErrorClosed, Op: "submit_keyed", err: errors.New("database is closed")}
+	}
+	db.commit.queue = append(db.commit.queue, request)
+	db.commit.mu.Unlock()
+	select {
+	case db.commit.wake <- struct{}{}:
+	default:
+	}
+	result := <-request.result
+	if result.panicValue != nil {
+		panic(result.panicValue)
+	}
+	return result.decision, result.err
+}
+
+func (db *KeyedDB) safelyExecuteKeyed(request *keyedCommitRequest) (record keyedWALRecord, decision KeyedDecision, err error, persist bool, panicValue any) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			panicValue = recovered
+			record, decision, err, persist = keyedWALRecord{}, KeyedDecision{}, nil, false
+		}
+	}()
+	record, decision, err, persist = db.executeKeyed(request)
+	return
+}
+
+func (db *KeyedDB) executeKeyed(request *keyedCommitRequest) (keyedWALRecord, KeyedDecision, error, bool) {
+	command, mutation := request.command, request.mutation
 	if strings.TrimSpace(command.ID) == "" {
-		return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("command ID is required")}
+		return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("command ID is required")}, false
 	}
 	if len(command.ID) > keyedMaxIdentityBytes {
-		return KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("command ID exceeds 4 KiB")}
+		return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("command ID exceeds 4 KiB")}, false
 	}
 	if mutation == nil {
-		return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("mutation is required")}
+		return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("mutation is required")}, false
 	}
 	if prior, ok := db.dedupe[command.ID]; ok {
 		decision := prior.decision()
 		decision.Duplicate = true
-		return decision, nil
+		return keyedWALRecord{}, decision, nil, false
 	}
 
 	tx := &KeyedTx{db: db, writes: make(map[string]*[]byte)}
@@ -180,40 +257,154 @@ func (db *KeyedDB) SubmitKeyed(ctx context.Context, command KeyedCommand, mutati
 	var rejection *KeyedRejection
 	if errors.As(mutationErr, &rejection) {
 		if strings.TrimSpace(rejection.Code) == "" {
-			return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("rejection code is required")}
+			return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: errors.New("rejection code is required")}, false
 		}
 		if len(rejection.Code) > keyedMaxCodeBytes {
-			return KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("rejection code exceeds 1 KiB")}
+			return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("rejection code exceeds 1 KiB")}, false
 		}
 		record.Applied = false
 		record.Code = rejection.Code
 		record.Result = append([]byte(nil), rejection.result...)
 	} else if mutationErr != nil {
-		return KeyedDecision{}, mutationErr
+		return keyedWALRecord{}, KeyedDecision{}, mutationErr, false
 	} else {
 		encoded, err := json.Marshal(result)
 		if err != nil {
-			return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: fmt.Errorf("encode result: %w", err)}
+			return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "submit_keyed", err: fmt.Errorf("encode result: %w", err)}, false
 		}
 		if len(encoded) > db.options.MaxValueBytes {
-			return KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("result exceeds MaxValueBytes")}
+			return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("result exceeds MaxValueBytes")}, false
 		}
 		record.Result = encoded
 		mutations, err := tx.finalize()
 		if err != nil {
-			return KeyedDecision{}, err
+			return keyedWALRecord{}, KeyedDecision{}, err, false
 		}
 		record.Mutations = mutations
 	}
 	if len(record.Result) > db.options.MaxValueBytes {
-		return KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("rejection result exceeds MaxValueBytes")}
+		return keyedWALRecord{}, KeyedDecision{}, &Error{Kind: ErrorCapacity, Op: "submit_keyed", err: errors.New("rejection result exceeds MaxValueBytes")}, false
 	}
-	if err := db.appendKeyed(record); err != nil {
-		db.poisoned.Store(true)
-		return KeyedDecision{}, err
+	return record, record.decision(), nil, true
+}
+
+func (db *KeyedDB) runCommitCoordinator() {
+	defer close(db.commit.done)
+	for {
+		<-db.commit.wake
+		for {
+			db.commit.mu.Lock()
+			if len(db.commit.queue) == 0 {
+				closed := db.closed.Load()
+				db.commit.mu.Unlock()
+				if closed {
+					return
+				}
+				break
+			}
+			limit := keyedMaxCommitGroup
+			if db.commit.disabled {
+				limit = 1
+			}
+			if limit > len(db.commit.queue) {
+				limit = len(db.commit.queue)
+			}
+			group := db.commit.queue[:limit]
+			if limit == len(db.commit.queue) {
+				db.commit.queue = nil
+			} else {
+				db.commit.queue = db.commit.queue[limit:len(db.commit.queue):len(db.commit.queue)]
+			}
+			db.commit.mu.Unlock()
+			db.processCommitGroup(group)
+		}
 	}
-	db.applyKeyed(record)
-	return record.decision(), nil
+}
+
+// processCommitGroup holds the pre-existing single database authority while it
+// executes callbacks in queue order. Applying frames before the shared Sync is
+// authority-private staging: no read can enter, and any storage failure poisons
+// every operation until recovery rebuilds state from the WAL's durable prefix.
+func (db *KeyedDB) processCommitGroup(group []*keyedCommitRequest) {
+	<-db.admission
+	defer db.leaveKeyed()
+	var resultStorage [keyedMaxCommitGroup]keyedCommitResult
+	var durableStorage [keyedMaxCommitGroup]bool
+	results := resultStorage[:len(group)]
+	durable := durableStorage[:len(group)]
+	var staged map[string]int
+	if len(group) > 1 {
+		staged = make(map[string]int, len(group))
+	}
+	frames := uint64(0)
+	var storageErr error
+	for index, request := range group {
+		if db.poisoned.Load() {
+			results[index].err = &Error{Kind: ErrorPoisoned, Op: "submit_keyed", err: errors.New("an earlier durability failure made the database unsafe; close and reopen the database")}
+			continue
+		}
+		select {
+		case <-request.ctx.Done():
+			results[index].err = request.ctx.Err()
+			continue
+		default:
+		}
+		if original, ok := staged[request.command.ID]; ok {
+			if _, retained := db.dedupe[request.command.ID]; retained {
+				decision := results[original].decision
+				decision.Duplicate = true
+				results[index].decision = decision
+				durable[index] = true // depends on the original frame's shared Sync
+				continue
+			}
+		}
+		record, decision, err, persist, panicValue := db.safelyExecuteKeyed(request)
+		results[index] = keyedCommitResult{decision: decision, err: err, panicValue: panicValue}
+		if !persist {
+			continue
+		}
+		if err := db.appendKeyedFrame(record); err != nil {
+			storageErr = err
+			db.poisoned.Store(true)
+			results[index].err = err
+			continue
+		}
+		db.applyKeyed(record)
+		if staged != nil {
+			staged[record.CommandID] = index
+		}
+		durable[index] = true
+		frames++
+	}
+	if frames > 0 && storageErr == nil {
+		storageErr = db.syncKeyed()
+		if storageErr != nil {
+			db.poisoned.Store(true)
+		} else if db.afterSync != nil {
+			db.afterSync()
+		}
+	}
+	if storageErr != nil {
+		for index := range results {
+			if durable[index] {
+				results[index] = keyedCommitResult{err: storageErr}
+			}
+		}
+	} else if frames > 0 {
+		db.commitStats.syncCalls.Add(1)
+		db.commitStats.framesSynced.Add(frames)
+		db.commitStats.groups.Add(1)
+		db.commitStats.groupSizes[frames].Add(1)
+		for {
+			old := db.commitStats.maxGroup.Load()
+			if old >= frames || db.commitStats.maxGroup.CompareAndSwap(old, frames) {
+				break
+			}
+		}
+	}
+	for index, request := range group {
+		request.result <- results[index]
+	}
 }
 
 func runKeyedMutation(tx *KeyedTx, mutation KeyedMutation) (result any, err error) {
@@ -265,6 +456,11 @@ func (db *KeyedDB) Close() error {
 	if db == nil || !db.closed.CompareAndSwap(false, true) {
 		return nil
 	}
+	select {
+	case db.commit.wake <- struct{}{}:
+	default:
+	}
+	<-db.commit.done
 	<-db.admission
 	defer db.leaveKeyed()
 	if db.poisoned.Load() {
@@ -415,8 +611,8 @@ func (db *KeyedDB) enterKeyed(ctx context.Context, op string) error {
 	if ctx == nil {
 		return &Error{Kind: ErrorInvalidInput, Op: op, err: errors.New("nil context")}
 	}
-	if op == "submit_keyed" && db.poisoned.Load() {
-		return &Error{Kind: ErrorPoisoned, Op: op, err: errors.New("an earlier durability failure made writes unsafe; close and reopen the database")}
+	if db.poisoned.Load() {
+		return &Error{Kind: ErrorPoisoned, Op: op, err: errors.New("an earlier durability failure made the database unsafe; close and reopen the database")}
 	}
 	select {
 	case <-ctx.Done():
@@ -432,7 +628,7 @@ func (db *KeyedDB) enterKeyed(ctx context.Context, op string) error {
 		db.leaveKeyed()
 		return &Error{Kind: ErrorClosed, Op: op, err: errors.New("database is closed")}
 	}
-	if op == "submit_keyed" && db.poisoned.Load() {
+	if db.poisoned.Load() {
 		db.leaveKeyed()
 		return &Error{Kind: ErrorPoisoned, Op: op, err: errors.New("an earlier durability failure made writes unsafe; close and reopen the database")}
 	}
