@@ -31,6 +31,7 @@ type Decision[T any] struct {
 type Store interface {
 	Create(context.Context, string, Item) (Decision[Item], error)
 	Get(context.Context, string) (Item, error)
+	ListLowStock(context.Context, int, int) ([]Item, error)
 	Reserve(context.Context, Command) (Decision[Reservation], error)
 	Release(context.Context, Command) (Decision[Item], error)
 }
@@ -42,6 +43,9 @@ func (s *Service) Create(ctx context.Context, commandID string, item Item) (Deci
 	return s.store.Create(ctx, commandID, item)
 }
 func (s *Service) Get(ctx context.Context, id string) (Item, error) { return s.store.Get(ctx, id) }
+func (s *Service) ListLowStock(ctx context.Context, threshold, limit int) ([]Item, error) {
+	return s.store.ListLowStock(ctx, threshold, limit)
+}
 func (s *Service) Reserve(ctx context.Context, command Command) (Decision[Reservation], error) {
 	return s.store.Reserve(ctx, command)
 }

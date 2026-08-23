@@ -2,27 +2,38 @@ package store
 
 import (
 	"context"
-	"net/url"
 
 	"example.com/octetdb-golden/webhook/internal/service"
 	"github.com/yuechen-li-dev/octetdb"
 )
 
-type DB struct{ db *octetdb.KeyedDB }
+type DB struct {
+	db       *octetdb.CatalogDB
+	webhooks *octetdb.Dataset
+}
 
 func Open(ctx context.Context, path string) (*DB, error) {
-	db, err := octetdb.OpenKeyed(ctx, path, octetdb.DefaultKeyedOptions())
+	db, err := octetdb.OpenCatalog(ctx, path, octetdb.DefaultKeyedOptions())
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db: db}, nil
+	bucket, err := db.Bucket(ctx, "events")
+	if err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	webhooks, err := bucket.Dataset(ctx, "webhooks", octetdb.DatasetOptions{TypeIdentity: "webhook.Event/v1"})
+	if err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	return &DB{db: db, webhooks: webhooks}, nil
 }
-func (s *DB) Close() error      { return s.db.Close() }
-func eventKey(id string) string { return "events/" + url.PathEscape(id) }
+func (s *DB) Close() error { return s.db.Close() }
 func (s *DB) Process(ctx context.Context, commandID string, event service.Event) (service.Decision, error) {
-	decision, err := s.db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.KeyedTx) (any, error) {
+	decision, err := s.webhooks.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
 		var existing service.Event
-		if ok, err := tx.Get(eventKey(event.ID), &existing); err != nil {
+		if ok, err := tx.Get(event.ID, &existing); err != nil {
 			return nil, err
 		} else if ok {
 			return existing, nil
@@ -31,7 +42,7 @@ func (s *DB) Process(ctx context.Context, commandID string, event service.Event)
 			return nil, octetdb.Reject("invalid_event")
 		}
 		event.Status = "processed"
-		if err := tx.Put(eventKey(event.ID), event); err != nil {
+		if err := tx.Put(event.ID, event); err != nil {
 			return nil, err
 		}
 		return event, nil
@@ -47,6 +58,6 @@ func (s *DB) Process(ctx context.Context, commandID string, event service.Event)
 }
 func (s *DB) Get(ctx context.Context, id string) (service.Event, bool, error) {
 	var event service.Event
-	ok, err := s.db.GetKeyed(ctx, eventKey(id), &event)
+	ok, err := s.webhooks.Get(ctx, id, &event)
 	return event, ok, err
 }

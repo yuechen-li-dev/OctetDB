@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"example.com/octetdb-golden/job/internal/service"
 	"github.com/go-chi/chi/v5"
@@ -19,6 +20,23 @@ func New(s *service.Service) http.Handler {
 		}
 		d, err := s.Create(r.Context(), commandID, chi.URLParam(r, "id"))
 		writeDecision(w, d, err, http.StatusCreated)
+	})
+	r.Get("/jobs/ready", func(w http.ResponseWriter, r *http.Request) {
+		limit := 10
+		if raw := r.URL.Query().Get("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed <= 0 {
+				http.Error(w, "limit must be a positive integer", http.StatusBadRequest)
+				return
+			}
+			limit = parsed
+		}
+		jobs, err := s.ListReady(r.Context(), limit)
+		if err != nil {
+			http.Error(w, "storage unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		writeJSON(w, http.StatusOK, jobs)
 	})
 	r.Get("/jobs/{id}", func(w http.ResponseWriter, r *http.Request) {
 		job, err := s.Get(r.Context(), chi.URLParam(r, "id"))
@@ -76,6 +94,14 @@ func New(s *service.Service) http.Handler {
 			return
 		}
 		d, err := s.Fail(r.Context(), commandID, chi.URLParam(r, "id"), body.Owner, body.Reason)
+		writeDecision(w, d, err, http.StatusOK)
+	})
+	r.Post("/jobs/{id}/requeue", func(w http.ResponseWriter, r *http.Request) {
+		commandID, ok := idempotencyKey(w, r)
+		if !ok {
+			return
+		}
+		d, err := s.Requeue(r.Context(), commandID, chi.URLParam(r, "id"))
 		writeDecision(w, d, err, http.StatusOK)
 	})
 	return r

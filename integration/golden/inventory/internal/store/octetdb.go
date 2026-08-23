@@ -8,22 +8,34 @@ import (
 	"github.com/yuechen-li-dev/octetdb"
 )
 
-type DB struct{ db *octetdb.KeyedDB }
+type DB struct {
+	db    *octetdb.CatalogDB
+	items *octetdb.Dataset
+}
 
 func Open(ctx context.Context, path string) (*DB, error) {
-	db, err := octetdb.OpenKeyed(ctx, path, octetdb.DefaultKeyedOptions())
+	db, err := octetdb.OpenCatalog(ctx, path, octetdb.DefaultKeyedOptions())
 	if err != nil {
 		return nil, err
 	}
-	return &DB{db: db}, nil
+	bucket, err := db.Bucket(ctx, "inventory")
+	if err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	items, err := bucket.Dataset(ctx, "items", octetdb.DatasetOptions{TypeIdentity: "inventory.Item/v1"})
+	if err != nil {
+		_ = db.Close()
+		return nil, err
+	}
+	return &DB{db: db, items: items}, nil
 }
-func (s *DB) Close() error     { return s.db.Close() }
-func itemKey(id string) string { return "items/" + id }
+func (s *DB) Close() error { return s.db.Close() }
 
 func (s *DB) Create(ctx context.Context, commandID string, item service.Item) (service.Decision[service.Item], error) {
-	decision, err := s.db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.KeyedTx) (any, error) {
+	decision, err := s.items.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
 		var existing service.Item
-		if ok, err := tx.Get(itemKey(item.ID), &existing); err != nil {
+		if ok, err := tx.Get(item.ID, &existing); err != nil {
 			return nil, err
 		} else if ok {
 			return existing, octetdb.RejectWithResult("item_exists", existing)
@@ -31,13 +43,13 @@ func (s *DB) Create(ctx context.Context, commandID string, item service.Item) (s
 		if item.ID == "" || item.Stock < 0 {
 			return nil, octetdb.Reject("invalid_item")
 		}
-		return item, tx.Put(itemKey(item.ID), item)
+		return item, tx.Put(item.ID, item)
 	})
 	return decode[service.Item](decision, err)
 }
 func (s *DB) Get(ctx context.Context, id string) (service.Item, error) {
 	var item service.Item
-	ok, err := s.db.GetKeyed(ctx, itemKey(id), &item)
+	ok, err := s.items.Get(ctx, id, &item)
 	if err != nil {
 		return item, err
 	}
@@ -46,10 +58,33 @@ func (s *DB) Get(ctx context.Context, id string) (service.Item, error) {
 	}
 	return item, nil
 }
+
+// ListLowStock returns at most limit items whose stock is at or below threshold,
+// ordered deterministically by item ID.
+func (s *DB) ListLowStock(ctx context.Context, threshold, limit int) ([]service.Item, error) {
+	if limit <= 0 {
+		return []service.Item{}, nil
+	}
+	items := make([]service.Item, 0, limit)
+	err := octetdb.ScanDataset(ctx, s.items, func(_ string, item service.Item) (octetdb.ScanAction, error) {
+		if item.Stock > threshold {
+			return octetdb.ScanContinue, nil
+		}
+		items = append(items, item)
+		if len(items) == limit {
+			return octetdb.ScanStop, nil
+		}
+		return octetdb.ScanContinue, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 func (s *DB) Reserve(ctx context.Context, command service.Command) (service.Decision[service.Reservation], error) {
-	decision, err := s.db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: command.ID}, func(tx *octetdb.KeyedTx) (any, error) {
+	decision, err := s.items.Mutate(ctx, octetdb.KeyedCommand{ID: command.ID}, func(tx *octetdb.DatasetTx) (any, error) {
 		var item service.Item
-		ok, err := tx.Get(itemKey(command.ItemID), &item)
+		ok, err := tx.Get(command.ItemID, &item)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +98,7 @@ func (s *DB) Reserve(ctx context.Context, command service.Command) (service.Deci
 			return nil, octetdb.Reject("insufficient_stock")
 		}
 		item.Stock -= command.Quantity
-		if err := tx.Put(itemKey(item.ID), item); err != nil {
+		if err := tx.Put(item.ID, item); err != nil {
 			return nil, err
 		}
 		return service.Reservation{ItemID: item.ID, Quantity: command.Quantity, Remaining: item.Stock}, nil
@@ -71,9 +106,9 @@ func (s *DB) Reserve(ctx context.Context, command service.Command) (service.Deci
 	return decode[service.Reservation](decision, err)
 }
 func (s *DB) Release(ctx context.Context, command service.Command) (service.Decision[service.Item], error) {
-	decision, err := s.db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: command.ID}, func(tx *octetdb.KeyedTx) (any, error) {
+	decision, err := s.items.Mutate(ctx, octetdb.KeyedCommand{ID: command.ID}, func(tx *octetdb.DatasetTx) (any, error) {
 		var item service.Item
-		ok, err := tx.Get(itemKey(command.ItemID), &item)
+		ok, err := tx.Get(command.ItemID, &item)
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +119,7 @@ func (s *DB) Release(ctx context.Context, command service.Command) (service.Deci
 			return nil, octetdb.Reject("invalid_quantity")
 		}
 		item.Stock += command.Quantity
-		return item, tx.Put(itemKey(item.ID), item)
+		return item, tx.Put(item.ID, item)
 	})
 	return decode[service.Item](decision, err)
 }

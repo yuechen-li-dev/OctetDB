@@ -22,13 +22,21 @@ func main() {
 	}
 	defer os.RemoveAll(path)
 
-	db, err := octetdb.OpenKeyed(ctx, path, octetdb.DefaultKeyedOptions())
+	db, err := octetdb.OpenCatalog(ctx, path, octetdb.DefaultKeyedOptions())
 	if err != nil {
 		log.Fatal(err)
 	}
-	decision, err := db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: "create-job-42"}, func(tx *octetdb.KeyedTx) (any, error) {
+	workers, err := db.Bucket(ctx, "workers")
+	if err != nil {
+		log.Fatal(err)
+	}
+	jobs, err := workers.Dataset(ctx, "jobs", octetdb.DatasetOptions{TypeIdentity: "example.Job/v1"})
+	if err != nil {
+		log.Fatal(err)
+	}
+	decision, err := jobs.Mutate(ctx, octetdb.KeyedCommand{ID: "create-job-42"}, func(tx *octetdb.DatasetTx) (any, error) {
 		job := Job{ID: "42", Status: "ready"}
-		return job, tx.Put("jobs/42", job)
+		return job, tx.Put("42", job)
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -37,13 +45,21 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err = octetdb.OpenKeyed(ctx, path, octetdb.DefaultKeyedOptions())
+	db, err = octetdb.OpenCatalog(ctx, path, octetdb.DefaultKeyedOptions())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
+	workers, err = db.Bucket(ctx, "workers")
+	if err != nil {
+		log.Fatal(err)
+	}
+	jobs, err = workers.Dataset(ctx, "jobs", octetdb.DatasetOptions{TypeIdentity: "example.Job/v1"})
+	if err != nil {
+		log.Fatal(err)
+	}
 	var job Job
-	ok, err := db.GetKeyed(ctx, "jobs/42", &job)
+	ok, err := jobs.Get(ctx, "42", &job)
 	if err != nil {
 		log.Fatal(err)
 	}

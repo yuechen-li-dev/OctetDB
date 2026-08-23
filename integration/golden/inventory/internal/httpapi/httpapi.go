@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"example.com/octetdb-golden/inventory/internal/service"
 	"github.com/go-chi/chi/v5"
@@ -17,10 +18,32 @@ func New(s *service.Service) http.Handler {
 	a := &API{service: s}
 	r := chi.NewRouter()
 	r.Post("/items/{id}", a.create)
+	r.Get("/items/low-stock", a.lowStock)
 	r.Get("/items/{id}", a.get)
 	r.Post("/items/{id}/reservations", a.reserve)
 	r.Post("/items/{id}/releases", a.release)
 	return r
+}
+func (a *API) lowStock(w http.ResponseWriter, r *http.Request) {
+	threshold, err := strconv.Atoi(r.URL.Query().Get("threshold"))
+	if err != nil {
+		http.Error(w, "threshold is required and must be an integer", http.StatusBadRequest)
+		return
+	}
+	limit := 10
+	if raw := r.URL.Query().Get("limit"); raw != "" {
+		limit, err = strconv.Atoi(raw)
+		if err != nil || limit <= 0 {
+			http.Error(w, "limit must be a positive integer", http.StatusBadRequest)
+			return
+		}
+	}
+	items, err := a.service.ListLowStock(r.Context(), threshold, limit)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, items)
 }
 func (a *API) create(w http.ResponseWriter, r *http.Request) {
 	commandID, ok := idempotencyKey(w, r)

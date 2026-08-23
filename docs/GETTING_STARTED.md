@@ -7,15 +7,32 @@ filenames, or benchmark tuning.
 ## 1. Open with defaults
 
 ```go
-db, err := octetdb.OpenKeyed(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
+db, err := octetdb.OpenCatalog(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
 if err != nil { return err }
 defer db.Close()
+
+inventory, err := db.Bucket(ctx, "inventory")
+if err != nil { return err }
+items, err := inventory.Dataset(ctx, "items", octetdb.DatasetOptions{TypeIdentity: "example.Item/v1"})
+if err != nil { return err }
 ```
 
 OctetDB creates and owns its product files beneath `./data/myapp`. One process
 may own that directory. The defaults bound live records, retained retry
 decisions, value size, and writes per command. You do not need to tune them to
 try the product.
+
+`Bucket` and `Dataset` create durable catalog entries on first use and stably
+reopen them later. The only legal hierarchy is:
+
+```text
+Database
+└── Bucket
+    └── Dataset
+        └── Records
+```
+
+It is logical topology, not filesystem nesting. There are no child datasets.
 
 ## 2. Store and read ordinary Go state
 
@@ -25,26 +42,54 @@ type Item struct {
     Stock int    `json:"stock"`
 }
 
-decision, err := db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: "create-widget"}, func(tx *octetdb.KeyedTx) (any, error) {
+decision, err := items.Mutate(ctx, octetdb.KeyedCommand{ID: "create-widget"}, func(tx *octetdb.DatasetTx) (any, error) {
     item := Item{SKU: "widget", Stock: 10}
-    return item, tx.Put("items/widget", item)
+    return item, tx.Put("widget", item)
 })
 ```
 
-After `SubmitKeyed` succeeds, the decision and all writes are durable. Read the
+After `Mutate` succeeds, the decision and all writes are durable. Read the
 current value with a normal destination pointer:
 
 ```go
 var item Item
-found, err := db.GetKeyed(ctx, "items/widget", &item)
+found, err := items.Get(ctx, "widget", &item)
 ```
 
-Keys are application-defined strings. Use stable, explicit prefixes such as
-`items/`, `orders/`, and `jobs/`. M2 exposes point lookup only; model a known
-projection explicitly in your application if you need one, and note that there
-is no scan or query planner yet.
+Keys are scoped to a dataset. The application no longer prefixes topology into
+keys: `items/123` and `orders/123` become record key `123` in two different
+datasets.
 
-## 3. Add explicit idempotent commands
+## 3. Discover records with a bounded scan
+
+Use the typed helper for application predicates. This example opens the
+explicit `workers/jobs` Dataset, filters Ready jobs, and stops after ten:
+
+```go
+ready := make([]Job, 0, 10)
+err := octetdb.ScanDataset(ctx, jobs, func(_ string, job Job) (octetdb.ScanAction, error) {
+    if job.Status != Ready {
+        return octetdb.ScanContinue, nil
+    }
+    ready = append(ready, job)
+    if len(ready) == 10 {
+        return octetdb.ScanStop, nil
+    }
+    return octetdb.ScanContinue, nil
+})
+```
+
+Results follow record-key ascending order. `ScanStop` is synchronous and avoids
+examining later records. The scan holds a stable committed state at the database
+admission boundary, which means a long scan blocks writes. Do not mutate
+OctetDB from the callback. Keep callbacks deterministic, local, and
+side-effect-free; cancellation and decode/callback errors end the scan.
+
+This is scan execution, not scan semantics: a future index may accelerate the
+same predicate without changing the public API or order. There are no SQL
+expressions, joins, global relations, or query planner.
+
+## 4. Add explicit idempotent commands
 
 The command ID is a correctness value supplied by the caller. Reusing it returns
 the original durable decision without running the callback again. For HTTP,
@@ -69,20 +114,20 @@ The returned decision has `Applied == false` and `Code == "insufficient_stock"`.
 An exact retry gets the same decision. An ordinary callback error aborts without
 recording the command ID and is suitable for operational failures.
 
-## 4. Add atomic invariants and multi-record changes
+## 5. Add atomic invariants and multi-record changes
 
 The callback may read and write multiple records. Its writes become visible
 together only after validation succeeds:
 
 ```go
-decision, err := db.SubmitKeyed(ctx, command, func(tx *octetdb.KeyedTx) (any, error) {
+decision, err := items.Mutate(ctx, command, func(tx *octetdb.DatasetTx) (any, error) {
     var item Item
-    found, err := tx.Get("items/widget", &item)
+    found, err := tx.Get("widget", &item)
     if err != nil { return nil, err }
     if !found { return nil, octetdb.Reject("not_found") }
     if item.Stock < quantity { return item, octetdb.RejectWithResult("insufficient_stock", item) }
     item.Stock -= quantity
-    if err := tx.Put("items/widget", item); err != nil { return nil, err }
+    if err := tx.Put("widget", item); err != nil { return nil, err }
     return item, nil
 })
 ```
@@ -91,7 +136,23 @@ Callbacks are serialized. Keep them deterministic and local: do not perform
 network calls or other irreversible external effects inside them. Compute or
 fetch external input first, then submit the intended state change.
 
-## 5. Advanced specialization
+When an invariant crosses datasets, submit one database mutation:
+
+```go
+decision, err := db.Mutate(ctx, command, func(tx *octetdb.CatalogTx) (any, error) {
+    // inventoryItems and reservations were opened before this callback.
+    if err := tx.Put(inventoryItems, sku, updatedItem); err != nil { return nil, err }
+    if err := tx.Put(reservations, reservationID, reservation); err != nil { return nil, err }
+    return reservation, nil
+})
+```
+
+One WAL decision makes all dataset writes visible together. Command identity is
+database-wide because one command may touch several datasets. Do not create
+buckets or datasets inside a mutation callback; catalog structure is an
+administrative operation.
+
+## 6. Advanced specialization
 
 The keyed workflow is an on-ramp, not OctetDB's entire architecture:
 
@@ -118,7 +179,7 @@ Keys and command IDs have a fixed 4 KiB limit; rejection codes have a fixed
 1 KiB limit. These mechanical safety bounds require no configuration.
 
 `Close` installs a deterministic snapshot and resets the WAL. Call
-`SnapshotKeyed` at a deliberate maintenance boundary if a long-running process
+`CatalogDB.Snapshot` at a deliberate maintenance boundary if a long-running process
 needs to bound recovery work. M2 adds no background scheduler.
 
 ## HTTP error mapping
@@ -141,5 +202,6 @@ OctetDB does not contain HTTP status codes.
 
 Prefer a conventional database when you need ad-hoc SQL, rapidly changing
 arbitrary schemas, many dynamic query shapes, minimal upfront modeling, or
-general multi-tenant relational workloads. The keyed API has point lookup, not
-listing, indexes, joins, schema migrations, or online backup.
+general multi-tenant relational workloads. The catalog API has deterministic
+Dataset scan, but no SQL, secondary indexes, joins, schema migrations, or online
+backup.

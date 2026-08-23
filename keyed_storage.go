@@ -54,7 +54,7 @@ type keyedSnapshotEnvelope struct {
 type keyedWAL struct{ file *os.File }
 
 func (db *KeyedDB) openStorage() error {
-	if err := ensureKeyedFormat(db.path); err != nil {
+	if err := ensureKeyedFormat(db.path, db.format); err != nil {
 		return err
 	}
 	if err := db.loadKeyedSnapshot(); err != nil {
@@ -77,14 +77,14 @@ func (db *KeyedDB) openStorage() error {
 	return nil
 }
 
-func ensureKeyedFormat(path string) error {
+func ensureKeyedFormat(path, expected string) error {
 	if err := os.MkdirAll(path, 0o755); err != nil {
 		return &Error{Kind: ErrorStorage, Op: "open_keyed", err: err}
 	}
 	formatPath := filepath.Join(path, "FORMAT")
 	data, err := os.ReadFile(formatPath)
 	if err == nil {
-		if string(data) != keyedFormatContents {
+		if string(data) != expected {
 			return &Error{Kind: ErrorIncompatible, Op: "open_keyed", err: errors.New("directory contains a different OctetDB model")}
 		}
 		return nil
@@ -110,8 +110,8 @@ func ensureKeyedFormat(path string) error {
 	if err != nil {
 		return &Error{Kind: ErrorStorage, Op: "open_keyed", err: err}
 	}
-	written, writeErr := file.WriteString(keyedFormatContents)
-	if writeErr == nil && written != len(keyedFormatContents) {
+	written, writeErr := file.WriteString(expected)
+	if writeErr == nil && written != len(expected) {
 		writeErr = io.ErrShortWrite
 	}
 	if writeErr == nil {
@@ -250,7 +250,7 @@ func (db *KeyedDB) validateKeyedRecord(record keyedWALRecord) error {
 		if mutation.Key == "" {
 			return corrupt("WAL mutation key is empty")
 		}
-		if len(mutation.Key) > keyedMaxKeyBytes {
+		if len(mutation.Key) > db.maxStoredKeyBytes() {
 			return corrupt("WAL key exceeds fixed bound")
 		}
 		if _, ok := seen[mutation.Key]; ok {
@@ -323,6 +323,9 @@ func (db *KeyedDB) applyKeyed(record keyedWALRecord) {
 		expired := db.dedupeIDs[0]
 		db.dedupeIDs = db.dedupeIDs[1:]
 		delete(db.dedupe, expired)
+	}
+	if db.afterApply != nil {
+		db.afterApply(record)
 	}
 }
 
@@ -412,7 +415,7 @@ func (db *KeyedDB) loadKeyedSnapshot() error {
 		if len(value) > db.options.MaxValueBytes {
 			return &Error{Kind: ErrorCapacity, Op: "open_keyed", err: errors.New("snapshot record exceeds configured value bound")}
 		}
-		if key == "" || len(key) > keyedMaxKeyBytes || !json.Valid(value) {
+		if key == "" || len(key) > db.maxStoredKeyBytes() || !json.Valid(value) {
 			return &Error{Kind: ErrorCorruption, Op: "open_keyed", err: errors.New("snapshot record violates configured bounds")}
 		}
 	}
@@ -443,6 +446,13 @@ func (db *KeyedDB) loadKeyedSnapshot() error {
 		return &Error{Kind: ErrorCorruption, Op: "open_keyed", err: errors.New("snapshot dedupe frontier does not match sequence")}
 	}
 	return nil
+}
+
+func (db *KeyedDB) maxStoredKeyBytes() int {
+	if db.format == catalogKeyedFormatContents {
+		return keyedMaxKeyBytes + 9
+	}
+	return keyedMaxKeyBytes
 }
 
 func (wal *keyedWAL) close() error {

@@ -1,8 +1,8 @@
 # OctetDB
 
 OctetDB is an embeddable specialized OLTP engine with a conventional Go on-ramp.
-Applications can start with bounded, durable, application-defined keyed state
-and atomic typed mutation functions. The original specialized account/transfer
+Applications can start with a bounded, durable Database/Bucket/Dataset catalog,
+application-defined keyed JSON records, and atomic typed mutation functions. The original specialized account/transfer
 model remains available, and deeper Oct-defined specialization is an advanced
 adoption step rather than an onboarding requirement.
 
@@ -35,15 +35,20 @@ build or use the public package.
 
 ```go
 ctx := context.Background()
-db, err := octetdb.OpenKeyed(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
+db, err := octetdb.OpenCatalog(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
 if err != nil {
     log.Fatal(err)
 }
 defer db.Close()
 
-decision, err := db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: "create-user-42"}, func(tx *octetdb.KeyedTx) (any, error) {
+usersBucket, err := db.Bucket(ctx, "identity")
+if err != nil { log.Fatal(err) }
+users, err := usersBucket.Dataset(ctx, "users", octetdb.DatasetOptions{TypeIdentity: "example.User/v1"})
+if err != nil { log.Fatal(err) }
+
+decision, err := users.Mutate(ctx, octetdb.KeyedCommand{ID: "create-user-42"}, func(tx *octetdb.DatasetTx) (any, error) {
     user := User{ID: "42", Name: "Ada"}
-    return user, tx.Put("users/42", user)
+    return user, tx.Put("42", user)
 })
 if err != nil {
     log.Fatal(err)
@@ -51,27 +56,93 @@ if err != nil {
 fmt.Println(decision.Applied)
 ```
 
-`SubmitKeyed` serializes one ordinary Go mutation callback, atomically applies
+`Mutate` serializes one ordinary Go mutation callback, atomically applies
 all of its record writes, synchronizes the durable decision, and retains the
 exact decision for stable command-ID retries. Domain rejections use `Reject` or
 `RejectWithResult`; unexpected callback errors are not recorded and may be
 retried. Values and results use `encoding/json`.
 
+The logical structure is deliberately shallow:
+
+```text
+Database
+└── Bucket
+    └── Dataset
+        └── Records
+```
+
+This is logical structure; OctetDB may materialize it differently for
+performance. Buckets and datasets are catalog entries, not filesystem paths.
+Record keys are scoped to their dataset, so key `123` in `identity/users` is
+distinct from key `123` in `commerce/orders`.
+
 Start with [Getting started](docs/GETTING_STARTED.md). Runnable examples cover
 the [keyed default](examples/keyed/main.go), [v0.1 minimal account lifecycle](examples/minimal/main.go),
 and [account batch idempotency across restart](examples/restart/main.go).
 
-## Keyed default
+## Catalog and keyed default
 
-`OpenKeyed` owns the supplied directory. The default bounds are 100,000 live
+`OpenCatalog` owns the supplied directory and creates a durable database
+identity and catalog automatically. `Bucket`, `Dataset`, `ListBuckets`, and
+`ListDatasets` are structural metadata operations; they are not record queries.
+M2B supports one dataset kind, `KeyedJSON`. An optional `TypeIdentity` is an
+application-owned compatibility label, not a reflected Go schema or migration
+system. Reopening a dataset with a different kind, type identity, or bound fails
+with `ErrorIncompatible`.
+
+The default bounds are 100,000 live
 records, 100,000 retained command decisions, 1 MiB per JSON value or command result, and 4 MiB of
 writes per command. A normal application chooses only its directory. Close
-installs a deterministic snapshot, while `SnapshotKeyed` is available for
-explicit maintenance. M2 deliberately provides point lookup only; it does not
-invent a dynamic query language or an unevidenced listing API.
+installs a deterministic snapshot, while `CatalogDB.Snapshot` is available for
+explicit maintenance. QUERY-M0 adds a deterministic Dataset scan; it does not
+add a dynamic query language, planner, or secondary index.
+
+Use `db.Mutate` with `CatalogTx` when one command must atomically read or write
+several datasets. Command IDs remain database-wide, so retry identity is stable
+even for cross-dataset invariants. Catalog creation is administrative and does
+not occur inside data mutation callbacks. M2B has no rename or destructive
+catalog deletion.
+
+`OpenKeyed`, `KeyedDB`, `GetKeyed`, and `SubmitKeyed` remain available as the
+PRODUCT-M2 candidate compatibility surface. Their keys occupy one global
+application-defined namespace; new v0.2 code should prefer `OpenCatalog`.
 
 Keys and command IDs are limited to 4 KiB and rejection codes to 1 KiB without
 additional configuration.
+
+## Dataset queries
+
+`Dataset.Scan` visits detached logical KeyedJSON records in record-key ascending
+order. `ScanDataset[T]` is the typed convenience: it decodes one value at a
+time, creates no intermediate result slice, and lets the callback return
+`ScanStop` for `Take`, `First`, or `Any` behavior.
+
+```go
+var ready []Job
+err := octetdb.ScanDataset(ctx, jobs, func(_ string, job Job) (octetdb.ScanAction, error) {
+    if job.Status != Ready {
+        return octetdb.ScanContinue, nil
+    }
+    ready = append(ready, job)
+    if len(ready) == 10 {
+        return octetdb.ScanStop, nil
+    }
+    return octetdb.ScanContinue, nil
+})
+```
+
+Every scan is scoped through an opened Database → Bucket → Dataset. A scan
+holds the database admission boundary for one stable committed state, so writes
+do not interleave and a long scan blocks mutations. The callback runs
+synchronously and must not call an OctetDB mutation; keep it deterministic,
+local, and free of external side effects. Context cancellation is checked for
+each record. One decode or callback error fails the scan, though callbacks may
+already have observed earlier records.
+
+Queries scan today. An in-memory primary-key cursor provides reproducible base
+order and genuine early stop, but it is not a predicate index. Future indexes
+may accelerate the same filter semantics without changing source identity,
+results, or order.
 
 Stable command IDs are part of application correctness. For HTTP, pass the
 client's `Idempotency-Key` through as `KeyedCommand.ID`; do not generate a new ID
@@ -109,7 +180,7 @@ format.
 ## Limitations
 
 - Single process and single replica; there is no directory lock, replication, or failover.
-- No SQL, network server, secondary indexes, migrations, or online backup API.
+- No SQL, query planner, network server, secondary indexes, migrations, or online backup API.
 - Keyed values use JSON and are loaded into memory; there is no schema migration
   framework, compare-and-swap API, cross-process writer coordination, or large-blob path.
 - Idempotency is exact only inside `DedupeHorizon`; expired IDs may apply again.

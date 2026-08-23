@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased — PRODUCT-M2B
+
+- Add a durable shallow Database/Bucket/Dataset catalog with stable database and
+  dataset identities, catalog enumeration, dataset-scoped keys, compatibility
+  checks, semantic dataset bounds, and fail-closed catalog recovery.
+- Add public single-dataset and atomic cross-dataset mutation surfaces while
+  retaining database-wide command idempotency.
+- Move the four candidate v0.2 golden applications to logical datasets without
+  changing their service or HTTP layers. Preserve the released v0.1 account
+  path and PRODUCT-M2 `OpenKeyed` compatibility surface with distinct format
+  markers.
+- Add QUERY-M0 `Dataset.Scan` and typed `ScanDataset` over KeyedJSON with
+  deterministic key order, stable serialized read semantics, per-record
+  cancellation, detached raw values, and synchronous early stop.
+- Add ready-job and low-stock product queries without SQL, a fluent query
+  builder, secondary indexes, goroutines, or a second iterator runtime.
+
 ## Unreleased
 
 - Add an application-defined keyed-state workflow with bounded defaults,

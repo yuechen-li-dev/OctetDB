@@ -86,16 +86,18 @@ func RejectWithResult(code string, result any) error {
 // KeyedDB is a durable, single-process database for application-defined JSON
 // records. Mutations are serialized and atomic across all keys they touch.
 type KeyedDB struct {
-	path      string
-	options   KeyedOptions
-	records   map[string][]byte
-	dedupe    map[string]keyedWALRecord
-	dedupeIDs []string
-	sequence  uint64
-	wal       keyedWAL
-	admission chan struct{}
-	closed    atomic.Bool
-	poisoned  atomic.Bool
+	path       string
+	options    KeyedOptions
+	records    map[string][]byte
+	dedupe     map[string]keyedWALRecord
+	dedupeIDs  []string
+	sequence   uint64
+	wal        keyedWAL
+	admission  chan struct{}
+	closed     atomic.Bool
+	poisoned   atomic.Bool
+	format     string
+	afterApply func(keyedWALRecord)
 }
 
 // KeyedTx is the application-facing transaction passed to a KeyedMutation.
@@ -109,6 +111,10 @@ type KeyedTx struct {
 // OpenKeyed creates or recovers a conventional keyed-state database beneath
 // path. OctetDB owns the product files in that directory.
 func OpenKeyed(ctx context.Context, path string, options KeyedOptions) (*KeyedDB, error) {
+	return openKeyed(ctx, path, options, keyedFormatContents)
+}
+
+func openKeyed(ctx context.Context, path string, options KeyedOptions, format string) (*KeyedDB, error) {
 	if ctx == nil {
 		return nil, &Error{Kind: ErrorInvalidInput, Op: "open_keyed", err: errors.New("nil context")}
 	}
@@ -126,7 +132,7 @@ func OpenKeyed(ctx context.Context, path string, options KeyedOptions) (*KeyedDB
 	}
 	db := &KeyedDB{
 		path: path, options: normalized, records: make(map[string][]byte),
-		dedupe: make(map[string]keyedWALRecord), admission: make(chan struct{}, 1),
+		dedupe: make(map[string]keyedWALRecord), admission: make(chan struct{}, 1), format: format,
 	}
 	if err := db.openStorage(); err != nil {
 		return nil, err

@@ -34,7 +34,9 @@ type Store interface {
 	Claim(context.Context, string, string, string) (Decision, error)
 	Complete(context.Context, string, string, string) (Decision, error)
 	Fail(context.Context, string, string, string, string) (Decision, error)
+	Requeue(context.Context, string, string) (Decision, error)
 	Get(context.Context, string) (Job, error)
+	ListReady(context.Context, int) ([]Job, error)
 }
 type Service struct{ store Store }
 
@@ -51,4 +53,10 @@ func (s *Service) Complete(ctx context.Context, commandID, id, owner string) (De
 func (s *Service) Fail(ctx context.Context, commandID, id, owner, reason string) (Decision, error) {
 	return s.store.Fail(ctx, commandID, id, owner, reason)
 }
+func (s *Service) Requeue(ctx context.Context, commandID, id string) (Decision, error) {
+	return s.store.Requeue(ctx, commandID, id)
+}
 func (s *Service) Get(ctx context.Context, id string) (Job, error) { return s.store.Get(ctx, id) }
+func (s *Service) ListReady(ctx context.Context, limit int) ([]Job, error) {
+	return s.store.ListReady(ctx, limit)
+}
