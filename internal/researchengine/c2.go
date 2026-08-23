@@ -1,4 +1,4 @@
-package m7write
+package engine
 
 // This file is the bounded OCTETDB-LAYOUT-M0 alternate lane. It deliberately
 // does not modify Engine, Store, the Oct lane, or the M2 WAL format.

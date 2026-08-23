@@ -1,4 +1,4 @@
-package m7generated
+package model
 
 // This file is the retained generated-package facade for logical FLOW state
 // deltas. It deliberately lives beside the generated checkpoint codec: hosts

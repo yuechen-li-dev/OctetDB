@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5"
+	"github.com/yuechen-li-dev/octetdb/internal/m5"
 )
 
 func main() {
@@ -54,7 +54,7 @@ func main() {
 func renderRowsOnlySource(productsPath string, rows int) []byte {
 	return []byte(fmt.Sprintf(`package DBSchedulerM6
 
-enum Category { C0 C1 C2 C3 C4 C5 C6 C7 }
+enum Category { C0 C1 core C3 C4 C5 C6 C7 }
 enum Status { Draft Active Retired }
 enum Region { R0 R1 R2 R3 R4 R5 }
 concept PositivePrice = Int { Require(Self > 0, "price must be positive") }
@@ -132,7 +132,7 @@ func writeEnums(b *bytes.Buffer, name string, n int, value func(int) string) {
 func renderOctSource(productsPath, pricePath string) []byte {
 	source := fmt.Sprintf(`package DBSchedulerM6
 
-enum Category { C0 C1 C2 C3 C4 C5 C6 C7 }
+enum Category { C0 C1 core C3 C4 C5 C6 C7 }
 enum Status { Draft Active Retired }
 enum Region { R0 R1 R2 R3 R4 R5 }
 
@@ -153,7 +153,7 @@ record table PriceIndex { RowID: Int }
 fn CategoryOf(value: Category) -> Int {
     if value == Category.C0 { return 0 }
     if value == Category.C1 { return 1 }
-    if value == Category.C2 { return 2 }
+    if value == Category.core { return 2 }
     if value == Category.C3 { return 3 }
     if value == Category.C4 { return 4 }
     if value == Category.C5 { return 5 }

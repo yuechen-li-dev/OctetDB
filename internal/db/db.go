@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+	"github.com/yuechen-li-dev/octetdb/internal/workload"
 )
 
 //go:embed schema.sql

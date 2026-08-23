@@ -3,7 +3,7 @@ package scheduled
 import (
 	"runtime"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+	"github.com/yuechen-li-dev/octetdb/internal/workload"
 )
 
 type commandDescriptor struct {

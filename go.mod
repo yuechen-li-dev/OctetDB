@@ -1,4 +1,4 @@
-module github.com/yuechen-li-dev/database-scheduler
+module github.com/yuechen-li-dev/octetdb
 
 go 1.26
 

@@ -14,11 +14,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/baseline"
-	"github.com/yuechen-li-dev/database-scheduler/internal/db"
-	"github.com/yuechen-li-dev/database-scheduler/internal/metrics"
-	"github.com/yuechen-li-dev/database-scheduler/internal/scheduled"
-	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+	"github.com/yuechen-li-dev/octetdb/internal/baseline"
+	"github.com/yuechen-li-dev/octetdb/internal/db"
+	"github.com/yuechen-li-dev/octetdb/internal/metrics"
+	"github.com/yuechen-li-dev/octetdb/internal/scheduled"
+	"github.com/yuechen-li-dev/octetdb/internal/workload"
 )
 
 type Phase struct {

@@ -1,11 +1,11 @@
-package m7write
+package engine
 
 import (
 	"errors"
 	"fmt"
 	"time"
 
-	generated "github.com/yuechen-li-dev/database-scheduler/internal/m7generated"
+	generated "github.com/yuechen-li-dev/octetdb/internal/model"
 )
 
 type AccountID uint64

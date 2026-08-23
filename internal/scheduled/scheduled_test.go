@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+	"github.com/yuechen-li-dev/octetdb/internal/workload"
 )
 
 func TestGeneratedAdmissionPolicyDecisions(t *testing.T) {

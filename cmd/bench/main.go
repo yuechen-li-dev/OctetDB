@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	benchrun "github.com/yuechen-li-dev/database-scheduler/internal/bench"
-	"github.com/yuechen-li-dev/database-scheduler/internal/db"
+	benchrun "github.com/yuechen-li-dev/octetdb/internal/bench"
+	"github.com/yuechen-li-dev/octetdb/internal/db"
 )
 
 func main() {

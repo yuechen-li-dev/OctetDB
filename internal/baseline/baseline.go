@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/db"
-	"github.com/yuechen-li-dev/database-scheduler/internal/workload"
+	"github.com/yuechen-li-dev/octetdb/internal/db"
+	"github.com/yuechen-li-dev/octetdb/internal/workload"
 )
 
 type Result struct {

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5"
+	"github.com/yuechen-li-dev/octetdb/internal/m5"
 )
 
 func main() {

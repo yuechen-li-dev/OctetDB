@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5"
+	"github.com/yuechen-li-dev/octetdb/internal/m5"
 )
 
 func main() {
@@ -90,7 +90,7 @@ func renderOct(rows []m5.Product, identity m5.Identity) string {
 	var b strings.Builder
 	b.Grow(len(rows) * 180)
 	b.WriteString("package DBSchedulerM5\n\n")
-	b.WriteString("enum Category { C0 C1 C2 C3 C4 C5 C6 C7 }\nenum Status { Draft Active Retired }\nenum Region { R0 R1 R2 R3 R4 R5 }\n\n")
+	b.WriteString("enum Category { C0 C1 core C3 C4 C5 C6 C7 }\nenum Status { Draft Active Retired }\nenum Region { R0 R1 R2 R3 R4 R5 }\n\n")
 	b.WriteString("concept PositivePrice = Int { Require(Self > 0, \"price must be positive\") }\n")
 	b.WriteString("record Publication { Version: Int Hash: String }\n")
 	b.WriteString("record CatalogData { ID: Int[] Category: Int[] Status: Int[] PriceCents: Int[] RatingTenths: Int[] Region: Int[] Name: String[] }\n")
@@ -177,7 +177,7 @@ fn EmitCompiledSnapshot() -> Void {
     let activeOffsets = ActiveOffsets()
     var lines = [
         "// Code generated from experiments/M5/generated/snapshot.octest by Oct artifact. DO NOT EDIT.",
-        "package m5compiled", "", "import m5 \"github.com/yuechen-li-dev/database-scheduler/internal/m5\"", "",
+        "package m5compiled", "", "import m5 \"github.com/yuechen-li-dev/octetdb/internal/m5\"", "",
         "const snapshotHash = \"%s\"", "",
         "var products = [...]m5.Product{"
     ]

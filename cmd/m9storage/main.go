@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	generated "github.com/yuechen-li-dev/database-scheduler/internal/m7generated"
-	"github.com/yuechen-li-dev/database-scheduler/internal/m7write"
+	generated "github.com/yuechen-li-dev/octetdb/internal/model"
+	m7write "github.com/yuechen-li-dev/octetdb/internal/researchengine"
 )
 
 type evidence struct {

@@ -14,8 +14,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5"
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5compiled"
+	"github.com/yuechen-li-dev/octetdb/internal/m5"
+	"github.com/yuechen-li-dev/octetdb/internal/m5compiled"
 )
 
 type startupResult struct {

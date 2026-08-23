@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/yuechen-li-dev/database-scheduler/internal/m5"
+	"github.com/yuechen-li-dev/octetdb/internal/m5"
 )
 
 func TestCompiledLanesMatchCanonicalAndRuntimeControls(t *testing.T) {

@@ -1,4 +1,4 @@
-package m7write
+package engine
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	generated "github.com/yuechen-li-dev/database-scheduler/internal/m7generated"
+	generated "github.com/yuechen-li-dev/octetdb/internal/model"
 )
 
 type queued struct {

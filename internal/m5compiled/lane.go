@@ -1,6 +1,6 @@
 package m5compiled
 
-import "github.com/yuechen-li-dev/database-scheduler/internal/m5"
+import "github.com/yuechen-li-dev/octetdb/internal/m5"
 
 type ScanLane struct{}
 

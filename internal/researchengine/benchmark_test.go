@@ -1,4 +1,4 @@
-package m7write
+package engine
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	generated "github.com/yuechen-li-dev/database-scheduler/internal/m7generated"
+	generated "github.com/yuechen-li-dev/octetdb/internal/model"
 )
 
 var benchmarkDecision generated.Main_TransitionDecision

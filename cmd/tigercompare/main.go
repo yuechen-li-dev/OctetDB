@@ -21,7 +21,7 @@ import (
 	"time"
 
 	tb "github.com/tigerbeetle/tigerbeetle-go"
-	"github.com/yuechen-li-dev/database-scheduler/internal/m7write"
+	m7write "github.com/yuechen-li-dev/octetdb/internal/researchengine"
 )
 
 const initialBalance = uint64(1_000_000_000_000)

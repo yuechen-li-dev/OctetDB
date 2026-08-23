@@ -1,7 +1,7 @@
 // Code generated from experiments/M5/generated/snapshot.octest by Oct artifact. DO NOT EDIT.
 package m5compiled
 
-import m5 "github.com/yuechen-li-dev/database-scheduler/internal/m5"
+import m5 "github.com/yuechen-li-dev/octetdb/internal/m5"
 
 const snapshotHash = "8314fe505eed49b57b8faf1cd72069cd6f5d35a4f17da24adda6f05755385d0e"
 
