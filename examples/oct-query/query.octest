@@ -1,0 +1,30 @@
+package OctetDBQueryExample
+
+concept Job {
+    ID: Int
+    Ready: Bool
+}
+
+fn IsReady(job: Job) -> Bool { return job.Ready }
+fn JobID(job: Job) -> Int { return job.ID }
+
+query ReadyJobIDs(jobs: Job[], limit: Int) yields Int {
+    filter IsReady
+    map JobID
+    take limit
+}
+
+[Fact]
+fn FilterMapTakeUsesFLOW() -> Void {
+    let jobs = [
+        Job { ID: 30 Ready: true },
+        Job { ID: 10 Ready: false },
+        Job { ID: 20 Ready: true }
+    ]
+    let ready = ReadyJobIDs(jobs, 1)
+    Assert.Equal(30, Query.First(ready)!, "source order and take are preserved")
+    Assert.Equal(true, Query.Any(ReadyJobIDs(jobs, 10)), "ready job exists")
+    Assert.Equal(2, Query.Count(ReadyJobIDs(jobs, 10)), "two ready jobs")
+}
+
+fn Main() -> Void {}

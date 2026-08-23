@@ -7,7 +7,7 @@ import (
 )
 
 type DB struct {
-	db   *octetdb.CatalogDB
+	db   *octetdb.Database
 	jobs *octetdb.Dataset
 }
 
@@ -94,16 +94,16 @@ func (s *DB) Requeue(ctx context.Context, commandID, id string) (service.Decisio
 	})
 }
 func (s *DB) mutate(ctx context.Context, commandID, id string, change func(*service.Job, bool) error) (service.Decision, error) {
-	decision, err := s.jobs.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
+	decision, err := s.db.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.Tx) (any, error) {
 		var job service.Job
-		exists, err := tx.Get(id, &job)
+		exists, err := tx.Get(s.jobs, id, &job)
 		if err != nil {
 			return nil, err
 		}
 		if err := change(&job, exists); err != nil {
 			return nil, err
 		}
-		return job, tx.Put(id, job)
+		return job, tx.Put(s.jobs, id, job)
 	})
 	if err != nil {
 		return service.Decision{}, err

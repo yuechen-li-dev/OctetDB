@@ -9,7 +9,7 @@ import (
 )
 
 // TestExternalModule runs only when OCTETDB_EXTERNAL_VERSION is set. It proves
-// the retained ordinary-user program against a downloadable module version;
+// the canonical v0.2 catalog program against a downloadable module version;
 // no replace directive or repository path is given to the consumer module.
 func TestExternalModule(t *testing.T) {
 	version := os.Getenv("OCTETDB_EXTERNAL_VERSION")
@@ -19,7 +19,7 @@ func TestExternalModule(t *testing.T) {
 	dir := t.TempDir()
 	runExternal(t, dir, "mod", "init", "example.com/octetdb-consumer")
 	runExternal(t, dir, "get", "github.com/yuechen-li-dev/octetdb@"+version)
-	source, err := os.ReadFile(filepath.Join("testdata", "external-consumer", "main.go"))
+	source, err := os.ReadFile(filepath.Join("testdata", "candidate-consumer", "main.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestExternalModule(t *testing.T) {
 		t.Fatal(err)
 	}
 	output := runExternal(t, dir, "run", ".")
-	if !strings.Contains(output, "external-ok balances=75,75 duplicate=true files=[FORMAT wal.oct] format=1") {
+	if !strings.Contains(output, "candidate-ok duplicate=true order=placed stock=3 low=[widget]") {
 		t.Fatalf("unexpected smoke output: %s", output)
 	}
 	deps := runExternal(t, dir, "list", "-deps", "-f", "{{if not .Standard}}{{.ImportPath}}{{end}}", ".")

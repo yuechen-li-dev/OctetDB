@@ -7,7 +7,7 @@ import (
 )
 
 type DB struct {
-	db     *octetdb.CatalogDB
+	db     *octetdb.Database
 	orders *octetdb.Dataset
 }
 
@@ -30,22 +30,22 @@ func Open(ctx context.Context, path string) (*DB, error) {
 }
 func (s *DB) Close() error { return s.db.Close() }
 func (s *DB) Create(ctx context.Context, commandID, id string) (service.Decision, error) {
-	decision, err := s.orders.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
+	decision, err := s.db.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.Tx) (any, error) {
 		var existing service.Order
-		if ok, err := tx.Get(id, &existing); err != nil {
+		if ok, err := tx.Get(s.orders, id, &existing); err != nil {
 			return nil, err
 		} else if ok {
 			return existing, octetdb.RejectWithResult("order_exists", existing)
 		}
 		order := service.Order{ID: id, Status: service.Created}
-		return order, tx.Put(id, order)
+		return order, tx.Put(s.orders, id, order)
 	})
 	return decode(decision, err)
 }
 func (s *DB) Transition(ctx context.Context, commandID, id string, to service.Status) (service.Decision, error) {
-	decision, err := s.orders.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
+	decision, err := s.db.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.Tx) (any, error) {
 		var order service.Order
-		ok, err := tx.Get(id, &order)
+		ok, err := tx.Get(s.orders, id, &order)
 		if err != nil {
 			return nil, err
 		}
@@ -56,7 +56,7 @@ func (s *DB) Transition(ctx context.Context, commandID, id string, to service.St
 			return order, octetdb.RejectWithResult("invalid_transition", order)
 		}
 		order.Status = to
-		return order, tx.Put(id, order)
+		return order, tx.Put(s.orders, id, order)
 	})
 	return decode(decision, err)
 }

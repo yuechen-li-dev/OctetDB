@@ -1,62 +1,58 @@
 # Durability contract
 
-The v0.1 account API and candidate v0.2 catalog/keyed API use separate format
-markers and storage implementations. Both use the same success rule: a returned
-data decision is authoritative only after its checksummed WAL frame is written
-and synchronized.
+For the canonical v0.2 catalog database, a successful `Database.Mutate` means
+one complete checksummed WAL frame containing the command decision and every
+cross-dataset write was written and synchronized. State is applied in memory
+only after synchronization. A durable rejection is a decision too; duplicate
+retry of a retained ID appends nothing.
 
-OctetDB v0.1 has one public durability mode. `Submit` and `SubmitBatch` return
-success only after all new decisions in the offered batch have been written as
-one checksummed WAL frame and the WAL file's `Sync` call has succeeded. State is
-applied in memory only after that synchronization. Rejected domain decisions
-are durable decisions too. A duplicate whose retained result is already durable
-does not append another record.
+Catalog structure is synchronized separately before `Bucket` or `Dataset`
+returns. OctetDB writes a checksummed complete catalog to a temporary file,
+synchronizes it, atomically renames it, and synchronizes the containing
+directory where supported. Catalog operations are administrative and cannot
+run inside mutations.
 
 ## Failure behavior
 
-- **Process crash:** a synchronized complete frame is replayed on `Open`, even
-  if the process crashed before applying it in memory or replying to the caller.
-- **OS crash or power loss:** OctetDB uses Go's file `Sync`; the guarantee is
-  conditional on the operating system, filesystem, drive, and controller
-  honoring that request. OctetDB cannot protect against hardware that falsely
-  reports persistence.
-- **Incomplete WAL tail:** recovery treats a short final length, payload, or
-  checksum as an interrupted append, ignores it, and truncates the WAL to the
-  last complete frame. A structurally complete frame with a bad checksum fails
-  open as corruption.
-- **Write or sync failure:** the write returns `ErrorStorage`. The handle is
-  poisoned and rejects later submissions with `ErrorPoisoned`; close it and
-  diagnose the storage before reopening.
-- **Snapshot:** OctetDB writes and syncs `snapshot.oct.tmp`, atomically renames it
-  to `snapshot.oct`, syncs the containing directory on POSIX, then resets and
-  syncs `wal.oct`. A crash before WAL reset is safe because replay skips records
-  already covered by the snapshot. Windows lacks the same directory-sync step,
-  so power loss around snapshot rename has a weaker metadata-persistence
-  guarantee and may cause a fail-closed recovery.
-- **Catalog structure:** `OpenCatalog`, `Bucket`, and `Dataset` write a
-  checksummed complete catalog to `catalog.tmp`, synchronize it, atomically
-  rename it to `catalog`, and synchronize the directory where supported before
-  returning. Dataset identity therefore becomes durable before data mutations
-  can target it. A catalog write ambiguity poisons the handle. Catalog changes
-  are administrative operations and never run inside ordinary mutation
-  callbacks.
-- **Restart:** `Open` validates the format marker and snapshot, restores the
-  snapshot, validates the WAL, and replays complete records after the snapshot
-  sequence.
-- **Duplicate retry:** command IDs are exact within the last `DedupeHorizon`
-  unique decisions. A retained ID returns its original sequence and decision
-  with `Result.Duplicate=true`, including after snapshot and restart. Once an ID
-  ages out of that explicitly bounded horizon, it may be applied again.
+- **Process crash:** a synchronized complete decision is replayed even if the
+  process crashed before applying it in memory or replying.
+- **OS crash or power loss:** durability depends on the operating system,
+  filesystem, drive, and controller honoring Go file `Sync`.
+- **Incomplete final WAL append:** recovery truncates a short final header,
+  payload, or checksum to the last complete frame.
+- **Corrupt complete frame:** checksum, sequence, JSON, dataset identity, or
+  bound violations fail open with `ErrorCorruption` or `ErrorCapacity` as
+  applicable.
+- **Write or sync failure:** the operation returns `ErrorStorage`; the handle is
+  poisoned and later mutations return `ErrorPoisoned` until close/reopen.
+- **Duplicate retry:** exact accepted or rejected decisions survive snapshot and
+  restart while retained inside `DedupeHorizon`. An expired ID may apply again.
 
-Cancellation is honored while waiting for local admission. Once admitted, a
-submission runs through synchronization and returns its definitive result. If a
-caller disconnects after admission and cannot observe the reply, it must retry
-the same command ID.
+## Snapshots and close
 
-These are single-process, single-replica durability guarantees. OctetDB v0.1
-does not provide replication, failover availability, or protection from loss of
-the database directory.
+`Database.Snapshot` and `Close` write and synchronize a deterministic temporary
+snapshot, rename it over the authoritative snapshot, sync the directory on
+POSIX, then truncate and synchronize the WAL. Snapshot data includes every
+dataset record, the sequence frontier, and retained command decisions. Catalog
+topology is in its separately synchronized catalog file.
 
-For catalog databases, command IDs remain database-wide and one WAL decision
-may contain writes to several datasets. Recovery applies or rejects that whole
-decision, never a dataset-by-dataset subset.
+Recovery safely skips WAL decisions already covered by the snapshot. Windows
+does not provide the same directory-sync step, so power loss around snapshot
+rename has weaker metadata persistence and may cause a fail-closed open.
+
+Queries have no persistence path. `Dataset.Scan` and `ScanDataset` are read-only
+and do not append to the WAL, advance sequence, or change dedupe state. Their
+results survive restart because the underlying catalog and records survive.
+
+## Compatibility paths
+
+The v0.1 account `Submit`/`SubmitBatch` API retains its published equivalent
+WAL rule. Deprecated pre-v0.2 `SubmitKeyed` retains the same rule for its
+distinct global-key format. The formats are not interchangeable.
+
+Cancellation is honored while waiting for admission. Once a mutation is
+admitted, it runs through synchronization and returns a definitive outcome. If
+a caller loses the reply, it retries the same command ID.
+
+These are single-process, single-replica guarantees. OctetDB does not protect
+against loss of the database directory or provide replication/failover.

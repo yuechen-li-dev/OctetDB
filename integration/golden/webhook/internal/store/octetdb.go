@@ -8,7 +8,7 @@ import (
 )
 
 type DB struct {
-	db       *octetdb.CatalogDB
+	db       *octetdb.Database
 	webhooks *octetdb.Dataset
 }
 
@@ -31,9 +31,9 @@ func Open(ctx context.Context, path string) (*DB, error) {
 }
 func (s *DB) Close() error { return s.db.Close() }
 func (s *DB) Process(ctx context.Context, commandID string, event service.Event) (service.Decision, error) {
-	decision, err := s.webhooks.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.DatasetTx) (any, error) {
+	decision, err := s.db.Mutate(ctx, octetdb.KeyedCommand{ID: commandID}, func(tx *octetdb.Tx) (any, error) {
 		var existing service.Event
-		if ok, err := tx.Get(event.ID, &existing); err != nil {
+		if ok, err := tx.Get(s.webhooks, event.ID, &existing); err != nil {
 			return nil, err
 		} else if ok {
 			return existing, nil
@@ -42,7 +42,7 @@ func (s *DB) Process(ctx context.Context, commandID string, event service.Event)
 			return nil, octetdb.Reject("invalid_event")
 		}
 		event.Status = "processed"
-		if err := tx.Put(event.ID, event); err != nil {
+		if err := tx.Put(s.webhooks, event.ID, event); err != nil {
 			return nil, err
 		}
 		return event, nil

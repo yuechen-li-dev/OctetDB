@@ -61,6 +61,8 @@ func DecodeResult(decision KeyedDecision, destination any) error {
 // KeyedMutation atomically reads and writes application-defined records. A nil
 // error applies all writes. Reject or RejectWithResult records an exact durable
 // rejection and discards all writes. Other errors abort without recording an ID.
+//
+// Deprecated: use Mutation with OpenCatalog.
 type KeyedMutation func(*KeyedTx) (any, error)
 
 // KeyedRejection is an application-domain rejection persisted for exact retry.
@@ -85,6 +87,9 @@ func RejectWithResult(code string, result any) error {
 
 // KeyedDB is a durable, single-process database for application-defined JSON
 // records. Mutations are serialized and atomic across all keys they touch.
+//
+// Deprecated: use Database with OpenCatalog. KeyedDB retains the distinct
+// pre-v0.2 global-key format only for compatibility.
 type KeyedDB struct {
 	path       string
 	options    KeyedOptions
@@ -102,6 +107,8 @@ type KeyedDB struct {
 
 // KeyedTx is the application-facing transaction passed to a KeyedMutation.
 // It is valid only during that callback.
+//
+// Deprecated: use Tx with Database.Mutate.
 type KeyedTx struct {
 	db      *KeyedDB
 	writes  map[string]*[]byte
@@ -110,6 +117,9 @@ type KeyedTx struct {
 
 // OpenKeyed creates or recovers a conventional keyed-state database beneath
 // path. OctetDB owns the product files in that directory.
+//
+// Deprecated: use OpenCatalog. OpenKeyed exists only for the distinct
+// pre-v0.2 global-key development format and never opens a catalog database.
 func OpenKeyed(ctx context.Context, path string, options KeyedOptions) (*KeyedDB, error) {
 	return openKeyed(ctx, path, options, keyedFormatContents)
 }
@@ -142,6 +152,8 @@ func openKeyed(ctx context.Context, path string, options KeyedOptions, format st
 }
 
 // SubmitKeyed executes one atomic, durable, exactly deduplicated mutation.
+//
+// Deprecated: use Database.Mutate.
 func (db *KeyedDB) SubmitKeyed(ctx context.Context, command KeyedCommand, mutation KeyedMutation) (KeyedDecision, error) {
 	if err := db.enterKeyed(ctx, "submit_keyed"); err != nil {
 		return KeyedDecision{}, err
@@ -210,6 +222,8 @@ func runKeyedMutation(tx *KeyedTx, mutation KeyedMutation) (result any, err erro
 }
 
 // GetKeyed decodes one current record into destination.
+//
+// Deprecated: use Dataset.Get.
 func (db *KeyedDB) GetKeyed(ctx context.Context, key string, destination any) (bool, error) {
 	if err := db.enterKeyed(ctx, "get_keyed"); err != nil {
 		return false, err
@@ -232,6 +246,8 @@ func (db *KeyedDB) GetKeyed(ctx context.Context, key string, destination any) (b
 }
 
 // SnapshotKeyed deterministically installs a current snapshot and resets the WAL.
+//
+// Deprecated: use Database.Snapshot.
 func (db *KeyedDB) SnapshotKeyed(ctx context.Context) error {
 	if err := db.enterKeyed(ctx, "snapshot_keyed"); err != nil {
 		return err

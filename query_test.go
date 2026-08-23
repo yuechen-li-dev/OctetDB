@@ -18,7 +18,7 @@ type queryTestRecord struct {
 	Stock  int    `json:"stock"`
 }
 
-func openQueryTestDataset(t testing.TB, path, bucketName, datasetName string, options KeyedOptions) (*CatalogDB, *Dataset) {
+func openQueryTestDataset(t testing.TB, path, bucketName, datasetName string, options KeyedOptions) (*Database, *Dataset) {
 	t.Helper()
 	db, err := OpenCatalog(context.Background(), path, options)
 	if err != nil {
@@ -39,9 +39,9 @@ func openQueryTestDataset(t testing.TB, path, bucketName, datasetName string, op
 
 func putQueryRecords(t testing.TB, dataset *Dataset, commandID string, records map[string]any) {
 	t.Helper()
-	decision, err := dataset.Mutate(context.Background(), KeyedCommand{ID: commandID}, func(tx *DatasetTx) (any, error) {
+	decision, err := dataset.db.Mutate(context.Background(), KeyedCommand{ID: commandID}, func(tx *Tx) (any, error) {
 		for key, value := range records {
-			if err := tx.Put(key, value); err != nil {
+			if err := tx.Put(dataset, key, value); err != nil {
 				return nil, err
 			}
 		}
@@ -216,35 +216,49 @@ func TestDatasetScanHundredThousandCancellationAndWriteBlocking(t *testing.T) {
 	}
 
 	entered := make(chan struct{})
-	release := make(chan struct{})
 	scanDone := make(chan error, 1)
+	scanStarted := time.Now()
+	scanned := 0
 	go func() {
 		scanDone <- dataset.Scan(context.Background(), func(DatasetRecord) (ScanAction, error) {
-			close(entered)
-			<-release
-			return ScanStop, nil
+			scanned++
+			if scanned == 1 {
+				close(entered)
+			}
+			// Make the representative 100k scan long enough to observe the
+			// serialized writer boundary reliably on fast machines.
+			if scanned%10_000 == 0 {
+				time.Sleep(time.Millisecond)
+			}
+			return ScanContinue, nil
 		})
 	}()
 	<-entered
 	mutationDone := make(chan error, 1)
+	mutationStarted := time.Now()
 	go func() {
-		_, err := dataset.Mutate(context.Background(), KeyedCommand{ID: "blocked-write"}, func(tx *DatasetTx) (any, error) {
-			return nil, tx.Put("later", queryTestRecord{ID: "later"})
+		_, err := db.Mutate(context.Background(), KeyedCommand{ID: "blocked-write"}, func(tx *Tx) (any, error) {
+			return nil, tx.Put(dataset, "later", queryTestRecord{ID: "later"})
 		})
 		mutationDone <- err
 	}()
 	select {
 	case err := <-mutationDone:
 		t.Fatalf("mutation did not block behind stable query snapshot: %v", err)
-	case <-time.After(20 * time.Millisecond):
+	case <-time.After(5 * time.Millisecond):
 	}
-	close(release)
 	if err := <-scanDone; err != nil {
 		t.Fatal(err)
 	}
+	scanDuration := time.Since(scanStarted)
 	if err := <-mutationDone; err != nil {
 		t.Fatal(err)
 	}
+	mutationWait := time.Since(mutationStarted)
+	if scanned != 100_000 || mutationWait < 5*time.Millisecond {
+		t.Fatalf("scanned=%d mutation wait=%s", scanned, mutationWait)
+	}
+	t.Logf("100k scan=%s; concurrent mutation waited=%s", scanDuration, mutationWait)
 }
 
 func TestDatasetScanConcurrentReadersRemainDeterministic(t *testing.T) {
@@ -284,14 +298,14 @@ func TestDatasetScanPrimaryKeyCursorTracksInsertUpdateAndDelete(t *testing.T) {
 		"b": queryTestRecord{ID: "b"},
 		"d": queryTestRecord{ID: "d"},
 	})
-	decision, err := dataset.Mutate(context.Background(), KeyedCommand{ID: "edit"}, func(tx *DatasetTx) (any, error) {
-		if err := tx.Put("a", queryTestRecord{ID: "a"}); err != nil {
+	decision, err := db.Mutate(context.Background(), KeyedCommand{ID: "edit"}, func(tx *Tx) (any, error) {
+		if err := tx.Put(dataset, "a", queryTestRecord{ID: "a"}); err != nil {
 			return nil, err
 		}
-		if err := tx.Put("b", queryTestRecord{ID: "b-updated"}); err != nil {
+		if err := tx.Put(dataset, "b", queryTestRecord{ID: "b-updated"}); err != nil {
 			return nil, err
 		}
-		return nil, tx.Delete("d")
+		return nil, tx.Delete(dataset, "d")
 	})
 	if err != nil || !decision.Applied {
 		t.Fatalf("edit decision=%+v err=%v", decision, err)

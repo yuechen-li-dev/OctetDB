@@ -1,11 +1,11 @@
-# PRODUCT-M2B / QUERY-M0 golden integrations
+# v0.2 golden integrations
 
 This is a separate Go module so its four applications can consume only exported
 OctetDB APIs. It uses `chi`, `net/http`, `encoding/json`, `slog`, `context`, plain
 constructors, and application-specific service/store interfaces.
 
 The module requires the candidate version `v0.2.0` and temporarily replaces it
-with the repository root because no release is made by this milestone. The clean
+with the repository root until a release tag is available. The clean
 v0.1.0 baseline had no replacement and is recorded in
 `docs/product/evidence/PRODUCT_M2_V01_BASELINE.md`.
 
@@ -19,7 +19,7 @@ The persistence adapters declare these logical leaves:
 | job | `workers` | `jobs` |
 
 They use no key prefixes, internal imports, filesystem topology, SQL, or Oct.
-QUERY-M0 adds two conventional exported-API reads:
+Two conventional exported-API reads extend the release contract:
 
 - job: `GET /jobs/ready?limit=10` scans `workers/jobs`, selects `Ready`, and
   stops at the limit; `POST /jobs/{id}/requeue` proves failed/requeued behavior;

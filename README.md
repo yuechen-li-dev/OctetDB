@@ -1,68 +1,55 @@
 # OctetDB
 
-OctetDB is an embeddable specialized OLTP engine with a conventional Go on-ramp.
-Applications can start with a bounded, durable Database/Bucket/Dataset catalog,
-application-defined keyed JSON records, and atomic typed mutation functions. The original specialized account/transfer
-model remains available, and deeper Oct-defined specialization is an advanced
-adoption step rather than an onboarding requirement.
-
-It is not a PostgreSQL replacement, general SQL database, network daemon,
-TigerBeetle clone, cache, or ORM.
+OctetDB is a boring embedded Go OLTP database by default: Database → Bucket →
+Dataset, ordinary Go structs, durable atomic mutations, exact bounded
+idempotency, deterministic scans, and restart safety. Oct is optional and
+provides deeper semantic/query specialization when desired.
 
 ## Status
 
-The first public release is `v0.1.0`. The keyed-state API documented below is a
-candidate additive v0.2 API in the current source tree and is not in v0.1.0.
-OctetDB is intentionally pre-1.0: APIs and database formats may change between
-minor releases, incompatible data is detected and rejected, and automatic
-migration is not promised.
-
-## Install
+`v0.2.0` is the current public release. OctetDB is pre-1.0: incompatible
+formats are rejected, and automatic migration is not promised.
 
 ```sh
-go get github.com/yuechen-li-dev/octetdb@v0.1.0
+go get github.com/yuechen-li-dev/octetdb@v0.2.0
 ```
 
-That command installs the released specialized account API. The keyed workflow
-below is implemented on the current main branch and should be consumed as a
-versioned dependency after the proposed v0.2.0 release.
+Go 1.23 or newer is required. Oct, PostgreSQL, and TigerBeetle are not required
+to build or use the public package.
 
-OctetDB requires Go 1.23 or newer. The release is tested on Windows and Linux
-under WSL2; macOS is not yet verified. Oct and PostgreSQL are not required to
-build or use the public package.
-
-## Default Go workflow
+## Quickstart
 
 ```go
-ctx := context.Background()
-db, err := octetdb.OpenCatalog(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
-if err != nil {
-    log.Fatal(err)
+type Item struct {
+    SKU   string `json:"sku"`
+    Stock int    `json:"stock"`
 }
+
+ctx := context.Background()
+db, err := octetdb.OpenCatalog(ctx, "./data/shop", octetdb.DefaultKeyedOptions())
+if err != nil { return err }
 defer db.Close()
 
-usersBucket, err := db.Bucket(ctx, "identity")
-if err != nil { log.Fatal(err) }
-users, err := usersBucket.Dataset(ctx, "users", octetdb.DatasetOptions{TypeIdentity: "example.User/v1"})
-if err != nil { log.Fatal(err) }
-
-decision, err := users.Mutate(ctx, octetdb.KeyedCommand{ID: "create-user-42"}, func(tx *octetdb.DatasetTx) (any, error) {
-    user := User{ID: "42", Name: "Ada"}
-    return user, tx.Put("42", user)
+inventory, err := db.Bucket(ctx, "inventory")
+if err != nil { return err }
+items, err := inventory.Dataset(ctx, "items", octetdb.DatasetOptions{
+    TypeIdentity: "shop.Item/v1",
 })
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Println(decision.Applied)
+if err != nil { return err }
+
+command := octetdb.KeyedCommand{ID: "receive-widget-001"}
+decision, err := db.Mutate(ctx, command, func(tx *octetdb.Tx) (any, error) {
+    item := Item{SKU: "widget", Stock: 8}
+    return item, tx.Put(items, item.SKU, item)
+})
+if err != nil { return err }
+
+var item Item
+found, err := items.Get(ctx, "widget", &item)
 ```
 
-`Mutate` serializes one ordinary Go mutation callback, atomically applies
-all of its record writes, synchronizes the durable decision, and retains the
-exact decision for stable command-ID retries. Domain rejections use `Reject` or
-`RejectWithResult`; unexpected callback errors are not recorded and may be
-retried. Values and results use `encoding/json`.
-
-The logical structure is deliberately shallow:
+The caller owns one directory; OctetDB owns all files beneath it. Buckets and
+datasets are durable logical catalog entries, not paths:
 
 ```text
 Database
@@ -71,153 +58,137 @@ Database
         └── Records
 ```
 
-This is logical structure; OctetDB may materialize it differently for
-performance. Buckets and datasets are catalog entries, not filesystem paths.
-Record keys are scoped to their dataset, so key `123` in `identity/users` is
-distinct from key `123` in `commerce/orders`.
+Record identity is `(Dataset, key)`. The same key can exist independently in
+two datasets. Command identity is database-wide.
 
-Start with [Getting started](docs/GETTING_STARTED.md). Runnable examples cover
-the [keyed default](examples/keyed/main.go), [v0.1 minimal account lifecycle](examples/minimal/main.go),
-and [account batch idempotency across restart](examples/restart/main.go).
+The complete runnable [quickstart](examples/quickstart/main.go) also proves
+close/reopen, duplicate retry, point read, and typed scan. See
+[Getting started](docs/GETTING_STARTED.md) for the progressive walkthrough.
 
-## Catalog and keyed default
+## Atomic mutation and retry
 
-`OpenCatalog` owns the supplied directory and creates a durable database
-identity and catalog automatically. `Bucket`, `Dataset`, `ListBuckets`, and
-`ListDatasets` are structural metadata operations; they are not record queries.
-M2B supports one dataset kind, `KeyedJSON`. An optional `TypeIdentity` is an
-application-owned compatibility label, not a reflected Go schema or migration
-system. Reopening a dataset with a different kind, type identity, or bound fails
-with `ErrorIncompatible`.
-
-The default bounds are 100,000 live
-records, 100,000 retained command decisions, 1 MiB per JSON value or command result, and 4 MiB of
-writes per command. A normal application chooses only its directory. Close
-installs a deterministic snapshot, while `CatalogDB.Snapshot` is available for
-explicit maintenance. QUERY-M0 adds a deterministic Dataset scan; it does not
-add a dynamic query language, planner, or secondary index.
-
-Use `db.Mutate` with `CatalogTx` when one command must atomically read or write
-several datasets. Command IDs remain database-wide, so retry identity is stable
-even for cross-dataset invariants. Catalog creation is administrative and does
-not occur inside data mutation callbacks. M2B has no rename or destructive
-catalog deletion.
-
-`OpenKeyed`, `KeyedDB`, `GetKeyed`, and `SubmitKeyed` remain available as the
-PRODUCT-M2 candidate compatibility surface. Their keys occupy one global
-application-defined namespace; new v0.2 code should prefer `OpenCatalog`.
-
-Keys and command IDs are limited to 4 KiB and rejection codes to 1 KiB without
-additional configuration.
-
-## Dataset queries
-
-`Dataset.Scan` visits detached logical KeyedJSON records in record-key ascending
-order. `ScanDataset[T]` is the typed convenience: it decodes one value at a
-time, creates no intermediate result slice, and lets the callback return
-`ScanStop` for `Take`, `First`, or `Any` behavior.
+`Database.Mutate` is the only catalog transaction boundary. One callback gets
+one `Tx` and may read or write any previously opened Dataset:
 
 ```go
-var ready []Job
-err := octetdb.ScanDataset(ctx, jobs, func(_ string, job Job) (octetdb.ScanAction, error) {
-    if job.Status != Ready {
-        return octetdb.ScanContinue, nil
-    }
-    ready = append(ready, job)
-    if len(ready) == 10 {
-        return octetdb.ScanStop, nil
-    }
-    return octetdb.ScanContinue, nil
-})
+decision, err := db.Mutate(ctx, octetdb.KeyedCommand{ID: orderCommandID},
+    func(tx *octetdb.Tx) (any, error) {
+        if err := tx.Put(orders, order.ID, order); err != nil { return nil, err }
+        if err := tx.Put(items, item.SKU, item); err != nil { return nil, err }
+        return order, nil
+    })
 ```
 
-Every scan is scoped through an opened Database → Bucket → Dataset. A scan
-holds the database admission boundary for one stable committed state, so writes
-do not interleave and a long scan blocks mutations. The callback runs
-synchronously and must not call an OctetDB mutation; keep it deterministic,
-local, and free of external side effects. Context cancellation is checked for
-each record. One decode or callback error fails the scan, though callbacks may
-already have observed earlier records.
+All writes become visible together after the accepted decision is written and
+synchronized. `Reject` and `RejectWithResult` record an exact durable rejection
+and discard writes. Other callback errors abort without recording the command
+ID. Retrying a retained ID returns the original decision without rerunning the
+callback. Keep callbacks deterministic and local; do network or irreversible
+work outside them.
 
-Queries scan today. An in-memory primary-key cursor provides reproducible base
-order and genuine early stop, but it is not a predicate index. Future indexes
-may accelerate the same filter semantics without changing source identity,
-results, or order.
+## Deterministic dataset scans
 
-Stable command IDs are part of application correctness. For HTTP, pass the
-client's `Idempotency-Key` through as `KeyedCommand.ID`; do not generate a new ID
-on each retry.
+Go users query without Oct. `Dataset.Scan` exposes detached JSON records;
+`ScanDataset[T]` is the ordinary typed path:
 
-## Specialized account model
+```go
+low := make([]Item, 0, 10)
+err := octetdb.ScanDataset(ctx, items,
+    func(_ string, item Item) (octetdb.ScanAction, error) {
+        if item.Stock <= 5 { low = append(low, item) }
+        if len(low) == 10 { return octetdb.ScanStop, nil }
+        return octetdb.ScanContinue, nil
+    })
+```
 
-One `DB` owns one directory and authoritative keyed account state. Commands
-carry stable IDs. `SubmitBatch` evaluates commands serially in offered order,
-including overlapping hot keys, and writes all new decisions in one WAL frame.
-Accepted and rejected decisions receive a sequence. Duplicate IDs within the
-configured exact bounded horizon return the original decision without applying
-it again.
+A scan is read-only, visits ascending record keys, observes one stable logical
+snapshot, returns detached values, checks context cancellation between records,
+and stops synchronously on `ScanStop`. It does not change the WAL, sequence, or
+dedupe state. The current serialized snapshot implementation blocks mutations
+for the scan duration. This is deterministic enumeration, not a query planner
+or predicate index.
 
-`Options` exposes only product bounds: path, maximum accounts, dedupe horizon,
-and maximum offered batch size. Defaults are 100,000 accounts, 100,000 retained
-command results, and 512 commands per batch.
+## API hierarchy
 
-## Durability
+- **Canonical:** `OpenCatalog`, `Database`, `Bucket`, `Dataset`, `Tx`, `Get`,
+  `Mutate`, `Scan`, and `ScanDataset[T]`.
+- **Compatibility:** the v0.1 `Open`/`DB` account API remains supported.
+  `OpenKeyed`/`KeyedDB` retain the distinct unreleased pre-v0.2 global-key
+  format and are deprecated; they are not taught as a new-application model.
+- **Advanced and optional:** Oct query syntax and specialized domain/compiler
+  paths. OctetDB has no runtime dependency on Oct.
 
-A successful submission means its complete WAL frame has been written and
-synchronized. Recovery validates an optional snapshot, validates and replays
-the complete WAL tail, and truncates an incomplete final append. Corruption and
-incompatible formats fail closed. See [the precise durability contract](docs/DURABILITY.md)
-and [recovery/storage layout](docs/RECOVERY.md).
+`DB` cannot be renamed because it is v0.1 public API. `Database` is the v0.2
+catalog type. `KeyedDB` and `KeyedTx` exist only for compatibility; canonical
+code uses `Database` and `Tx`. There is no `CatalogDB` or `CatalogTx` in v0.2.
 
-## Format compatibility
+## Defaults
 
-`FormatVersion` identifies the database format independently of the Go module
-version. Before 1.0, the format may change between minor releases. OctetDB does
-not yet promise automatic migration, but it does promise that incompatible data
-is detected and rejected rather than silently interpreted as the current
-format.
+A normal application supplies only a directory. Zero options select:
+
+| Bound | Default |
+| --- | ---: |
+| live records, database-wide | 100,000 |
+| retained exact command decisions | 100,000 |
+| one encoded value or decision result | 1 MiB |
+| encoded writes in one command | 4 MiB |
+| dataset live records | inherited from database |
+| dataset value size | inherited from database |
+
+Record keys and command IDs have a fixed 4 KiB limit; rejection codes have a
+fixed 1 KiB limit. Dataset-specific bounds may be lower. There are no query
+tuning knobs.
+
+## Optional Oct specialization
+
+Oct's separate query syntax expresses `filter`/`map`/`take` and
+`Query.First`/`Any`/`Count`, lowering to Oct FLOW state machines. It can make
+composable query behavior and compiler specialization more ergonomic, but it is
+not required for Dataset scans. The [advanced example](examples/oct-query/README.md)
+pins the verified Oct revision. Beginner code does not expose FLOW or compiler
+IR concepts.
+
+## Durability, formats, and recovery
+
+A successful mutation decision means its checksummed WAL frame was written and
+synchronized. `Close` installs a deterministic snapshot. Recovery validates
+the catalog, snapshot, and WAL; replays complete decisions; truncates an
+incomplete final append; and fails closed on corruption or incompatible
+formats. See [Durability](docs/DURABILITY.md) and [Recovery](docs/RECOVERY.md).
+
+Compatibility summary:
+
+- v0.1 `accounts-v1`: supported by `Open`/`DB`.
+- pre-v0.2 `keyed-json-v1`: deprecated compatibility through `OpenKeyed` only.
+- v0.2 `catalog-keyed-json-v1`: canonical for new databases through
+  `OpenCatalog`.
+
+There is no automatic migration, and one opener never silently interprets
+another model's directory.
 
 ## Limitations
 
-- Single process and single replica; there is no directory lock, replication, or failover.
-- No SQL, query planner, network server, secondary indexes, migrations, or online backup API.
-- Keyed values use JSON and are loaded into memory; there is no schema migration
-  framework, compare-and-swap API, cross-process writer coordination, or large-blob path.
-- Idempotency is exact only inside `DedupeHorizon`; expired IDs may apply again.
-- Cancellation is honored before admission, not after durable processing begins.
+- Single process, single open handle, and single replica; no directory lock,
+  replication, failover, or online backup API.
+- No SQL, joins, secondary indexes, query planner, MVCC, migrations, or schema
+  reflection.
+- JSON values are held in memory; no large-blob path.
+- Long scans serialize mutations.
+- Idempotency is exact only inside `DedupeHorizon`; an expired ID is new again.
+- Cancellation is honored before mutation admission, not after durable
+  processing begins.
 - Snapshot rename power-loss guarantees are weaker on Windows than POSIX.
 
-## When not to use OctetDB
-
-A conventional database is usually a better choice when you need ad-hoc SQL,
-rapidly changing arbitrary schemas, many dynamic query shapes, minimal upfront
-modeling, or general multi-tenant relational workloads. OctetDB asks the
-application to state its mutations and invariants explicitly in exchange for a
-bounded path toward deeper semantic specialization.
-
-## Performance evidence
-
-In a bounded single-replica local OLTP experiment, the specialized safe-Go
-engine that became the v0.1 production engine exceeded the measured
-single-replica TigerBeetle control in the tested configurations. The systems
-were not guarantee-equivalent, and this is neither a general database benchmark
-nor a claim that OctetDB is generally faster than TigerBeetle. See the
-[TigerCompareM0 report](docs/experiments/TIGER_COMPARE_M0.md) for methodology,
-environment, and limitations.
-
-## License
-
-OctetDB is licensed under the [GNU General Public License v3.0](LICENSE).
-
-## Development and experiments
+## Development
 
 ```sh
 go test ./...
+go test -race ./...
 go vet ./...
 ```
 
-The root package and `internal/core` are production OctetDB. `cmd/`, the other
-`internal/` packages, `postgres/`, and `experiments/` retain benchmark controls,
-fixtures, generated artifacts, and historical research. Start with the
-[experiment archive index](docs/experiments/README.md), not those packages, when
-looking for historical evidence.
+The production public import graph is the root package plus `internal/core` and
+the Go standard library. Research and benchmark packages remain elsewhere in
+the repository and are not imported by the v0.2 package.
+
+OctetDB is licensed under [GPL-3.0](LICENSE).

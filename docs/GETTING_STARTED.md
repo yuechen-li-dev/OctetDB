@@ -1,29 +1,24 @@
-# Getting started
+# Getting started with OctetDB v0.2
 
-OctetDB has a progressive adoption path. Stage 1 uses ordinary Go values and
-does not require Oct, generated code, layout contracts, WAL filenames, snapshot
-filenames, or benchmark tuning.
+The default Go path needs one directory, ordinary structs, and stable command
+IDs. It does not need Oct, generated code, SQL, or knowledge of storage files.
 
-## 1. Open with defaults
+## 1. Open the database and catalog
 
 ```go
-db, err := octetdb.OpenCatalog(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
+db, err := octetdb.OpenCatalog(ctx, "./data/shop", octetdb.DefaultKeyedOptions())
 if err != nil { return err }
 defer db.Close()
 
 inventory, err := db.Bucket(ctx, "inventory")
 if err != nil { return err }
-items, err := inventory.Dataset(ctx, "items", octetdb.DatasetOptions{TypeIdentity: "example.Item/v1"})
+items, err := inventory.Dataset(ctx, "items", octetdb.DatasetOptions{
+    TypeIdentity: "shop.Item/v1",
+})
 if err != nil { return err }
 ```
 
-OctetDB creates and owns its product files beneath `./data/myapp`. One process
-may own that directory. The defaults bound live records, retained retry
-decisions, value size, and writes per command. You do not need to tune them to
-try the product.
-
-`Bucket` and `Dataset` create durable catalog entries on first use and stably
-reopen them later. The only legal hierarchy is:
+OctetDB owns files beneath `./data/shop`. The durable topology is exactly:
 
 ```text
 Database
@@ -32,9 +27,10 @@ Database
         └── Records
 ```
 
-It is logical topology, not filesystem nesting. There are no child datasets.
+The topology is semantic, not physical. A bucket or dataset name is not a file
+path. Record identity is Dataset plus key.
 
-## 2. Store and read ordinary Go state
+## 2. Mutate ordinary Go state atomically
 
 ```go
 type Item struct {
@@ -42,166 +38,126 @@ type Item struct {
     Stock int    `json:"stock"`
 }
 
-decision, err := items.Mutate(ctx, octetdb.KeyedCommand{ID: "create-widget"}, func(tx *octetdb.DatasetTx) (any, error) {
-    item := Item{SKU: "widget", Stock: 10}
-    return item, tx.Put("widget", item)
+command := octetdb.KeyedCommand{ID: "receive-widget-001"}
+decision, err := db.Mutate(ctx, command, func(tx *octetdb.Tx) (any, error) {
+    item := Item{SKU: "widget", Stock: 8}
+    return item, tx.Put(items, item.SKU, item)
 })
 ```
 
-After `Mutate` succeeds, the decision and all writes are durable. Read the
-current value with a normal destination pointer:
+`Database.Mutate` is the transaction boundary even when a command touches one
+Dataset. A nil callback error accepts every write atomically. `Reject` or
+`RejectWithResult` records a durable application rejection and discards writes.
+Any other error aborts without recording the ID.
+
+The callback is serialized and must be deterministic and local. Fetch network
+input first; do not perform irreversible external work inside the callback.
+
+## 3. Read one known record
 
 ```go
 var item Item
 found, err := items.Get(ctx, "widget", &item)
 ```
 
-Keys are scoped to a dataset. The application no longer prefixes topology into
-keys: `items/123` and `orders/123` become record key `123` in two different
-datasets.
+`Get`, `Tx.Get`, `Tx.Put`, and `ScanDataset[T]` encode or decode ordinary Go
+values. Normal application code does not handle JSON bytes. `Dataset.Scan` is
+available when a tool genuinely needs detached raw JSON.
 
-## 3. Discover records with a bounded scan
+## 4. Retry safely
 
-Use the typed helper for application predicates. This example opens the
-explicit `workers/jobs` Dataset, filters Ready jobs, and stops after ten:
+Command IDs are database-wide correctness values. Reusing an ID within the
+configured horizon returns the exact original decision without invoking the
+callback again—including after close/reopen.
 
-```go
-ready := make([]Job, 0, 10)
-err := octetdb.ScanDataset(ctx, jobs, func(_ string, job Job) (octetdb.ScanAction, error) {
-    if job.Status != Ready {
-        return octetdb.ScanContinue, nil
-    }
-    ready = append(ready, job)
-    if len(ready) == 10 {
-        return octetdb.ScanStop, nil
-    }
-    return octetdb.ScanContinue, nil
-})
-```
-
-Results follow record-key ascending order. `ScanStop` is synchronous and avoids
-examining later records. The scan holds a stable committed state at the database
-admission boundary, which means a long scan blocks writes. Do not mutate
-OctetDB from the callback. Keep callbacks deterministic, local, and
-side-effect-free; cancellation and decode/callback errors end the scan.
-
-This is scan execution, not scan semantics: a future index may accelerate the
-same predicate without changing the public API or order. There are no SQL
-expressions, joins, global relations, or query planner.
-
-## 4. Add explicit idempotent commands
-
-The command ID is a correctness value supplied by the caller. Reusing it returns
-the original durable decision without running the callback again. For HTTP,
-validate `Idempotency-Key` and pass it through unchanged:
+For HTTP, validate and pass the caller's `Idempotency-Key` unchanged. Never
+generate a new ID for each retry. `DecodeResult` decodes the typed application
+result from either the accepted or rejected decision.
 
 ```go
-command := octetdb.KeyedCommand{ID: r.Header.Get("Idempotency-Key")}
-```
-
-Do not silently generate a different ID for each retry. IDs are retained exactly
-inside the bounded dedupe horizon; an expired ID is new again.
-
-Use a durable domain rejection for expected invalid intent:
-
-```go
-if item.Stock < quantity {
+if item.Stock < requested {
     return item, octetdb.RejectWithResult("insufficient_stock", item)
 }
 ```
 
-The returned decision has `Applied == false` and `Code == "insufficient_stock"`.
-An exact retry gets the same decision. An ordinary callback error aborts without
-recording the command ID and is suitable for operational failures.
+## 5. Preserve invariants across datasets
 
-## 5. Add atomic invariants and multi-record changes
-
-The callback may read and write multiple records. Its writes become visible
-together only after validation succeeds:
+Open every Dataset before entering the mutation. One `Tx` can access all of
+them:
 
 ```go
-decision, err := items.Mutate(ctx, command, func(tx *octetdb.DatasetTx) (any, error) {
-    var item Item
-    found, err := tx.Get("widget", &item)
-    if err != nil { return nil, err }
-    if !found { return nil, octetdb.Reject("not_found") }
-    if item.Stock < quantity { return item, octetdb.RejectWithResult("insufficient_stock", item) }
-    item.Stock -= quantity
-    if err := tx.Put("widget", item); err != nil { return nil, err }
-    return item, nil
-})
+decision, err := db.Mutate(ctx, octetdb.KeyedCommand{ID: "place-order-42"},
+    func(tx *octetdb.Tx) (any, error) {
+        var item Item
+        found, err := tx.Get(items, sku, &item)
+        if err != nil { return nil, err }
+        if !found { return nil, octetdb.Reject("item_not_found") }
+        if item.Stock < quantity { return item, octetdb.RejectWithResult("insufficient_stock", item) }
+        item.Stock -= quantity
+        if err := tx.Put(items, sku, item); err != nil { return nil, err }
+        if err := tx.Put(orders, order.ID, order); err != nil { return nil, err }
+        return order, nil
+    })
 ```
 
-Callbacks are serialized. Keep them deterministic and local: do not perform
-network calls or other irreversible external effects inside them. Compute or
-fetch external input first, then submit the intended state change.
+The accepted/rejected decision and all writes use one database WAL boundary.
+Catalog creation is administrative and is not allowed inside a mutation.
 
-When an invariant crosses datasets, submit one database mutation:
+## 6. Scan a known dataset
 
 ```go
-decision, err := db.Mutate(ctx, command, func(tx *octetdb.CatalogTx) (any, error) {
-    // inventoryItems and reservations were opened before this callback.
-    if err := tx.Put(inventoryItems, sku, updatedItem); err != nil { return nil, err }
-    if err := tx.Put(reservations, reservationID, reservation); err != nil { return nil, err }
-    return reservation, nil
-})
+low := make([]Item, 0, 10)
+err := octetdb.ScanDataset(ctx, items,
+    func(_ string, item Item) (octetdb.ScanAction, error) {
+        if item.Stock <= 5 { low = append(low, item) }
+        if len(low) == 10 { return octetdb.ScanStop, nil }
+        return octetdb.ScanContinue, nil
+    })
 ```
 
-One WAL decision makes all dataset writes visible together. Command identity is
-database-wide because one command may touch several datasets. Do not create
-buckets or datasets inside a mutation callback; catalog structure is an
-administrative operation.
+Public scan guarantees:
 
-## 6. Advanced specialization
+- read-only: no WAL append, sequence change, or dedupe mutation;
+- ascending record-key order;
+- one stable logical committed snapshot;
+- detached raw and typed values;
+- context cancellation checked between records;
+- synchronous early stop: no later record is decoded after `ScanStop`.
 
-The keyed workflow is an on-ramp, not OctetDB's entire architecture:
+The callback runs inline. Do not mutate OctetDB from it. The current scan holds
+the database admission boundary, so a long scan blocks mutations. This is a
+known v0.2 limitation, not MVCC.
 
-```text
-default Go keyed state
-→ explicit application command model
-→ richer semantic bounds, batches, idempotency, and workflows
-→ Oct-defined behavior and compiler specialization
-```
+## 7. Close and reopen
 
-Move deeper only when a stable domain and measured workload justify it. The
-v0.1 account API is an example of a narrow specialized model. Advanced Oct and
-layout research are not prerequisites for the keyed workflow.
+`Close` installs a deterministic snapshot containing records and retained
+command decisions. Catalog topology is already synchronized when created.
+Reopen the same directory and the database identity, every Dataset, cross-
+dataset state, dedupe decisions, and scan results survive.
 
-## Bounds and maintenance
+Use `Database.Snapshot` only at an application-chosen maintenance boundary for
+a long-running process. There is no background snapshot scheduler.
 
-Defaults are 100,000 live records, 100,000 retained command decisions, 1 MiB
-per JSON value or command result, and 4 MiB of writes per command. These are safe trial defaults,
-not claims about every production domain. A true maximum population and retry
-horizon are semantic production decisions; set `KeyedOptions` explicitly once
-you know them.
+## Defaults and errors
 
-Keys and command IDs have a fixed 4 KiB limit; rejection codes have a fixed
-1 KiB limit. These mechanical safety bounds require no configuration.
+Zero options select 100,000 live records, 100,000 retained decisions, 1 MiB per
+encoded value/result, and 4 MiB of writes per command. Dataset bounds inherit
+database bounds unless explicitly lowered. Keys and command IDs are limited to
+4 KiB; rejection codes to 1 KiB.
 
-`Close` installs a deterministic snapshot and resets the WAL. Call
-`CatalogDB.Snapshot` at a deliberate maintenance boundary if a long-running process
-needs to bound recovery work. M2 adds no background scheduler.
+Use `errors.As` to inspect `*octetdb.Error` and its stable `Kind`:
+`ErrorInvalidInput`, `ErrorCapacity`, `ErrorStorage`, `ErrorCorruption`,
+`ErrorIncompatible`, `ErrorClosed`, or `ErrorPoisoned`.
 
-## HTTP error mapping
+## Compatibility and advanced paths
 
-Keep transport choices in the application adapter:
+New v0.2 code uses `OpenCatalog`. The v0.1 `Open`/`DB` account API remains
+supported. Deprecated `OpenKeyed` supports only the separate pre-v0.2
+global-key development format and is not a second onboarding choice.
 
-| Condition | Typical HTTP response |
-| --- | --- |
-| malformed input or missing idempotency key | 400 |
-| domain rejection such as invalid transition | 409 |
-| application record not found | 404 |
-| `ErrorCapacity` | 507, or a documented 503 policy |
-| storage, poisoned, or durability failure | 503 |
-| cancelled context | stop writing the response |
-| duplicate retry | return the original successful/rejected result |
+Oct is optional. Its advanced `query` syntax provides `filter`, `map`, `take`,
+and `Query.First`/`Any`/`Count` by lowering to FLOW. It is useful when Oct
+authoring or compiler specialization is desired; it is not required for Go
+Dataset scans. See the [separate advanced example](../examples/oct-query/README.md).
 
-OctetDB does not contain HTTP status codes.
-
-## When not to use OctetDB
-
-Prefer a conventional database when you need ad-hoc SQL, rapidly changing
-arbitrary schemas, many dynamic query shapes, minimal upfront modeling, or
-general multi-tenant relational workloads. The catalog API has deterministic
-Dataset scan, but no SQL, secondary indexes, joins, schema migrations, or online
-backup.
+Run the [canonical Go quickstart](../examples/quickstart/main.go) next.

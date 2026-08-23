@@ -1,58 +1,62 @@
-# Recovery and storage layout
+# Recovery and storage ownership
 
-An OctetDB database is one application-owned directory. The v0.1 account model
-uses:
+A user selects one directory:
 
-| File | Role |
-| --- | --- |
-| `FORMAT` | Text format/model/provenance marker; created and synced before the first open |
-| `wal.oct` | Versioned binary WAL with a checksummed header and checksummed batch frames |
-| `snapshot.oct` | Optional versioned binary snapshot with a SHA-256 payload digest |
-| `snapshot.oct.tmp` | Temporary snapshot output; not authoritative until renamed |
+```go
+db, err := octetdb.OpenCatalog(ctx, "./data/shop", octetdb.DefaultKeyedOptions())
+```
 
-Format version 1 uses the fixed `accounts-v1` product model and the safe-Go
-engine. There are no segments, metadata database, or lock file in v0.1. The
-application must ensure only one process/handle opens a directory at a time.
+OctetDB owns every file beneath that directory. Applications name only the
+directory, Bucket, Dataset, record key, and command ID. They do not choose
+catalog, WAL, or snapshot filenames.
 
-The candidate v0.2 catalog/keyed model has a distinct `keyed-json-v1` FORMAT
-marker and these backend-owned files:
+The durable semantic topology is Database → Bucket → Dataset → Records. It is
+not mirrored as directories. Physical record encoding and files are backend-
+owned and may change in a future incompatible pre-1.0 format.
 
-| File | Role |
-| --- | --- |
-| `FORMAT` | Text model marker, distinct from `accounts-v1` |
-| `catalog` | Checksummed durable Database/Bucket/Dataset topology and stable identities |
-| `catalog.tmp` | Interrupted catalog write; never authoritative |
-| `wal` | Checksummed JSON decision frames containing backend-encoded dataset/key identities |
-| `snapshot` | Optional checksummed deterministic keyed-state snapshot |
-| `snapshot.tmp` | Interrupted snapshot output; never authoritative |
+## Canonical v0.2 recovery
 
-This layout is not a direct materialization of the logical tree. Buckets and
-datasets do not create directories, and records do not create files. A private
-compact key encoding maps `(DatasetID, RecordKey)` into the current keyed
-backend; it is not semantic identity and is not a public storage address.
+`OpenCatalog`:
 
-`OpenCatalog` first recovers the keyed snapshot and WAL, then validates the
-catalog checksum and topology. Every recovered record must carry a dataset ID
-present in the catalog. A missing catalog beside existing keyed decisions,
-unknown dataset IDs, duplicate dataset IDs, or malformed topology fails closed.
-Catalog creation/update is synchronized before callers can submit records to a
-new dataset, so recovery cannot silently reinterpret a record after topology
-loss.
+1. validates the format marker;
+2. loads and verifies an optional snapshot;
+3. validates and replays the complete WAL tail, truncating only an incomplete
+   final append;
+4. validates the catalog checksum, database identity, unique dataset IDs,
+   topology, kinds, type identities, and bounds;
+5. verifies that every recovered backend record belongs to a catalog Dataset;
+6. rebuilds the non-durable ascending primary-key scan cursor from records.
 
-On `Open`, OctetDB validates `FORMAT`, loads and validates `snapshot.oct` when
-present, opens and validates `wal.oct`, discards an incomplete final append, and
-replays complete records whose sequence follows the snapshot. Sequence gaps,
-checksum failures, impossible recovered state, malformed records, and malformed
-snapshots fail closed with `ErrorCorruption`. Unsupported marker, WAL, snapshot,
-or model versions fail with `ErrorIncompatible`. Ordinary filesystem failures
-return `ErrorStorage`.
+Malformed checksummed data, impossible sequences, missing dataset identities,
+or corrupt JSON fail with `ErrorCorruption`. Unsupported model/format versions
+or a mismatched opener fail with `ErrorIncompatible`. Filesystem failures return
+`ErrorStorage`; configured bounds that are smaller than recovered durable state
+return `ErrorCapacity`.
 
-Pre-1.0 formats may change. There is deliberately no migration machinery in
-M0; a future incompatible release must reject this format or provide an
-explicit offline upgrade tool. Copy the whole directory for backup only while
-the DB is closed, or after an application-coordinated snapshot and quiescence.
+An incomplete temporary catalog or snapshot file is not authoritative.
+Automatic migration and best-effort salvage are intentionally absent.
 
-`OpenKeyed` remains able to open PRODUCT-M2 global-key directories. It does not
-silently upgrade them to a catalog database; `OpenCatalog` rejects keyed data
-that has no durable catalog identity. The released v0.1 account directory and
-API remain unchanged.
+## Format inventory and policy
+
+| Model | Status in v0.2 | Opener | Migration |
+| --- | --- | --- | --- |
+| `accounts-v1` from v0.1 | supported public compatibility | `Open` | none required |
+| `keyed-json-v1` pre-v0.2 candidate | deprecated compatibility only | `OpenKeyed` | none; export/recreate manually |
+| `catalog-keyed-json-v1` | canonical new v0.2 format | `OpenCatalog` | n/a |
+
+`OpenKeyed` retains its old distinct format; it is not implemented through the
+catalog format. `OpenCatalog` never invents a default Dataset around global
+keys. Each opener rejects the other formats, so old directories are never
+silently reinterpreted.
+
+## Operational recovery
+
+Copy the entire directory only while the database is closed, or after the
+application has coordinated quiescence and a snapshot. Do not copy or replace
+individual files as an application workflow. There is no online backup,
+directory lock, repair tool, or schema migration in v0.2.
+
+The corruption contract covers catalog damage, snapshot damage, complete WAL
+damage, incomplete final WAL append, format mismatch, and Dataset
+kind/type/bound mismatch. Detected failures use public `ErrorKind` categories
+rather than diagnostic string matching.

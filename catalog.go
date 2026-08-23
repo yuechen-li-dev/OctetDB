@@ -84,9 +84,9 @@ type catalogBucket struct {
 	Datasets map[string]DatasetInfo `json:"datasets"`
 }
 
-// CatalogDB is a durable keyed database with a shallow Database/Bucket/Dataset
-// catalog. Commands and their deduplication identity remain database-wide.
-type CatalogDB struct {
+// Database is a durable database with a shallow Database/Bucket/Dataset
+// catalog. Commands and their deduplication identity are database-wide.
+type Database struct {
 	keyed     *KeyedDB
 	catalog   catalogState
 	queryKeys map[uint64][]string
@@ -94,38 +94,29 @@ type CatalogDB struct {
 
 // Bucket is a stable handle to a first-level catalog namespace.
 type Bucket struct {
-	db   *CatalogDB
+	db   *Database
 	name string
 }
 
 // Dataset is a stable handle to a leaf keyed-record collection.
 type Dataset struct {
-	db   *CatalogDB
+	db   *Database
 	info DatasetInfo
 }
 
-// CatalogTx is valid only inside a CatalogMutation callback. It can access
-// several datasets in one database-wide atomic command.
-type CatalogTx struct {
+// Tx is valid only inside a Mutation callback. It can access several datasets
+// in one database-wide atomic command.
+type Tx struct {
 	tx *KeyedTx
-	db *CatalogDB
+	db *Database
 }
 
-// DatasetTx scopes transaction operations to one dataset.
-type DatasetTx struct {
-	tx      *CatalogTx
-	dataset *Dataset
-}
-
-// CatalogMutation atomically reads and writes records across datasets.
-type CatalogMutation func(*CatalogTx) (any, error)
-
-// DatasetMutation atomically reads and writes records in one dataset.
-type DatasetMutation func(*DatasetTx) (any, error)
+// Mutation atomically reads and writes records across datasets.
+type Mutation func(*Tx) (any, error)
 
 // OpenCatalog creates or recovers a conventional catalog-aware database.
 // OctetDB owns the product files beneath path.
-func OpenCatalog(ctx context.Context, path string, options KeyedOptions) (*CatalogDB, error) {
+func OpenCatalog(ctx context.Context, path string, options KeyedOptions) (*Database, error) {
 	keyed, err := openKeyed(ctx, path, options, catalogKeyedFormatContents)
 	if err != nil {
 		return nil, err
@@ -136,7 +127,7 @@ func OpenCatalog(ctx context.Context, path string, options KeyedOptions) (*Catal
 		keyed.closed.Store(true)
 		return nil, err
 	}
-	db := &CatalogDB{keyed: keyed, catalog: state, queryKeys: make(map[uint64][]string)}
+	db := &Database{keyed: keyed, catalog: state, queryKeys: make(map[uint64][]string)}
 	db.initializeQueryKeys()
 	keyed.afterApply = db.applyQueryKeyMutations
 	return db, nil
@@ -145,7 +136,7 @@ func OpenCatalog(ctx context.Context, path string, options KeyedOptions) (*Catal
 // initializeQueryKeys reconstructs the non-durable primary-key cursor used by
 // Dataset.Scan. It is derived from committed records and is not a secondary
 // predicate index or part of query meaning.
-func (db *CatalogDB) initializeQueryKeys() {
+func (db *Database) initializeQueryKeys() {
 	for backendKey := range db.keyed.records {
 		id, ok := backendDatasetID(backendKey)
 		if !ok {
@@ -160,7 +151,7 @@ func (db *CatalogDB) initializeQueryKeys() {
 
 // applyQueryKeyMutations maintains primary-key order inside the same admission
 // boundary that applies the durable record mutation.
-func (db *CatalogDB) applyQueryKeyMutations(record keyedWALRecord) {
+func (db *Database) applyQueryKeyMutations(record keyedWALRecord) {
 	if !record.Applied {
 		return
 	}
@@ -189,7 +180,7 @@ func (db *CatalogDB) applyQueryKeyMutations(record keyedWALRecord) {
 }
 
 // DatabaseID returns the durable generated identity of this database.
-func (db *CatalogDB) DatabaseID() string {
+func (db *Database) DatabaseID() string {
 	if db == nil {
 		return ""
 	}
@@ -198,7 +189,7 @@ func (db *CatalogDB) DatabaseID() string {
 
 // Bucket opens or durably creates a bucket. Structural changes are not data
 // transactions and are complete before this method returns.
-func (db *CatalogDB) Bucket(ctx context.Context, name string) (*Bucket, error) {
+func (db *Database) Bucket(ctx context.Context, name string) (*Bucket, error) {
 	if err := validCatalogName("bucket", name); err != nil {
 		return nil, err
 	}
@@ -219,7 +210,7 @@ func (db *CatalogDB) Bucket(ctx context.Context, name string) (*Bucket, error) {
 }
 
 // ListBuckets returns catalog bucket names in deterministic order.
-func (db *CatalogDB) ListBuckets(ctx context.Context) ([]BucketInfo, error) {
+func (db *Database) ListBuckets(ctx context.Context) ([]BucketInfo, error) {
 	if err := db.enter(ctx, "list_buckets"); err != nil {
 		return nil, err
 	}
@@ -233,7 +224,7 @@ func (db *CatalogDB) ListBuckets(ctx context.Context) ([]BucketInfo, error) {
 }
 
 // Catalog returns a deterministic detached topology snapshot.
-func (db *CatalogDB) Catalog(ctx context.Context) (Catalog, error) {
+func (db *Database) Catalog(ctx context.Context) (Catalog, error) {
 	if err := db.enter(ctx, "catalog"); err != nil {
 		return Catalog{}, err
 	}
@@ -347,22 +338,9 @@ func (dataset *Dataset) Get(ctx context.Context, key string, destination any) (b
 	return true, nil
 }
 
-// Mutate submits a database-wide idempotent command scoped to this dataset.
-func (dataset *Dataset) Mutate(ctx context.Context, command KeyedCommand, mutation DatasetMutation) (KeyedDecision, error) {
-	if dataset == nil || dataset.db == nil {
-		return KeyedDecision{}, &Error{Kind: ErrorClosed, Op: "dataset_mutate", err: errors.New("database is closed")}
-	}
-	if mutation == nil {
-		return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "dataset_mutate", err: errors.New("mutation is required")}
-	}
-	return dataset.db.Mutate(ctx, command, func(tx *CatalogTx) (any, error) {
-		return mutation(&DatasetTx{tx: tx, dataset: dataset})
-	})
-}
-
 // Mutate submits one durable atomic command that may touch several datasets.
 // Command IDs and exact retry decisions are database-wide.
-func (db *CatalogDB) Mutate(ctx context.Context, command KeyedCommand, mutation CatalogMutation) (KeyedDecision, error) {
+func (db *Database) Mutate(ctx context.Context, command KeyedCommand, mutation Mutation) (KeyedDecision, error) {
 	if db == nil || db.keyed == nil {
 		return KeyedDecision{}, &Error{Kind: ErrorClosed, Op: "catalog_mutate", err: errors.New("database is closed")}
 	}
@@ -370,7 +348,7 @@ func (db *CatalogDB) Mutate(ctx context.Context, command KeyedCommand, mutation 
 		return KeyedDecision{}, &Error{Kind: ErrorInvalidInput, Op: "catalog_mutate", err: errors.New("mutation is required")}
 	}
 	return db.keyed.SubmitKeyed(ctx, command, func(tx *KeyedTx) (any, error) {
-		catalogTx := &CatalogTx{tx: tx, db: db}
+		catalogTx := &Tx{tx: tx, db: db}
 		result, err := mutation(catalogTx)
 		if err != nil {
 			return result, err
@@ -384,7 +362,7 @@ func (db *CatalogDB) Mutate(ctx context.Context, command KeyedCommand, mutation 
 
 // Snapshot installs a deterministic data snapshot. Catalog state is already
 // synchronized by each structural operation.
-func (db *CatalogDB) Snapshot(ctx context.Context) error {
+func (db *Database) Snapshot(ctx context.Context) error {
 	if db == nil || db.keyed == nil {
 		return &Error{Kind: ErrorClosed, Op: "catalog_snapshot", err: errors.New("database is closed")}
 	}
@@ -392,7 +370,7 @@ func (db *CatalogDB) Snapshot(ctx context.Context) error {
 }
 
 // Close snapshots data and closes storage. It is idempotent.
-func (db *CatalogDB) Close() error {
+func (db *Database) Close() error {
 	if db == nil || db.keyed == nil {
 		return nil
 	}
@@ -400,7 +378,7 @@ func (db *CatalogDB) Close() error {
 }
 
 // Get reads a record in the named dataset.
-func (tx *CatalogTx) Get(dataset *Dataset, key string, destination any) (bool, error) {
+func (tx *Tx) Get(dataset *Dataset, key string, destination any) (bool, error) {
 	if err := tx.validDataset(dataset, key, "get"); err != nil {
 		return false, err
 	}
@@ -428,7 +406,7 @@ func (tx *CatalogTx) Get(dataset *Dataset, key string, destination any) (bool, e
 }
 
 // Put writes a JSON record in the named dataset.
-func (tx *CatalogTx) Put(dataset *Dataset, key string, value any) error {
+func (tx *Tx) Put(dataset *Dataset, key string, value any) error {
 	if err := tx.validDataset(dataset, key, "put"); err != nil {
 		return err
 	}
@@ -445,7 +423,7 @@ func (tx *CatalogTx) Put(dataset *Dataset, key string, value any) error {
 }
 
 // Delete removes a record in the named dataset.
-func (tx *CatalogTx) Delete(dataset *Dataset, key string) error {
+func (tx *Tx) Delete(dataset *Dataset, key string) error {
 	if err := tx.validDataset(dataset, key, "delete"); err != nil {
 		return err
 	}
@@ -453,31 +431,7 @@ func (tx *CatalogTx) Delete(dataset *Dataset, key string) error {
 	return nil
 }
 
-// Get reads a record in this transaction's dataset.
-func (tx *DatasetTx) Get(key string, destination any) (bool, error) {
-	if tx == nil || tx.tx == nil || tx.dataset == nil {
-		return false, &Error{Kind: ErrorInvalidInput, Op: "dataset_tx_get", err: errors.New("transaction is no longer active")}
-	}
-	return tx.tx.Get(tx.dataset, key, destination)
-}
-
-// Put writes a record in this transaction's dataset.
-func (tx *DatasetTx) Put(key string, value any) error {
-	if tx == nil || tx.tx == nil || tx.dataset == nil {
-		return &Error{Kind: ErrorInvalidInput, Op: "dataset_tx_put", err: errors.New("transaction is no longer active")}
-	}
-	return tx.tx.Put(tx.dataset, key, value)
-}
-
-// Delete removes a record in this transaction's dataset.
-func (tx *DatasetTx) Delete(key string) error {
-	if tx == nil || tx.tx == nil || tx.dataset == nil {
-		return &Error{Kind: ErrorInvalidInput, Op: "dataset_tx_delete", err: errors.New("transaction is no longer active")}
-	}
-	return tx.tx.Delete(tx.dataset, key)
-}
-
-func (tx *CatalogTx) validDataset(dataset *Dataset, key, op string) error {
+func (tx *Tx) validDataset(dataset *Dataset, key, op string) error {
 	if tx == nil || tx.tx == nil || tx.db == nil {
 		return &Error{Kind: ErrorInvalidInput, Op: "catalog_tx_" + op, err: errors.New("transaction is no longer active")}
 	}
@@ -490,7 +444,7 @@ func (tx *CatalogTx) validDataset(dataset *Dataset, key, op string) error {
 	return validRecordKey(key)
 }
 
-func (tx *CatalogTx) validateDatasetBounds() error {
+func (tx *Tx) validateDatasetBounds() error {
 	counts := make(map[uint64]int)
 	for key := range tx.db.keyed.records {
 		if id, ok := backendDatasetID(key); ok {
@@ -519,7 +473,7 @@ func (tx *CatalogTx) validateDatasetBounds() error {
 	return nil
 }
 
-func (db *CatalogDB) enter(ctx context.Context, op string) error {
+func (db *Database) enter(ctx context.Context, op string) error {
 	if db == nil || db.keyed == nil {
 		return &Error{Kind: ErrorClosed, Op: op, err: errors.New("database is closed")}
 	}

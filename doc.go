@@ -1,32 +1,37 @@
-// Package octetdb provides an embeddable, single-process OLTP engine with a
-// conventional catalog/keyed-state workflow and specialized domain paths.
+// Package octetdb provides a durable embedded Go OLTP database.
 //
-// A successful Submit or SubmitBatch call means the command decisions and
-// resulting authoritative account state have been written to the WAL and the
-// WAL has been synchronized. Open recovers the latest installed snapshot and
-// then replays the complete WAL tail. OctetDB rejects detected corruption and
-// incompatible formats rather than attempting a best-effort open.
+// New applications open one user-selected directory with OpenCatalog, then
+// declare the durable logical topology:
 //
-// A successful SubmitKeyed call likewise means its exact decision and all
-// resulting record mutations have been written and synchronized. OpenKeyed
-// recovers a validated snapshot and complete WAL tail.
+//	Database
+//	└── Bucket
+//	    └── Dataset
+//	        └── Records
 //
-// New applications can use OpenCatalog with DefaultKeyedOptions. Bucket and
-// Dataset calls durably declare a shallow Database/Bucket/Dataset topology;
-// Dataset.Get and Dataset.Mutate store ordinary Go values as keyed JSON without
-// application string prefixes. Dataset.Scan and ScanDataset visit detached
-// logical records in key order while holding one stable committed state; a
-// callback can stop synchronously without a goroutine or channel pipeline.
-// CatalogDB.Mutate can atomically access several datasets. Stable KeyedCommand
-// IDs remain database-wide and give exact retry decisions inside the configured
-// bounded dedupe horizon.
+// Record identity is a Dataset plus an application key. KeyedCommand identity
+// is database-wide because one Database.Mutate callback can atomically read and
+// write records in several datasets. A successful mutation has one durable
+// accepted or rejected decision and is exactly retryable while its command ID
+// remains inside the configured dedupe horizon.
 //
-// The catalog is semantic topology, not physical nesting. M2B has no arbitrary
-// child datasets, SQL/query language, secondary index, rename, or destructive
-// delete. Query-M0 scans KeyedJSON datasets and may block writes for the scan
-// duration. OpenKeyed remains the candidate PRODUCT-M2 compatibility
-// path, and the v0.1 Open and DB APIs retain the account/transfer model.
+// Dataset.Get decodes one record into an ordinary Go value. Dataset.Scan and
+// ScanDataset visit detached values in ascending record-key order from one
+// stable logical snapshot. Scans are read-only, honor context cancellation
+// between records, and stop synchronously when a callback returns ScanStop.
+// The current serialized snapshot implementation blocks mutations for the
+// duration of a scan.
 //
-// OctetDB is not a SQL database, network service, replicated system, ORM, or
-// dynamic query engine. A directory must be opened by only one process.
+// Oct is optional. Go applications can use every database and scan capability
+// in this package without the Oct compiler or runtime. Oct's separate
+// filter/map/take query syntax is an advanced authoring path that lowers to its
+// FLOW runtime; Oct compiler internals are not dependencies of this package.
+//
+// The v0.1 Open and DB account API remains supported. OpenKeyed is a deprecated
+// compatibility path for the distinct, unreleased pre-v0.2 global-key format;
+// new code should use OpenCatalog. Formats are detected fail-closed and are
+// never silently reinterpreted or migrated.
+//
+// OctetDB is single-process and single-replica. It is not SQL, a network
+// service, an ORM, or a replicated system. The application must ensure that at
+// most one process or handle opens a database directory.
 package octetdb

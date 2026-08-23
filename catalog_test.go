@@ -62,7 +62,7 @@ func TestCatalogTreeIdentityEnumerationAndRestart(t *testing.T) {
 		t.Fatalf("datasets=%+v", datasets)
 	}
 
-	decision, err := db.Mutate(ctx, KeyedCommand{ID: "same-key"}, func(tx *CatalogTx) (any, error) {
+	decision, err := db.Mutate(ctx, KeyedCommand{ID: "same-key"}, func(tx *Tx) (any, error) {
 		if err := tx.Put(jobs, "123", catalogTestRecord{Value: 1}); err != nil {
 			return nil, err
 		}
@@ -123,14 +123,14 @@ func TestCatalogCrossDatasetAtomicityAndGlobalDuplicateIdentity(t *testing.T) {
 	ordersBucket, _ := db.Bucket(ctx, "commerce")
 	items, _ := inventoryBucket.Dataset(ctx, "items", DefaultDatasetOptions())
 	orders, _ := ordersBucket.Dataset(ctx, "orders", DefaultDatasetOptions())
-	_, err = items.Mutate(ctx, KeyedCommand{ID: "seed"}, func(tx *DatasetTx) (any, error) {
-		return nil, tx.Put("widget", catalogTestRecord{Value: 10})
+	_, err = db.Mutate(ctx, KeyedCommand{ID: "seed"}, func(tx *Tx) (any, error) {
+		return nil, tx.Put(items, "widget", catalogTestRecord{Value: 10})
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	decision, err := db.Mutate(ctx, KeyedCommand{ID: "reserve-1"}, func(tx *CatalogTx) (any, error) {
+	decision, err := db.Mutate(ctx, KeyedCommand{ID: "reserve-1"}, func(tx *Tx) (any, error) {
 		var item catalogTestRecord
 		ok, err := tx.Get(items, "widget", &item)
 		if err != nil || !ok {
@@ -149,15 +149,15 @@ func TestCatalogCrossDatasetAtomicityAndGlobalDuplicateIdentity(t *testing.T) {
 		t.Fatalf("decision=%+v err=%v", decision, err)
 	}
 	called := false
-	duplicate, err := orders.Mutate(ctx, KeyedCommand{ID: "reserve-1"}, func(tx *DatasetTx) (any, error) {
+	duplicate, err := db.Mutate(ctx, KeyedCommand{ID: "reserve-1"}, func(tx *Tx) (any, error) {
 		called = true
-		return nil, tx.Put("should-not-exist", 1)
+		return nil, tx.Put(orders, "should-not-exist", 1)
 	})
 	if err != nil || !duplicate.Duplicate || called {
 		t.Fatalf("duplicate=%+v called=%v err=%v", duplicate, called, err)
 	}
 
-	rejected, err := db.Mutate(ctx, KeyedCommand{ID: "reserve-rejected"}, func(tx *CatalogTx) (any, error) {
+	rejected, err := db.Mutate(ctx, KeyedCommand{ID: "reserve-rejected"}, func(tx *Tx) (any, error) {
 		if err := tx.Put(items, "widget", catalogTestRecord{Value: 0}); err != nil {
 			return nil, err
 		}
@@ -195,13 +195,13 @@ func TestCatalogDatasetCompatibilityAndCapacity(t *testing.T) {
 	assertErrorKind(t, err, ErrorIncompatible)
 	_, err = bucket.Dataset(ctx, "items", DatasetOptions{Kind: DatasetKind("octagon_record"), TypeIdentity: "Item/v1", MaxRecords: 1, MaxValueBytes: 32})
 	assertErrorKind(t, err, ErrorIncompatible)
-	_, err = dataset.Mutate(ctx, KeyedCommand{ID: "one"}, func(tx *DatasetTx) (any, error) { return nil, tx.Put("one", "value") })
+	_, err = db.Mutate(ctx, KeyedCommand{ID: "one"}, func(tx *Tx) (any, error) { return nil, tx.Put(dataset, "one", "value") })
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = dataset.Mutate(ctx, KeyedCommand{ID: "two"}, func(tx *DatasetTx) (any, error) { return nil, tx.Put("two", "value") })
+	_, err = db.Mutate(ctx, KeyedCommand{ID: "two"}, func(tx *Tx) (any, error) { return nil, tx.Put(dataset, "two", "value") })
 	assertErrorKind(t, err, ErrorCapacity)
-	_, err = dataset.Mutate(ctx, KeyedCommand{ID: "large"}, func(tx *DatasetTx) (any, error) { return nil, tx.Put("large", string(make([]byte, 40))) })
+	_, err = db.Mutate(ctx, KeyedCommand{ID: "large"}, func(tx *Tx) (any, error) { return nil, tx.Put(dataset, "large", string(make([]byte, 40))) })
 	assertErrorKind(t, err, ErrorCapacity)
 }
 
@@ -215,8 +215,8 @@ func TestCatalogMaximumRecordKeySurvivesRestart(t *testing.T) {
 	bucket, _ := db.Bucket(ctx, "inventory")
 	dataset, _ := bucket.Dataset(ctx, "items", DefaultDatasetOptions())
 	key := string(make([]byte, keyedMaxKeyBytes))
-	if _, err := dataset.Mutate(ctx, KeyedCommand{ID: "maximum-key"}, func(tx *DatasetTx) (any, error) {
-		return nil, tx.Put(key, catalogTestRecord{Value: 1})
+	if _, err := db.Mutate(ctx, KeyedCommand{ID: "maximum-key"}, func(tx *Tx) (any, error) {
+		return nil, tx.Put(dataset, key, catalogTestRecord{Value: 1})
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -243,14 +243,14 @@ func TestCatalogTransactionCannotEscapeCallback(t *testing.T) {
 	defer db.Close()
 	bucket, _ := db.Bucket(ctx, "inventory")
 	dataset, _ := bucket.Dataset(ctx, "items", DefaultDatasetOptions())
-	var escaped *DatasetTx
-	if _, err := dataset.Mutate(ctx, KeyedCommand{ID: "capture"}, func(tx *DatasetTx) (any, error) {
+	var escaped *Tx
+	if _, err := db.Mutate(ctx, KeyedCommand{ID: "capture"}, func(tx *Tx) (any, error) {
 		escaped = tx
 		return nil, nil
 	}); err != nil {
 		t.Fatal(err)
 	}
-	err = escaped.Put("late", 1)
+	err = escaped.Put(dataset, "late", 1)
 	assertErrorKind(t, err, ErrorInvalidInput)
 }
 
@@ -326,7 +326,7 @@ func TestCatalogRejectsPathLikeNesting(t *testing.T) {
 	assertErrorKind(t, err, ErrorInvalidInput)
 }
 
-func crashCatalogForTest(t *testing.T, db *CatalogDB) {
+func crashCatalogForTest(t *testing.T, db *Database) {
 	t.Helper()
 	if err := db.keyed.wal.close(); err != nil {
 		t.Fatal(err)

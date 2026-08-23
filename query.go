@@ -35,9 +35,11 @@ func (record DatasetRecord) Decode(destination any) error {
 	return nil
 }
 
-// Scan visits this dataset's records in record-key ascending order. The scan
-// holds the database admission boundary and observes one stable committed
-// state. Mutations cannot interleave and must not be called from visit.
+// Scan visits detached records in record-key ascending order. It is read-only:
+// it does not append to the WAL, advance the sequence, or change dedupe state.
+// The scan holds the database admission boundary and observes one stable
+// committed state. Mutations cannot interleave and must not be called from
+// visit. Context cancellation is checked between records.
 //
 // visit should be deterministic, local, and side-effect-free. It runs
 // synchronously and may return ScanStop for First, Any, or Take behavior.
@@ -51,9 +53,11 @@ func (dataset *Dataset) Scan(ctx context.Context, visit func(DatasetRecord) (Sca
 	})
 }
 
-// ScanDataset is the typed KeyedJSON scan helper. It decodes one record at a
-// time and creates no intermediate result slice. A decode failure fails the
-// whole scan; already-observed callback values cannot be revoked.
+// ScanDataset is the typed KeyedJSON scan helper. It decodes each detached
+// record into a new T and creates no intermediate result slice. Ordering,
+// snapshot, cancellation, read-only, and synchronous-stop semantics are the
+// same as Dataset.Scan. A decode failure fails the whole scan; already-observed
+// callback values cannot be revoked.
 func ScanDataset[T any](ctx context.Context, dataset *Dataset, visit func(key string, value T) (ScanAction, error)) error {
 	if visit == nil {
 		return &Error{Kind: ErrorInvalidInput, Op: "scan_dataset", err: errors.New("visit callback is required")}
@@ -72,7 +76,7 @@ func (dataset *Dataset) scan(ctx context.Context, visit func(key string, encoded
 		return &Error{Kind: ErrorClosed, Op: "dataset_scan", err: errors.New("database is closed")}
 	}
 	if dataset.info.Kind != KeyedJSON {
-		return &Error{Kind: ErrorIncompatible, Op: "dataset_scan", err: errors.New("dataset kind is not queryable in QUERY-M0")}
+		return &Error{Kind: ErrorIncompatible, Op: "dataset_scan", err: errors.New("dataset kind does not support scans")}
 	}
 	if err := dataset.db.keyed.enterKeyed(ctx, "dataset_scan"); err != nil {
 		return err
