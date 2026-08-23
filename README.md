@@ -1,18 +1,21 @@
 # OctetDB
 
-OctetDB is an embeddable specialized OLTP engine whose transactional behavior
-is defined semantically and materialized as a safe-Go execution and storage
-system. The v0.1 model is intentionally narrow: bounded accounts, deposits,
-withdrawals, transfers, account freezing, and a two-step transfer workflow.
+OctetDB is an embeddable specialized OLTP engine with a conventional Go on-ramp.
+Applications can start with bounded, durable, application-defined keyed state
+and atomic typed mutation functions. The original specialized account/transfer
+model remains available, and deeper Oct-defined specialization is an advanced
+adoption step rather than an onboarding requirement.
 
 It is not a PostgreSQL replacement, general SQL database, network daemon,
 TigerBeetle clone, cache, or ORM.
 
 ## Status
 
-The first public release is `v0.1.0`. It is intentionally pre-1.0: the API and
-database format may change between minor releases, incompatible data is
-detected and rejected, and automatic migration is not promised.
+The first public release is `v0.1.0`. The keyed-state API documented below is a
+candidate additive v0.2 API in the current source tree and is not in v0.1.0.
+OctetDB is intentionally pre-1.0: APIs and database formats may change between
+minor releases, incompatible data is detected and rejected, and automatic
+migration is not promised.
 
 ## Install
 
@@ -20,34 +23,61 @@ detected and rejected, and automatic migration is not promised.
 go get github.com/yuechen-li-dev/octetdb@v0.1.0
 ```
 
+That command installs the released specialized account API. The keyed workflow
+below is implemented on the current main branch and should be consumed as a
+versioned dependency after the proposed v0.2.0 release.
+
 OctetDB requires Go 1.23 or newer. The release is tested on Windows and Linux
 under WSL2; macOS is not yet verified. Oct and PostgreSQL are not required to
 build or use the public package.
 
-## 30-second example
+## Default Go workflow
 
 ```go
 ctx := context.Background()
-db, err := octetdb.Open(ctx, octetdb.Options{Path: "./account-data"})
+db, err := octetdb.OpenKeyed(ctx, "./data/myapp", octetdb.DefaultKeyedOptions())
 if err != nil {
     log.Fatal(err)
 }
 defer db.Close()
 
-result, err := db.Submit(ctx, octetdb.Command{
-    ID: "create-1", Kind: octetdb.Create, AccountID: 1, Amount: 100,
+decision, err := db.SubmitKeyed(ctx, octetdb.KeyedCommand{ID: "create-user-42"}, func(tx *octetdb.KeyedTx) (any, error) {
+    user := User{ID: "42", Name: "Ada"}
+    return user, tx.Put("users/42", user)
 })
 if err != nil {
     log.Fatal(err)
 }
-account, ok := db.Get(1)
-fmt.Println(result.Accepted, account.Balance, ok)
+fmt.Println(decision.Applied)
 ```
 
-Runnable examples cover the [minimal lifecycle](examples/minimal/main.go) and
-[batch idempotency across restart](examples/restart/main.go).
+`SubmitKeyed` serializes one ordinary Go mutation callback, atomically applies
+all of its record writes, synchronizes the durable decision, and retains the
+exact decision for stable command-ID retries. Domain rejections use `Reject` or
+`RejectWithResult`; unexpected callback errors are not recorded and may be
+retried. Values and results use `encoding/json`.
 
-## Core model
+Start with [Getting started](docs/GETTING_STARTED.md). Runnable examples cover
+the [keyed default](examples/keyed/main.go), [v0.1 minimal account lifecycle](examples/minimal/main.go),
+and [account batch idempotency across restart](examples/restart/main.go).
+
+## Keyed default
+
+`OpenKeyed` owns the supplied directory. The default bounds are 100,000 live
+records, 100,000 retained command decisions, 1 MiB per JSON value or command result, and 4 MiB of
+writes per command. A normal application chooses only its directory. Close
+installs a deterministic snapshot, while `SnapshotKeyed` is available for
+explicit maintenance. M2 deliberately provides point lookup only; it does not
+invent a dynamic query language or an unevidenced listing API.
+
+Keys and command IDs are limited to 4 KiB and rejection codes to 1 KiB without
+additional configuration.
+
+Stable command IDs are part of application correctness. For HTTP, pass the
+client's `Idempotency-Key` through as `KeyedCommand.ID`; do not generate a new ID
+on each retry.
+
+## Specialized account model
 
 One `DB` owns one directory and authoritative keyed account state. Commands
 carry stable IDs. `SubmitBatch` evaluates commands serially in offered order,
@@ -78,12 +108,21 @@ format.
 
 ## Limitations
 
-- Account/transfer domain only; there is no generic schema or user-defined model.
-- Single process and single replica; v0.1 has no directory lock, replication, or failover.
+- Single process and single replica; there is no directory lock, replication, or failover.
 - No SQL, network server, secondary indexes, migrations, or online backup API.
+- Keyed values use JSON and are loaded into memory; there is no schema migration
+  framework, compare-and-swap API, cross-process writer coordination, or large-blob path.
 - Idempotency is exact only inside `DedupeHorizon`; expired IDs may apply again.
 - Cancellation is honored before admission, not after durable processing begins.
 - Snapshot rename power-loss guarantees are weaker on Windows than POSIX.
+
+## When not to use OctetDB
+
+A conventional database is usually a better choice when you need ad-hoc SQL,
+rapidly changing arbitrary schemas, many dynamic query shapes, minimal upfront
+modeling, or general multi-tenant relational workloads. OctetDB asks the
+application to state its mutations and invariants explicitly in exchange for a
+bounded path toward deeper semantic specialization.
 
 ## Performance evidence
 

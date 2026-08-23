@@ -1,0 +1,23 @@
+External directory: C:\Users\yuech\AppData\Local\Temp\octetdb-product-m2-v01
+External module:    example.com/octetdb-v01-golden
+Requirement:        github.com/yuechen-li-dev/octetdb v0.1.0
+Replace directives: none
+
+> go list -m -f '{{.Path}} {{.Version}} {{.Dir}}' github.com/yuechen-li-dev/octetdb
+github.com/yuechen-li-dev/octetdb v0.1.0 C:\Users\yuech\go\pkg\mod\github.com\yuechen-li-dev\octetdb@v0.1.0
+
+> go test -v ./...
+=== RUN   TestInventoryReservation
+--- PASS: TestInventoryReservation
+=== RUN   TestWebhookProcessor
+--- PASS: TestWebhookProcessor
+=== RUN   TestOrderLifecycleCannotEnforceTransitionsAtomically
+--- PASS: TestOrderLifecycleCannotEnforceTransitionsAtomically
+=== RUN   TestJobStateCannotEnforceSingleClaim
+--- PASS: TestJobStateCannotEnforceSingleClaim
+PASS
+ok      example.com/octetdb-v01-golden
+
+The latter two tests deliberately assert the invalid double transition and
+double claim that v0.1 cannot prevent. This output was captured before product
+implementation began.

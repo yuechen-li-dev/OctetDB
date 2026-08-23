@@ -1,5 +1,5 @@
-// Package octetdb provides an embeddable, single-process OLTP engine for a
-// bounded account and transfer domain.
+// Package octetdb provides an embeddable, single-process OLTP engine with a
+// conventional keyed-state workflow and specialized domain paths.
 //
 // A successful Submit or SubmitBatch call means the command decisions and
 // resulting authoritative account state have been written to the WAL and the
@@ -7,8 +7,16 @@
 // then replays the complete WAL tail. OctetDB rejects detected corruption and
 // incompatible formats rather than attempting a best-effort open.
 //
-// OctetDB v0.1 is not a SQL database, a network service, a replicated system,
-// or a generic command store. Applications open one DB for a directory, submit
-// uniquely identified commands, read accounts by ID, optionally create a
-// snapshot, and close the DB before opening that directory again.
+// A successful SubmitKeyed call likewise means its exact decision and all
+// resulting record mutations have been written and synchronized. OpenKeyed
+// recovers a validated snapshot and complete WAL tail.
+//
+// New applications can use OpenKeyed with DefaultKeyedOptions, store ordinary
+// Go values as JSON, and express atomic validated changes with SubmitKeyed.
+// Stable KeyedCommand IDs give exact retry decisions inside the configured
+// bounded dedupe horizon. The v0.1 Open and DB APIs retain the narrower
+// account/transfer model.
+//
+// OctetDB is not a SQL database, network service, replicated system, ORM, or
+// dynamic query engine. A directory must be opened by only one process.
 package octetdb
