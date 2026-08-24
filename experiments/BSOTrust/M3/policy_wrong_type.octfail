@@ -1,0 +1,14 @@
+expect error: "PositiveAmount"
+package BSOTrustM3WrongType
+
+concept PositiveAmount = Int {
+    Require(Self > 0, "amount must be positive")
+}
+
+record AmountLimitV1 {
+    MaxAmount: PositiveAmount
+}
+
+fn InvalidPolicy() -> AmountLimitV1 {
+    return AmountLimitV1 { MaxAmount: "ten" }
+}

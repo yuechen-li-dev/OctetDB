@@ -1,0 +1,138 @@
+package BSOTrustM3
+
+enum PolicyClass { Trust Authorization Transaction Application }
+enum TransactionClass { Subscription MarketplacePurchase EscrowRelease Refund HighValueTransfer DelegatedTransfer }
+enum PolicyReason { Allowed AmountExceeded CumulativeLimitExceeded ExpiredAuthorization WrongCounterparty WrongTransactionClass WrongSubject WrongDelegate PolicyVersionMismatch MissingTrust StateConflict MissingEscrow }
+enum PolicyChange { AmountLimitIncreased AmountLimitDecreased CumulativeLimitAdded CumulativeLimitRemoved ValidityExtended RequiredTrustReduced }
+enum EscrowCondition { None DeliveryOrTimeoutNoDispute }
+
+concept PositiveAmount = Int {
+    Require(Self > 0, "amount must be positive")
+}
+
+concept NonNegativeAmount = Int {
+    Require(Self >= 0, "cumulative amount must be non-negative")
+}
+
+concept PositivePolicyVersion = Int {
+    Require(Self > 0, "policy version must be positive")
+}
+
+concept LogicalTime = Int {
+    Require(Self >= 0, "logical time must be non-negative")
+}
+
+record PolicyIdentityV1 {
+    PolicyID: String
+    PolicyVersion: PositivePolicyVersion
+    PolicyDigest: String
+}
+
+record AuthorizationScopeV1 {
+    Subject: String
+    Delegate: String
+    Counterparty: String
+    TransactionClass: TransactionClass
+    MaxAmount: PositiveAmount
+    MaxCumulativeAmount: NonNegativeAmount
+    ValidUntil: LogicalTime
+}
+
+record PolicyFactsV1 {
+    Subject: String
+    Actor: String
+    Counterparty: String
+    TransactionClass: TransactionClass
+    Amount: PositiveAmount
+    LogicalTime: LogicalTime
+    ConsumedAmount: NonNegativeAmount
+    ReservedAmount: NonNegativeAmount
+    TrustPresent: Bool
+    EscrowPresent: Bool
+}
+
+record PolicyDecisionV1 {
+    Identity: PolicyIdentityV1
+    DecisionID: String
+    FactVersion: Int
+    Allowed: Bool
+    Reason: PolicyReason
+}
+
+record PolicyDiffV1 {
+    PolicyID: String
+    OldVersion: PositivePolicyVersion
+    NewVersion: PositivePolicyVersion
+    Changes: PolicyChange[]
+    AuthorityExpanded: Bool
+}
+
+fn DenialReason(scope: AuthorizationScopeV1, facts: PolicyFactsV1, escrowRequiredAbove: NonNegativeAmount) -> PolicyReason {
+    return switch {
+        case facts.Subject != scope.Subject => PolicyReason.WrongSubject
+        case scope.Delegate != "" and facts.Actor != scope.Delegate => PolicyReason.WrongDelegate
+        case facts.Counterparty != scope.Counterparty => PolicyReason.WrongCounterparty
+        case facts.TransactionClass != scope.TransactionClass => PolicyReason.WrongTransactionClass
+        case facts.LogicalTime > scope.ValidUntil => PolicyReason.ExpiredAuthorization
+        case facts.Amount > scope.MaxAmount => PolicyReason.AmountExceeded
+        case scope.MaxCumulativeAmount > 0 and facts.ConsumedAmount + facts.ReservedAmount + facts.Amount > scope.MaxCumulativeAmount => PolicyReason.CumulativeLimitExceeded
+        case not facts.TrustPresent => PolicyReason.MissingTrust
+        case escrowRequiredAbove > 0 and facts.Amount > escrowRequiredAbove and not facts.EscrowPresent => PolicyReason.MissingEscrow
+        else => PolicyReason.Allowed
+    }
+}
+
+fn IsAllowed(reason: PolicyReason) -> Bool {
+    return switch reason {
+        case PolicyReason.Allowed => true
+        else => false
+    }
+}
+
+fn AmountExpansion(oldAmount: PositiveAmount, newAmount: PositiveAmount) -> PolicyDiffV1 {
+    let expanded = newAmount > oldAmount
+    let changes = if expanded { [PolicyChange.AmountLimitIncreased] } else { [PolicyChange.AmountLimitDecreased] }
+    return PolicyDiffV1 { PolicyID: "policy:amount" OldVersion: 1 NewVersion: 2 Changes: changes AuthorityExpanded: expanded }
+}
+
+[Fact]
+fn ValidBoundedAuthorizationPasses() -> Void {
+    let scope = AuthorizationScopeV1 { Subject: "bso:a" Delegate: "service:x" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription MaxAmount: 10 MaxCumulativeAmount: 100 ValidUntil: 1000 }
+    let facts = PolicyFactsV1 { Subject: "bso:a" Actor: "service:x" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription Amount: 10 LogicalTime: 1 ConsumedAmount: 90 ReservedAmount: 0 TrustPresent: true EscrowPresent: false }
+    Assert.Equal(PolicyReason.Allowed, DenialReason(scope, facts, 0), "exact delegated scope is admitted")
+}
+
+[Fact]
+fn ConfusedDeputyDimensionsFailClosed() -> Void {
+    let scope = AuthorizationScopeV1 { Subject: "bso:a" Delegate: "service:x" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription MaxAmount: 10 MaxCumulativeAmount: 100 ValidUntil: 1000 }
+    let wrongParty = PolicyFactsV1 { Subject: "bso:a" Actor: "service:x" Counterparty: "bso:c" TransactionClass: TransactionClass.Subscription Amount: 10 LogicalTime: 1 ConsumedAmount: 0 ReservedAmount: 0 TrustPresent: true EscrowPresent: false }
+    let wrongClass = wrongParty with { Counterparty: "bso:b" TransactionClass: TransactionClass.HighValueTransfer }
+    Assert.Equal(PolicyReason.WrongCounterparty, DenialReason(scope, wrongParty, 0), "counterparty is an exact capability dimension")
+    Assert.Equal(PolicyReason.WrongTransactionClass, DenialReason(scope, wrongClass, 0), "transaction class is an exact capability dimension")
+}
+
+[Fact]
+fn AuthorityExpansionIsMachineReadable() -> Void {
+    let diff = AmountExpansion(10, 10000)
+    Assert.True(diff.AuthorityExpanded, "a larger amount is an authority expansion")
+    Assert.Equal(PolicyChange.AmountLimitIncreased, diff.Changes[0], "change kind is typed")
+}
+
+[Fact]
+fn CompositionUsesAllRequirements() -> Void {
+    let scope = AuthorizationScopeV1 { Subject: "bso:a" Delegate: "" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription MaxAmount: 10 MaxCumulativeAmount: 100 ValidUntil: 1000 }
+    let facts = PolicyFactsV1 { Subject: "bso:a" Actor: "bso:a" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription Amount: 6 LogicalTime: 1 ConsumedAmount: 0 ReservedAmount: 0 TrustPresent: true EscrowPresent: false }
+    let authorization = DenialReason(scope, facts, 0)
+    let marketplace = DenialReason(scope, facts, 5)
+    Assert.True(IsAllowed(authorization), "authorization alone allows")
+    Assert.Equal(PolicyReason.MissingEscrow, marketplace, "applicable marketplace requirement denies")
+    Assert.False(IsAllowed(authorization) and IsAllowed(marketplace), "composition is deny unless every requirement holds")
+}
+
+[Fact]
+fn TypedPolicyDoesNotDivineIntent() -> Void {
+    let buggy = AuthorizationScopeV1 { Subject: "bso:a" Delegate: "service:x" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription MaxAmount: 10 MaxCumulativeAmount: 0 ValidUntil: 1000 }
+    let one = PolicyFactsV1 { Subject: "bso:a" Actor: "service:x" Counterparty: "bso:b" TransactionClass: TransactionClass.Subscription Amount: 10 LogicalTime: 1 ConsumedAmount: 110 ReservedAmount: 0 TrustPresent: true EscrowPresent: false }
+    Assert.Equal(PolicyReason.Allowed, DenialReason(buggy, one, 0), "well-typed omission still admits the twelfth payment")
+    Assert.True(one.ConsumedAmount + one.Amount > 100, "encoded rule diverges from intended total")
+}
