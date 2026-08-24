@@ -1,0 +1,90 @@
+package BSOTrustM1
+
+enum TrustRole { Identity Risk Authorization }
+
+concept PositiveCapacity = Int {
+    Require(Self > 0, "provider capacity must be positive")
+}
+
+concept ValidReliability = Int {
+    Require(Self >= 0, "reliability must be non-negative")
+    Require(Self <= 100, "reliability cannot exceed 100")
+}
+
+record ProviderDirectoryEntryV1 {
+    ProviderID: String
+    Roles: TrustRole[]
+    Available: Bool
+    LatencyCost: Int
+    ServiceCost: Int
+    Reliability: ValidReliability
+    PolicyVersion: Int
+    Capacity: PositiveCapacity
+}
+
+record TrustPreferenceV1 {
+    Role: TrustRole
+    PreferredProviders: String[]
+    Threshold: Int
+}
+
+record ProviderSelectionV1 {
+    ProviderID: String
+    Role: TrustRole
+    PreferenceScore: Int
+    TotalScore: Int
+    Fallback: Bool
+}
+
+record ProviderAvailabilityV1 {
+    ProviderID: String
+    LogicalRound: Int
+    Available: Bool
+    RemainingCapacity: Int
+}
+
+record TrustCacheEntryV1 {
+    ProviderID: String
+    Role: TrustRole
+    Subject: String
+    Scope: String
+    PolicyVersion: Int
+    ValidUntil: Int
+}
+
+fn SelectionScore(preferenceRank: Int, latency: Int, cost: Int, reliability: ValidReliability) -> Int {
+    return preferenceRank * 1000 + cost * 10 + latency + (100 - reliability)
+}
+
+fn CacheUsable(entry: TrustCacheEntryV1, provider: String, role: TrustRole, subject: String, scope: String, policyVersion: Int, now: Int) -> Bool {
+    return entry.ProviderID == provider and entry.Role == role and entry.Subject == subject and entry.Scope == scope and entry.PolicyVersion == policyVersion and entry.ValidUntil >= now
+}
+
+fn CanServe(entry: ProviderDirectoryEntryV1, availability: ProviderAvailabilityV1) -> Bool {
+    return entry.ProviderID == availability.ProviderID and entry.Available and availability.Available and availability.RemainingCapacity > 0
+}
+
+[Fact]
+fn LowerPreferenceRankWinsDeterministically() -> Void {
+    let preferred = SelectionScore(0, 3, 2, 99)
+    let fallback = SelectionScore(1, 1, 1, 100)
+    Assert.True(preferred < fallback, "bounded costs cannot override policy preference")
+}
+
+[Fact]
+fn ExactCacheScopeIsRequired() -> Void {
+    let entry = TrustCacheEntryV1 { ProviderID: "identity:a" Role: TrustRole.Identity Subject: "bso:1" Scope: "subscription:1" PolicyVersion: 1 ValidUntil: 8 }
+    Assert.True(CacheUsable(entry, "identity:a", TrustRole.Identity, "bso:1", "subscription:1", 1, 7), "exact live key reuses")
+    Assert.False(CacheUsable(entry, "identity:a", TrustRole.Identity, "bso:2", "subscription:1", 1, 7), "different subject cannot reuse")
+    Assert.False(CacheUsable(entry, "identity:a", TrustRole.Identity, "bso:1", "subscription:2", 1, 7), "different scope cannot reuse")
+    Assert.False(CacheUsable(entry, "identity:a", TrustRole.Identity, "bso:1", "subscription:1", 1, 9), "expired evidence cannot reuse")
+}
+
+[Fact]
+fn CapacityAndAvailabilityAreHardConstraints() -> Void {
+    let entry = ProviderDirectoryEntryV1 { ProviderID: "risk:a" Roles: [TrustRole.Risk] Available: true LatencyCost: 1 ServiceCost: 1 Reliability: 99 PolicyVersion: 1 Capacity: 2 }
+    let open = ProviderAvailabilityV1 { ProviderID: "risk:a" LogicalRound: 1 Available: true RemainingCapacity: 1 }
+    let saturated = ProviderAvailabilityV1 { ProviderID: "risk:a" LogicalRound: 1 Available: true RemainingCapacity: 0 }
+    Assert.True(CanServe(entry, open), "available capacity serves")
+    Assert.False(CanServe(entry, saturated), "saturation forces fallback")
+}
