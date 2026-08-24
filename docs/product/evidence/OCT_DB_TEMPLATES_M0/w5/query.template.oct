@@ -1,0 +1,47 @@
+package Main
+
+import DatabaseTemplates
+import DatabaseTemplateContracts
+
+record Job {
+    ID: Int
+    Status: Int
+}
+
+fn IsReady(job: Job) -> Bool {return job.Status == 1}
+fn RebuildJobs(source: Job[]) -> Job[] {return source}
+
+// This concrete control is intentionally the same query shape as the catalog
+// declaration after Record = Job. Backend-boundary evidence normalizes names
+// and compares the two MIR flows structurally.
+query BespokeFilteredView(source: Job[], predicate: fn(Job) -> Bool, limit: Int) yields Job {
+    filter predicate
+    take limit
+}
+
+fn AssembleTemplateW5(jobs: Job[]) -> Void {
+    let publication = DatabaseTemplates.RebuildPublication<Job> {
+        SourceName: "PERF-M4 durable Job Dataset"
+        SourceVersion: 1
+        Rebuild: RebuildJobs
+    }
+    let defaultAccess = DatabaseTemplates.ReadMostlyDataset<Job> {
+        Publication: publication
+        ExpectedReadsPerPublish: 1
+    }
+    let access = defaultAccess with {ExpectedReadsPerPublish: 1000}
+    let defaultView = DatabaseTemplates.MaterializedFilter<Job> {
+        Access: access
+        Predicate: IsReady
+        Limit: 1
+    }
+    let readyView = defaultView with {Limit: 10}
+    let templateMachine = DatabaseTemplates.FilteredView<Job>(jobs, readyView.Predicate, readyView.Limit)
+    let bespokeMachine = BespokeFilteredView(jobs, IsReady, 10)
+    Step(templateMachine)
+    Step(bespokeMachine)
+}
+
+fn Main() -> Void {
+    AssembleTemplateW5([Job {ID: 1 Status: 1}])
+}

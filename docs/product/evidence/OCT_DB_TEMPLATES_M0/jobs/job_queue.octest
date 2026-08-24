@@ -1,0 +1,59 @@
+package Main
+
+import DatabaseTemplates
+import DatabaseTemplateContracts
+
+record Job {
+    ID: String
+    Status: Int
+}
+
+fn IsReady(job: Job) -> Bool {return job.Status == 1}
+fn RebuildJobs(source: Job[]) -> Job[] {return source}
+fn AllowsTransition(from: Int, to: Int) -> Bool {return from != to}
+
+[Fact]
+fn ProfiledReadyScansUseTheJobQueueStartingPoint() -> Void {
+    let identity = DatabaseTemplates.StableIdentity<Job, String> {KeyOf: .ID}
+    let defaultExtent = DatabaseTemplates.BoundedExtent<Job> {MaxRecords: 1}
+    let extent = defaultExtent with {MaxRecords: 100000}
+    let dataset = DatabaseTemplates.BoundedKeyedDataset<Job, String> {Identity: identity Extent: extent}
+    let publication = DatabaseTemplates.RebuildPublication<Job> {
+        SourceName: "jobs"
+        SourceVersion: 1
+        Rebuild: RebuildJobs
+    }
+    let defaultReads = DatabaseTemplates.ReadMostlyDataset<Job> {
+        Publication: publication
+        ExpectedReadsPerPublish: 1
+    }
+    let reads = defaultReads with {ExpectedReadsPerPublish: 1000}
+    let defaultReady = DatabaseTemplates.MaterializedFilter<Job> {Access: reads Predicate: IsReady Limit: 1}
+    let ready = defaultReady with {Limit: 2}
+    let lifecycle = DatabaseTemplates.FiniteStateDataset<Job, Int> {
+        StateOf: .Status
+        States:[0, 1, 2]
+        AllowsTransition: AllowsTransition
+    }
+    let queue = DatabaseTemplates.JobQueue<Job, String, Int> {
+        Dataset: dataset
+        Lifecycle: lifecycle
+        ReadyView: ready
+    }
+    let jobs =[
+    Job {ID: "J-30" Status: 1},
+    Job {ID: "J-10" Status: 0},
+    Job {ID: "J-20" Status: 1},
+    Job {ID: "J-40" Status: 1}
+    ]
+    let keyOf = queue.Dataset.Identity.KeyOf
+    Assert.Equal("J-30", keyOf(jobs[0]), "typed stable identity")
+    Assert.True(queue.Dataset.Extent.MaxRecords == 100000, "bounded jobs")
+    let view = DatabaseTemplates.FilteredView<Job>(jobs, queue.ReadyView.Predicate, queue.ReadyView.Limit)
+    Step(view)
+    Assert.Equal("J-30", Yielded(view) !.ID, "source order first")
+    Step(view)
+    Assert.Equal("J-20", Yielded(view) !.ID, "source order second")
+    Step(view)
+    Assert.Equal(true, Complete(view), "early stop")
+}

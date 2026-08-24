@@ -1,0 +1,40 @@
+{
+  "schema": "oct.template-provenance.m0",
+  "generated_at": "2026-08-23",
+  "compiler": {
+    "repository": "yuechen-li-dev/oct",
+    "base_revision": "e97570aa6486d1b3d58df9878345df0ae5a1ba72",
+    "state": "base revision plus OCT-DB-TEMPLATES-M0 working-tree changes"
+  },
+  "application": {
+    "repository": "yuechen-li-dev/OctetDB",
+    "base_revision": "6d4d47d76d27330e0d08cdac9b2b00b310625980",
+    "source": "w5/query.template.oct",
+    "source_sha256": "1effcba2cb0597ee6166e2c84a6b9c7784955174b1127a4ad6b93f4ffd024e1b"
+  },
+  "catalog_sources": {
+    "Database.Applications.template.oct": "e476375c3f18e090c5e9866991a4f3ff7b9b37a9eaea79e8f165972a188af4b3",
+    "Database.Patterns.template.oct": "fcbd448585712f5f501bb4ec415775713d26859773d32aa62fd4464a3b3c6a14",
+    "Database.Queries.template.oct": "179833e7bd60db45a26d96d62437274f0015434bcd5635d9c93b4265822e9f58",
+    "Database.Semantics.template.oct": "7e7b5850d741c746c5dda5c41a10911884b27a2724a7dcee98ef8912a2ee3094",
+    "DatabaseTemplateContracts.oct": "cad1a15db3814971d11fe69af6a20c79947084452adc28cb4da558eb104efef8"
+  },
+  "specializations": [
+    "DatabaseTemplates.RebuildPublication<Main.Job>",
+    "DatabaseTemplates.ReadMostlyDataset<Main.Job>",
+    "DatabaseTemplates.MaterializedFilter<Main.Job>",
+    "DatabaseTemplates.FilteredView<Main.Job>"
+  ],
+  "with_overrides": [
+    "ReadMostlyDataset<Main.Job>.ExpectedReadsPerPublish",
+    "MaterializedFilter<Main.Job>.Limit"
+  ],
+  "generated_artifact": {
+    "path": "w5/generated/generated.go",
+    "sha256": "63d9ea2fc878db4a15f90afff89c08dd00b4d21d666453d300671c9682885ad1",
+    "bytes": 47641,
+    "physical_lines": 1314,
+    "nonblank_lines": 1206,
+    "manual_edits": 0
+  }
+}

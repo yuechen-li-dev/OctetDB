@@ -1,24 +1,29 @@
 # OCT-DB-TEMPLATES-M0 evidence
 
-This evidence records why the milestone ends in **Honest stop** rather than
-shipping a metadata-only template catalog that cannot type-check its central
-`Record`, `Key`, and predicate overrides.
+This directory contains the successful rerun evidence. The original Honest Stop control remains intact in `compiler-probes/` and `probe-results.txt`; it captured the pre-parametrics failures rather than a workaround target.
 
-## Reproduction
+Current evidence:
 
-From the Oct repository at commit `5a77e76801cdd3e7c8dbdeb272ce04ba4930d5dd`:
+- `jobs/` and `inventory/`: typed application compositions;
+- `negative/`: webhook decision to keep default OctetDB;
+- `w5/`: template/bespoke parity source, deterministic generation, benchmark, generated Go, and provenance;
+- `llm/`: durable pointer to four isolated fresh-agent trials;
+- `run_app.ps1`: temporary-project interpreted/compiled reproduction.
+
+From this repository:
 
 ```powershell
-go run ./cmd/oct run <OctetDB>/docs/product/evidence/OCT_DB_TEMPLATES_M0/compiler-probes/convention/Main.oct
-go run ./cmd/oct build <OctetDB>/docs/product/evidence/OCT_DB_TEMPLATES_M0/compiler-probes/parametric-record/ParametricRecord.template.oct
-go run ./cmd/oct build <OctetDB>/docs/product/evidence/OCT_DB_TEMPLATES_M0/compiler-probes/nominal-predicate/Main.oct
-go run ./cmd/oct build <OctetDB>/docs/product/evidence/OCT_DB_TEMPLATES_M0/compiler-probes/field-selector/Main.oct
+$oct = "C:\path\to\oct"
+./docs/product/evidence/OCT_DB_TEMPLATES_M0/run_app.ps1 -OctRepo $oct -Source ./docs/product/evidence/OCT_DB_TEMPLATES_M0/jobs/job_queue.octest -Execution interpreted
+./docs/product/evidence/OCT_DB_TEMPLATES_M0/run_app.ps1 -OctRepo $oct -Source ./docs/product/evidence/OCT_DB_TEMPLATES_M0/jobs/job_queue.octest -Execution compiled
+./docs/product/evidence/OCT_DB_TEMPLATES_M0/run_app.ps1 -OctRepo $oct -Source ./docs/product/evidence/OCT_DB_TEMPLATES_M0/inventory/inventory.octest -Execution interpreted
+./docs/product/evidence/OCT_DB_TEMPLATES_M0/run_app.ps1 -OctRepo $oct -Source ./docs/product/evidence/OCT_DB_TEMPLATES_M0/inventory/inventory.octest -Execution compiled
+./docs/product/evidence/OCT_DB_TEMPLATES_M0/w5/generate.ps1 -OctRepo $oct
+go test ./docs/product/evidence/OCT_DB_TEMPLATES_M0/w5/generated -run TestTemplateAndBespokeW5ResultParity -v
+go test ./docs/product/evidence/OCT_DB_TEMPLATES_M0/w5/generated -run '^$' -bench '^BenchmarkTemplateVersusBespokeW5$' -benchtime=1s -count=5
+go test ./docs/product/evidence/OCT_DB_TEMPLATES_M0/w5/generated -run '^$' -bench '^BenchmarkTemplateVersusBespokeW5Reverse$' -benchtime=1s -count=5
 ```
 
-The first probe proves `.template.oct` already participates in normal package
-discovery and `with` customization without a parser mode. The remaining probes
-isolate the missing language capabilities: user-defined type parameters,
-predicate retargeting across nominal record types, and typed field selectors.
+The scripts copy canonical template source only into safely bounded temporary directories. No generated Go is manually edited and no template/runtime subsystem is involved.
 
-`probe-results.txt` contains the exact command results. No generated Go was
-hand-edited and no runtime/template subsystem was added.
+OCT-TEMPLATE-CODEGEN-M0 adds a compiler regression that compares the two FLOWs after normalized MIR and normalized Go emission. W5's forward and reverse benchmark controls show that the former 11.7% apparent template penalty reverses when only helper/code placement changes; this is layout sensitivity, not evidence of either a template penalty or speedup.

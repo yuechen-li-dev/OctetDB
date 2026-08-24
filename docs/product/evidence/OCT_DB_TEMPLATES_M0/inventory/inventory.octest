@@ -1,0 +1,49 @@
+package Main
+
+import DatabaseTemplates
+import DatabaseTemplateContracts
+
+record InventoryItem {
+    SKU: String
+    Available: Int
+}
+
+fn IsLowStock(item: InventoryItem) -> Bool {return item.Available<5}
+fn RebuildInventory(source: InventoryItem[]) -> InventoryItem[] {return source}
+
+[Fact]
+fn ProfiledLowStockScansUseTheInventoryStartingPoint() -> Void {
+    let identity = DatabaseTemplates.StableIdentity<InventoryItem, String> {KeyOf: .SKU}
+    let defaultExtent = DatabaseTemplates.BoundedExtent<InventoryItem> {MaxRecords: 1}
+    let extent = defaultExtent with {MaxRecords: 50000}
+    let dataset = DatabaseTemplates.BoundedKeyedDataset<InventoryItem, String> {Identity: identity Extent: extent}
+    let publication = DatabaseTemplates.RebuildPublication<InventoryItem> {
+        SourceName: "inventory"
+        SourceVersion: 4
+        Rebuild: RebuildInventory
+    }
+    let reads = DatabaseTemplates.ReadMostlyDataset<InventoryItem> {
+        Publication: publication
+        ExpectedReadsPerPublish: 400
+    }
+    let defaultLowStock = DatabaseTemplates.MaterializedFilter<InventoryItem> {
+        Access: reads
+        Predicate: IsLowStock
+        Limit: 1
+    }
+    let lowStock = defaultLowStock with {Limit: 5}
+    let inventory = DatabaseTemplates.Inventory<InventoryItem, String> {
+        Dataset: dataset
+        LowStockView: lowStock
+    }
+    let items =[
+    InventoryItem {SKU: "SKU-9" Available: 8},
+    InventoryItem {SKU: "SKU-2" Available: 2}
+    ]
+    let keyOf = inventory.Dataset.Identity.KeyOf
+    Assert.Equal("SKU-2", keyOf(items[1]), "typed SKU identity")
+    Assert.True(inventory.Dataset.Extent.MaxRecords == 50000, "bounded inventory")
+    let view = DatabaseTemplates.FilteredView<InventoryItem>(items, inventory.LowStockView.Predicate, inventory.LowStockView.Limit)
+    Assert.Equal("SKU-2", Query.First(view) !.SKU, "low-stock result")
+    Assert.True(inventory.LowStockView.Access.Publication.SourceName == "inventory", "explicit publication authority")
+}
