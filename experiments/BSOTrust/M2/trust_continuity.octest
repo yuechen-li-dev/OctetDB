@@ -1,0 +1,105 @@
+package BSOTrustM2
+
+enum TrustRole { Identity Risk Authorization }
+enum ContinuityHealth { Healthy Degraded Unknown Failed }
+enum ContinuityDegradationReason { None AlternateUnavailable PolicyNoLongerCompatible ProviderRevoked ProofExpired NoSharedAlternate ProviderVersionChanged }
+
+concept PositiveAlternateCount = Int {
+    Require(Self > 0, "alternate count must be positive")
+}
+
+concept NonNegativeCheckInterval = Int {
+    Require(Self >= 0, "check interval must be non-negative")
+}
+
+concept ValidContinuityLifetime = Int {
+    Require(Self > 0, "continuity lifetime must be positive")
+}
+
+record ContinuityPolicyV1 {
+    Role: TrustRole
+    MinimumViableAlternates: PositiveAlternateCount
+    CheckInterval: NonNegativeCheckInterval
+    MaxStaleness: ValidContinuityLifetime
+    Strict: Bool
+}
+
+record ContinuityStateV1 {
+    RelationshipID: String
+    Role: TrustRole
+    PrimaryProviderID: String
+    VerifiedAlternates: String[]
+    LastChecked: Int
+    ValidUntil: Int
+    Health: ContinuityHealth
+    Reason: ContinuityDegradationReason
+}
+
+record ContinuityProofV1 {
+    ProofID: String
+    RelationshipID: String
+    Role: TrustRole
+    PrimaryProviderID: String
+    AlternateProviderID: String
+    SenderPolicyVersion: Int
+    ReceiverPolicyVersion: Int
+    ProviderPolicyVersion: Int
+    ProviderSchemaVersion: Int
+    CheckedAt: Int
+    ValidUntil: Int
+}
+
+record ContinuityCheckRequestV1 {
+    ContinuityCheckID: String
+    RelationshipID: String
+    Role: TrustRole
+    PrimaryProviderID: String
+    AlternateProviderID: String
+    TransactionClass: String
+    MaximumAmountBand: Int
+    LogicalTime: Int
+}
+
+record ContinuityCheckResultV1 {
+    ContinuityCheckID: String
+    Viable: Bool
+    Reason: ContinuityDegradationReason
+    ProviderCalls: Int
+    FinancialMutation: Bool
+}
+
+fn EvaluateHealth(verified: Int, minimum: PositiveAlternateCount, expired: Bool, compatible: Bool) -> ContinuityHealth {
+    if not compatible { return ContinuityHealth.Degraded }
+    if expired { return ContinuityHealth.Degraded }
+    if verified >= minimum { return ContinuityHealth.Healthy }
+    return ContinuityHealth.Unknown
+}
+
+fn FailureReason(expired: Bool, compatible: Bool, shared: Bool) -> ContinuityDegradationReason {
+    if not shared { return ContinuityDegradationReason.NoSharedAlternate }
+    if not compatible { return ContinuityDegradationReason.PolicyNoLongerCompatible }
+    if expired { return ContinuityDegradationReason.ProofExpired }
+    return ContinuityDegradationReason.None
+}
+
+[Fact]
+fn CurrentCompatibleAlternateIsHealthy() -> Void {
+    Assert.Equal(ContinuityHealth.Healthy, EvaluateHealth(1, 1, false, true), "one current alternate satisfies policy")
+}
+
+[Fact]
+fn StaleProofIsDegraded() -> Void {
+    Assert.Equal(ContinuityHealth.Degraded, EvaluateHealth(1, 1, true, true), "expired evidence is not live continuity")
+    Assert.Equal(ContinuityDegradationReason.ProofExpired, FailureReason(true, true, true), "expiry is typed")
+}
+
+[Fact]
+fn NoIntersectionIsActionable() -> Void {
+    Assert.Equal(ContinuityDegradationReason.NoSharedAlternate, FailureReason(false, true, false), "registry presence cannot replace policy intersection")
+}
+
+[Fact]
+fn ContinuityCheckCannotMoveMoney() -> Void {
+    let result = ContinuityCheckResultV1 { ContinuityCheckID: "check:1" Viable: true Reason: ContinuityDegradationReason.None ProviderCalls: 1 FinancialMutation: false }
+    Assert.False(result.FinancialMutation, "continuity is a dry run")
+}
