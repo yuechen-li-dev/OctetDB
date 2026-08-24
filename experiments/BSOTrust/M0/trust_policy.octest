@@ -1,0 +1,255 @@
+package Main
+
+enum TrustRole {
+    Identity
+    Risk
+    Authorization
+    Escrow
+    Dispute
+}
+
+enum TransactionClass {
+    Direct
+    Purchase
+    Subscription
+    Donation
+    Marketplace
+    InstitutionSettlement
+}
+
+enum IdentityLevel {
+    Known
+    Verified
+    Institutional
+}
+
+enum RiskDecision {
+    Approve
+    Reject
+    Challenge
+}
+
+enum DisputeDecision {
+    NoAction
+    RefundApproved
+    RefundRejected
+}
+
+concept PositiveThreshold = Int {
+    Require(Self > 0, "trust threshold must be positive")
+}
+
+concept NonNegativeMaxAmount = Int {
+    Require(Self >= 0, "maximum amount must be non-negative")
+}
+
+concept ValidPolicyVersion = Int {
+    Require(Self > 0, "policy version must be positive")
+}
+
+concept TrustRuleV1 {
+    Role: TrustRole
+    AcceptedProviders: String[]
+    Threshold: PositiveThreshold
+    MaxAmount: NonNegativeMaxAmount
+    TransactionClass: TransactionClass
+    ValidUntil: Int
+}
+
+concept TrustPolicyV1 {
+    BSOID: String
+    Version: ValidPolicyVersion
+    DirectLimit: NonNegativeMaxAmount
+    ValidUntil: Int
+    Rules: TrustRuleV1[]
+    RevokedProviders: String[]
+}
+
+concept TrustProviderCapabilitiesV1 {
+    ProviderID: String
+    Roles: TrustRole[]
+    PolicyVersion: ValidPolicyVersion
+}
+
+concept IdentityAttestationV1 {
+    ProviderID: String
+    SubjectBSO: String
+    IdentityLevel: IdentityLevel
+    IssuedAt: Int
+    ValidUntil: Int
+    PolicyVersion: String
+    AttestationID: String
+    Auth: String
+}
+
+concept RiskAttestationV1 {
+    ProviderID: String
+    TransferID: String
+    Decision: RiskDecision
+    PolicyVersion: String
+    IssuedAt: Int
+    ValidUntil: Int
+    ReasonCode: String
+    AttestationID: String
+    Auth: String
+}
+
+concept AuthorizationAttestationV1 {
+    ProviderID: String
+    SubjectBSO: String
+    TransactionClass: TransactionClass
+    MaxAmount: NonNegativeMaxAmount
+    IssuedAt: Int
+    ValidUntil: Int
+    PolicyVersion: String
+    AttestationID: String
+    ApplicationReference: String
+    Auth: String
+}
+
+concept EscrowAttestationV1 {
+    ProviderID: String
+    TransferID: String
+    HoldAccepted: Bool
+    ReleasePolicyID: String
+    PolicyVersion: String
+    IssuedAt: Int
+    ValidUntil: Int
+    AttestationID: String
+    Auth: String
+}
+
+concept DisputeAttestationV1 {
+    ProviderID: String
+    OriginalTransferID: String
+    Decision: DisputeDecision
+    PolicyVersion: String
+    IssuedAt: Int
+    ValidUntil: Int
+    AttestationID: String
+    Auth: String
+}
+
+concept TrustResolutionV1 {
+    ResolutionID: String
+    TransferID: String
+    RequiredRoles: TrustRole[]
+    SelectedProviders: String[]
+    AttestationIDs: String[]
+    Admitted: Bool
+    FailureReason: String
+    SenderPolicyVersion: ValidPolicyVersion
+    ReceiverPolicyVersion: ValidPolicyVersion
+    IssuedAt: Int
+    ProvidersConsulted: Int
+    FreshProviderCalls: Int
+    ReusedAttestations: Int
+}
+
+fn HasString(values: String[], expected: String) -> Bool {
+    for i in 0..Len(values) {
+        if values[i] == expected {
+            return true
+        }
+    }
+    return false
+}
+
+fn CompatibleProviderCount(sender: String[], receiver: String[], revoked: String[]) -> Int {
+    var count = 0
+    for i in 0..Len(sender) {
+        if HasString(receiver, sender[i]) and not HasString(revoked, sender[i]) {
+            count = count + 1
+        }
+    }
+    return count
+}
+
+fn ApprovalCount(decisions: RiskDecision[]) -> Int {
+    var count = 0
+    for i in 0..Len(decisions) {
+        if decisions[i] == RiskDecision.Approve {
+            count = count + 1
+        }
+    }
+    return count
+}
+
+fn EvidenceValid(now: Int, validUntil: Int) -> Bool {
+    return now <= validUntil
+}
+
+fn PolicySatisfied(compatibleProviders: Int, approvals: Int, threshold: PositiveThreshold) -> Bool {
+    return compatibleProviders >= threshold and approvals >= threshold
+}
+
+[Fact]
+fn SharedProviderAndFallbackAreDeterministic() -> Void {
+    let preferred: String[] = ["trust:identity:acme", "trust:identity:backup"]
+    let receiver: String[] = ["trust:identity:acme", "trust:identity:backup"]
+    let noneRevoked: String[] = []
+    let primaryUnavailable: String[] = ["trust:identity:acme"]
+    Assert.Equal(2, CompatibleProviderCount(preferred, receiver, noneRevoked), "two shared providers")
+    Assert.Equal(1, CompatibleProviderCount(preferred, receiver, primaryUnavailable), "backup remains after primary outage/revocation")
+}
+
+[Fact]
+fn IncompatiblePoliciesHaveNoIntersection() -> Void {
+    let sender: String[] = ["trust:identity:acme"]
+    let receiver: String[] = ["trust:identity:other"]
+    let revoked: String[] = []
+    Assert.Equal(0, CompatibleProviderCount(sender, receiver, revoked), "incompatible policies")
+}
+
+[Fact]
+fn ThresholdCountsApprovalsExactly() -> Void {
+    let threshold: PositiveThreshold = 2
+    let passing = [RiskDecision.Approve, RiskDecision.Reject, RiskDecision.Approve]
+    let failing = [RiskDecision.Approve, RiskDecision.Reject, RiskDecision.Reject]
+    Assert.True(PolicySatisfied(3, ApprovalCount(passing), threshold), "two approvals satisfy local policy")
+    Assert.False(PolicySatisfied(3, ApprovalCount(failing), threshold), "one approval does not satisfy local policy")
+}
+
+[Fact]
+fn ExpiredAndChallengeEvidenceAreUnsatisfied() -> Void {
+    Assert.True(EvidenceValid(9, 9), "valid through bounded lifetime")
+    Assert.False(EvidenceValid(10, 9), "expired evidence rejected")
+    Assert.Equal(0, ApprovalCount([RiskDecision.Challenge]), "challenge is not approval")
+}
+
+[Fact]
+fn TypedPolicyAndResolutionConstruct() -> Void {
+    let rule = TrustRuleV1 {
+        Role: TrustRole.Risk
+        AcceptedProviders: ["trust:risk:a", "trust:risk:b", "trust:risk:c"]
+        Threshold: 2
+        MaxAmount: 100000
+        TransactionClass: TransactionClass.InstitutionSettlement
+        ValidUntil: 1000
+    }
+    let policy = TrustPolicyV1 {
+        BSOID: "bso:sender"
+        Version: 1
+        DirectLimit: 5
+        ValidUntil: 1000
+        Rules: [rule]
+        RevokedProviders: []
+    }
+    let resolution = TrustResolutionV1 {
+        ResolutionID: "resolution:1"
+        TransferID: "transfer:1"
+        RequiredRoles: [TrustRole.Risk]
+        SelectedProviders: ["trust:risk:a", "trust:risk:c"]
+        AttestationIDs: ["att:a", "att:c"]
+        Admitted: true
+        FailureReason: ""
+        SenderPolicyVersion: 1
+        ReceiverPolicyVersion: 1
+        IssuedAt: 3
+        ProvidersConsulted: 3
+        FreshProviderCalls: 3
+        ReusedAttestations: 0
+    }
+    Assert.True(policy.Version == 1, "policy version is typed")
+    Assert.True(resolution.Admitted, "resolution constructs")
+}
