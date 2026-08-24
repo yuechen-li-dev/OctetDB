@@ -1,0 +1,31 @@
+Command: go run ./cmd/bso-sim --mode normal
+Host: Windows/NTFS, America/Los_Angeles
+OctetDB base revision: 512d4ddc7ab025f73bb5a58412f0e06ef88972f7
+Seed: 20260823
+Total runtime: 27.321 s
+
+| Scenario | BSOs | Transfers | BSO ops/s | Global ops/s | Messages/transfer | Unresolved | Conservation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| scale-10 | 10 | 300 | 414 | 1571 | 5.25 | 0 | true |
+| scale-100 | 100 | 750 | 522 | 846 | 5.21 | 0 | true |
+| scale-1000 | 1000 | 1500 | 511 | 390 | 6.21 | 0 | true |
+| hot-merchant | 100 | 600 | 224 | 957 | 4.00 | 0 | true |
+| hot-payer | 100 | 1200 | 680 | 630 | 4.00 | 0 | true |
+| fault-mean | 100 | 400 | 514 | 1163 | 6.99 | 0 | true |
+
+| Fault profile | Success | Retries | Duplicates suppressed | Reconciliations | Lost value | Double apply |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| scale-10/fun | 300 | 311 | 393 | 311 | 0 | 0 |
+| scale-100/fun | 750 | 768 | 943 | 768 | 0 | 0 |
+| scale-1000/fun | 1500 | 3046 | 3419 | 3046 | 0 | 0 |
+| hot-merchant/none | 600 | 0 | 0 | 0 | 0 | 0 |
+| hot-payer/none | 8 | 0 | 0 | 0 | 0 | 0 |
+| fault-mean/mean | 400 | 846 | 1323 | 846 | 0 | 0 |
+
+Digests:
+scale-10 cdb875e5a3be2485e05dbfcd1504c028a85fa42ab2c43383c300a094f380cead
+scale-100 dee91cc434726f3bf9a77b40c1ce45bc63415f5698ec229834fa6f71e57339a7
+scale-1000 b831730f0de6df4e27b3251b3d36756b278896d900b4f5cf652404b9125ad0eb
+hot-merchant ba8da99f474a44f2460d8233c6a130780acec1be2f6152d9601534b09cead04b
+hot-payer a680166e2e0eb816668fd31d67fa1e5ba32959bc018b5e6fd9a9aae5484ba754
+fault-mean e9d22479c40d1d6a47e74e923987b33337f04fb1e8cec4979ddbea882445dbbe

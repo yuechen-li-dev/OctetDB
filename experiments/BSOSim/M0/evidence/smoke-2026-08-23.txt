@@ -1,0 +1,22 @@
+Command: go run ./cmd/bso-sim --mode smoke
+Host: Windows/NTFS, America/Los_Angeles
+OctetDB base revision: 512d4ddc7ab025f73bb5a58412f0e06ef88972f7
+Seed: 20260823
+Total runtime: 424 ms
+
+| Scenario | BSOs | Transfers | BSO ops/s | Global ops/s | Messages/transfer | Unresolved | Conservation |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| scale-10 | 10 | 50 | 519 | 1919 | 5.22 | 0 | true |
+| hot-merchant | 10 | 30 | 542 | 2906 | 4.00 | 0 | true |
+| hot-payer | 10 | 30 | 1377 | 2765 | 4.00 | 0 | true |
+
+| Fault profile | Success | Retries | Duplicates suppressed | Reconciliations | Lost value | Double apply |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| scale-10/fun | 50 | 52 | 65 | 52 | 0 | 0 |
+| hot-merchant/none | 30 | 0 | 0 | 0 | 0 | 0 |
+| hot-payer/none | 7 | 0 | 0 | 0 | 0 | 0 |
+
+Digests:
+scale-10 08758395be0ca080ddbc1da4d01621250ddad9383b9a61985d95b0c12a7e5a8c
+hot-merchant 6e90f8efc899d229b9f21d3b090c5e7263e62d922b26816a270aa411ff58c2d2
+hot-payer 145a00296687fb8738023243adf1e4d84805df85648f6c3ab620d1479dba8a2d
