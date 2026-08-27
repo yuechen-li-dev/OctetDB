@@ -191,4 +191,4 @@ The production public import graph is the root package plus `internal/core` and
 the Go standard library. Research and benchmark packages remain elsewhere in
 the repository and are not imported by the v0.2 package.
 
-OctetDB is licensed under [GPL-3.0](LICENSE).
+OctetDB is licensed under [AGPL-3.0](LICENSE).
